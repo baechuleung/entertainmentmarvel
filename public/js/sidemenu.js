@@ -1,3 +1,8 @@
+// Firebase 모듈 import
+import { auth, db } from '/js/firebase-config.js';
+import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
 // 사이드 메뉴 관리
 const SideMenu = {
     menu: null,
@@ -6,12 +11,17 @@ const SideMenu = {
 
     // 초기화
     init: async function() {
+        console.log('SideMenu.init() 시작');
+        
         // 사이드 메뉴 HTML 로드
         await this.loadSideMenu();
         
         // DOM 요소 저장
         this.menu = document.getElementById('side-menu');
         this.overlay = document.getElementById('menu-overlay');
+        
+        console.log('menu:', this.menu);
+        console.log('overlay:', this.overlay);
         
         // Firebase Auth 상태 체크 및 UI 업데이트
         this.checkAuthStatus();
@@ -21,11 +31,7 @@ const SideMenu = {
     },
 
     // Firebase Auth 상태 체크
-    checkAuthStatus: async function() {
-        // Firebase Auth 모듈 동적 import
-        const { auth } = await import('/js/firebase-config.js');
-        const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
-        
+    checkAuthStatus: function() {
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 // 로그인 상태
@@ -40,9 +46,6 @@ const SideMenu = {
     // Firestore에서 사용자 데이터 로드
     loadUserData: async function(uid) {
         try {
-            const { db } = await import('/js/firebase-config.js');
-            const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-            
             const userDoc = await getDoc(doc(db, 'users', uid));
             
             if (userDoc.exists()) {
@@ -60,6 +63,8 @@ const SideMenu = {
         const memberInfo = document.querySelector('.user-info.member');
         const logoutBtn = document.querySelector('.footer-link');
         const logoutArrow = document.querySelector('.menu-footer .arrow');
+        const businessOnlyMenu = document.querySelector('.business-only');
+        const businessOnlyDivider = document.querySelector('.business-only-divider');
         
         if (isLoggedIn && userData) {
             // 회원인 경우
@@ -77,6 +82,12 @@ const SideMenu = {
                 
                 if (memberTypeEl) {
                     memberTypeEl.textContent = userData.userType === 'business' ? '업체회원' : '일반회원';
+                }
+                
+                // 업체회원인 경우 공고 관리 메뉴 표시
+                if (userData.userType === 'business') {
+                    if (businessOnlyMenu) businessOnlyMenu.style.display = 'block';
+                    if (businessOnlyDivider) businessOnlyDivider.style.display = 'block';
                 }
                 
                 if (levelTextEl) {
@@ -115,6 +126,8 @@ const SideMenu = {
             if (memberInfo) memberInfo.style.display = 'none';
             if (logoutBtn) logoutBtn.style.display = 'none';
             if (logoutArrow) logoutArrow.style.display = 'none';
+            if (businessOnlyMenu) businessOnlyMenu.style.display = 'none';
+            if (businessOnlyDivider) businessOnlyDivider.style.display = 'none';
         }
     },
 
@@ -134,9 +147,12 @@ const SideMenu = {
 
     // 이벤트 리스너 설정
     setupEventListeners: function() {
+        console.log('setupEventListeners 실행');
+        
         // 햄버거 메뉴 클릭
         document.addEventListener('click', (e) => {
             if (e.target.closest('#common-header .hamburger')) {
+                console.log('햄버거 메뉴 클릭됨');
                 e.preventDefault();
                 this.open();
             }
@@ -235,6 +251,7 @@ const SideMenu = {
         // 페이지 이동 매핑
         const pageMap = {
             '홈으로 가기': '/main/main.html',
+            '공고 관리': '/job-posting/job-posting.html',
             '1:1 고객센터': '/support/support.html',
             'FAQ': '/faq/faq.html',
             '공지사항': '/notice/notice.html',
@@ -252,9 +269,6 @@ const SideMenu = {
     handleLogout: async function() {
         if (confirm('로그아웃 하시겠습니까?')) {
             try {
-                const { auth } = await import('/js/firebase-config.js');
-                const { signOut } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
-                
                 await signOut(auth);
                 console.log('로그아웃 완료');
                 

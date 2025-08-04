@@ -9,6 +9,17 @@ async function loadHeader() {
         
         // 헤더 이벤트 초기화
         initHeaderEvents();
+        
+        // DOM이 완전히 로드된 후 sidemenu.js 로드
+        setTimeout(() => {
+            // sidemenu.js 스크립트 동적 로드 (module로 로드)
+            const sidemenuScript = document.createElement('script');
+            sidemenuScript.type = 'module';
+            sidemenuScript.src = '/js/sidemenu.js';
+            document.body.appendChild(sidemenuScript);
+            console.log('sidemenu.js 로드 시작');
+        }, 100);
+        
     } catch (error) {
         console.error('헤더 로드 실패:', error);
     }
@@ -24,7 +35,7 @@ function initHeaderEvents() {
         });
     }
     
-
+    // 햄버거 메뉴는 sidemenu.js에서 처리
 }
 
 // 페이지 로드 시 헤더 로드
