@@ -13,7 +13,7 @@
             siteName: '유흥마블',
             locale: 'ko_KR',
             type: 'website',
-            domain: 'https://yourdomain.com' // 실제 도메인으로 변경 필요
+            domain: 'https://entmarvel.com' // 실제 도메인으로 변경 필요
         },
 
         // HTML에서 기존 메타 정보 읽기

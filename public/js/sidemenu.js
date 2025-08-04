@@ -283,6 +283,11 @@ const SideMenu = {
 };
 
 // 페이지 로드 시 초기화
-document.addEventListener('DOMContentLoaded', function() {
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        SideMenu.init();
+    });
+} else {
+    // 이미 DOM이 로드된 경우 바로 실행
     SideMenu.init();
-});
+}
