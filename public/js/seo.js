@@ -12,7 +12,8 @@
             image: '/img/social-thumbnail.png',
             siteName: '유흥마블',
             locale: 'ko_KR',
-            type: 'website'
+            type: 'website',
+            domain: 'https://yourdomain.com' // 실제 도메인으로 변경 필요
         },
 
         // HTML에서 기존 메타 정보 읽기
@@ -35,6 +36,27 @@
             };
             
             return data;
+        },
+
+        // Canonical URL 생성 및 추가
+        generateCanonical: function() {
+            // 이미 canonical이 있는지 확인
+            const existingCanonical = document.querySelector('link[rel="canonical"]');
+            if (existingCanonical) {
+                console.log('Canonical 링크가 이미 존재합니다.');
+                return;
+            }
+
+            // Canonical URL 생성
+            const canonicalURL = this.defaults.domain + window.location.pathname;
+            
+            // Canonical 링크 태그 생성
+            const canonicalLink = document.createElement('link');
+            canonicalLink.rel = 'canonical';
+            canonicalLink.href = canonicalURL;
+            document.head.appendChild(canonicalLink);
+            
+            console.log('Canonical URL 추가:', canonicalURL);
         },
 
         // Open Graph와 Twitter Card 태그 자동 생성
@@ -101,6 +123,16 @@
                 this.setMetaTag('twitter:description', data.description);
             }
             
+            // keywords 업데이트
+            if (data.keywords) {
+                this.setMetaTag('keywords', data.keywords);
+            }
+            
+            // author 업데이트
+            if (data.author) {
+                this.setMetaTag('author', data.author);
+            }
+            
             // image 업데이트
             if (data.image) {
                 this.setMetaTag('og:image', data.image, 'property');
@@ -110,6 +142,7 @@
 
         // 초기화
         init: function() {
+            this.generateCanonical();
             this.generateSocialTags();
         }
     };

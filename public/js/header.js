@@ -24,7 +24,7 @@ function initHeaderEvents() {
         });
     }
     
-    // 햄버거 메뉴는 sidemenu.js에서 처리
+
 }
 
 // 페이지 로드 시 헤더 로드
