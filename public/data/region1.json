@@ -1,0 +1,21 @@
+{
+  "regions": [
+    { "code": "seoul", "name": "서울" },
+    { "code": "gyeonggi", "name": "경기" },
+    { "code": "incheon", "name": "인천" },
+    { "code": "busan", "name": "부산" },
+    { "code": "daegu", "name": "대구" },
+    { "code": "gwangju", "name": "광주" },
+    { "code": "daejeon", "name": "대전" },
+    { "code": "ulsan", "name": "울산" },
+    { "code": "sejong", "name": "세종" },
+    { "code": "gangwon", "name": "강원" },
+    { "code": "chungbuk", "name": "충북" },
+    { "code": "chungnam", "name": "충남" },
+    { "code": "jeonbuk", "name": "전북" },
+    { "code": "jeonnam", "name": "전남" },
+    { "code": "gyeongbuk", "name": "경북" },
+    { "code": "gyeongnam", "name": "경남" },
+    { "code": "jeju", "name": "제주" }
+  ]
+}
