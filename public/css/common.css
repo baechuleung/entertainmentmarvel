@@ -1,0 +1,56 @@
+/* 전역 리셋 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 기본 body 스타일 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 450px;
+    margin: 0 auto;
+}
+
+/* 공통 버튼 스타일 */
+button {
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+/* 공통 입력 필드 스타일 */
+input, select, textarea {
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+}
+
+/* 공통 링크 스타일 */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* 스크롤바 숨기기 (모바일 대응) */
+::-webkit-scrollbar {
+    display: none;
+}
+
+/* 터치 하이라이트 제거 (모바일) */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 이미지 기본 스타일 */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 메인 컨텐츠 영역 (헤더 높이만큼 여백) */
+main {
+    margin-top: 60px;
+    min-height: calc(100vh - 60px);
+}

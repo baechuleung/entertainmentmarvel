@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- SEO 메타 태그 -->
+    <title>회원가입 - 유흥마블</title>
+    <meta name="description" content="유흥마블 회원가입 페이지입니다. 간편하게 가입하고 다양한 서비스를 이용해보세요.">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/sidemenu.css">
+    <link rel="stylesheet" href="css/signup.css">
+    
+    <!-- Scripts -->
+    <script src="/js/seo.js"></script>
+</head>
+<body>
+    <!-- 공통 헤더가 여기에 동적으로 로드됩니다 -->
+    
+    <main>
+        <div class="signup-container">
+            <div class="signup-box">
+                <div class="signup-header">
+                    <h1>회원가입</h1>
+                    <p>유흥마블과 함께 시작하세요</p>
+                </div>
+                
+                <form id="signup-form" class="signup-form">
+                    <div class="form-group">
+                        <label>회원 유형 *</label>
+                        <div class="member-type-group">
+                            <label class="radio-label">
+                                <input type="radio" name="member-type" value="member" checked>
+                                <span>일반회원</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="member-type" value="business">
+                                <span>업체회원</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">이메일 *</label>
+                        <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                        <span class="error-text" id="email-error"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">비밀번호 *</label>
+                        <input type="password" id="password" name="password" placeholder="6자 이상 입력해주세요" required>
+                        <span class="error-text" id="password-error"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password-confirm">비밀번호 확인 *</label>
+                        <input type="password" id="password-confirm" name="password-confirm" placeholder="비밀번호를 다시 입력해주세요" required>
+                        <span class="error-text" id="password-confirm-error"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="nickname">닉네임 *</label>
+                        <input type="text" id="nickname" name="nickname" placeholder="닉네임을 입력해주세요" required>
+                        <span class="error-text" id="nickname-error"></span>
+                    </div>
+                    
+                    <div class="terms-section">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="agree-all">
+                            <span>전체 동의</span>
+                        </label>
+                        
+                        <div class="terms-list">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="agree-terms" class="agree-item" required>
+                                <span>[필수] 이용약관 동의</span>
+                                <a href="/policy/terms.html" target="_blank">보기</a>
+                            </label>
+                            
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="agree-privacy" class="agree-item" required>
+                                <span>[필수] 개인정보 처리방침 동의</span>
+                                <a href="/policy/privacy.html" target="_blank">보기</a>
+                            </label>
+                            
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="agree-marketing" class="agree-item">
+                                <span>[선택] 마케팅 정보 수신 동의</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-signup-submit">회원가입</button>
+                </form>
+                
+                <div class="login-link">
+                    <span>이미 회원이신가요?</span>
+                    <a href="/auth/login.html">로그인</a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Scripts -->
+    <script src="/js/header.js"></script>
+    <script src="/js/sidemenu.js"></script>
+    <script type="module" src="js/signup.js"></script>
+</body>
+</html>
