@@ -1,0 +1,64 @@
+/* 회원 관리 페이지 스타일 */
+.filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filters select,
+.filters input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.filters select {
+    min-width: 150px;
+}
+
+.filters input {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* 회원 유형 배지 */
+.user-type-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.user-type-badge.member {
+    background-color: #3498db;
+    color: white;
+}
+
+.user-type-badge.business {
+    background-color: #9b59b6;
+    color: white;
+}
+
+.user-type-badge.administrator {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* 레벨 표시 */
+.level-badge {
+    color: #f39c12;
+    font-weight: bold;
+}
+
+/* 액션 버튼 */
+.action-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.action-buttons .btn {
+    padding: 5px 10px;
+    font-size: 12px;
+}

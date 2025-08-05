@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>광고 관리 - 유흥마블 관리자</title>
+    <link rel="stylesheet" href="/admin/css/admin-common.css">
+    <link rel="stylesheet" href="css/ads.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 관리자 헤더가 여기에 동적으로 로드됩니다 -->
+        
+        <!-- 컨텐츠 -->
+        <main class="admin-content">
+            <div class="page-header">
+                <h1 class="page-title">광고 관리</h1>
+            </div>
+            
+            <div class="filters">
+                <select id="filter-status">
+                    <option value="">전체 상태</option>
+                    <option value="active">활성</option>
+                    <option value="inactive">비활성</option>
+                </select>
+                
+                <select id="filter-type">
+                    <option value="">전체 업종</option>
+                </select>
+                
+                <input type="text" id="search-input" placeholder="제목, 작성자 검색">
+                <button class="btn btn-primary" id="btn-search">검색</button>
+            </div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>제목</th>
+                        <th>작성자</th>
+                        <th>업종</th>
+                        <th>지역</th>
+                        <th>상태</th>
+                        <th>등록일</th>
+                        <th>조회수</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody id="ads-tbody">
+                    <!-- 광고 목록이 여기에 표시됩니다 -->
+                </tbody>
+            </table>
+        </main>
+    </div>
+    
+    <script type="module" src="js/ads.js"></script>
+</body>
+</html>

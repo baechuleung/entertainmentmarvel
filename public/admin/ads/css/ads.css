@@ -1,0 +1,72 @@
+/* 광고 관리 페이지 스타일 */
+.filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filters select,
+.filters input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.filters select {
+    min-width: 150px;
+}
+
+.filters input {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* 상태 배지 */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-badge.active {
+    background-color: #27ae60;
+    color: white;
+}
+
+.status-badge.inactive {
+    background-color: #95a5a6;
+    color: white;
+}
+
+/* 액션 버튼 */
+.action-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.action-buttons .btn {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+/* 테이블 스타일 개선 */
+.data-table {
+    font-size: 14px;
+}
+
+.data-table td {
+    vertical-align: middle;
+}
+
+.data-table th:first-child,
+.data-table td:first-child {
+    width: 80px;
+}
+
+.data-table th:last-child,
+.data-table td:last-child {
+    width: 150px;
+}
