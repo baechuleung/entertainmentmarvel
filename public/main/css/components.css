@@ -7,69 +7,141 @@
 .banner {
     position: relative;
     width: 100%;
-    height: 200px;
+    min-height: 285px;
     background: url('/img/main/main_top_bg.png') center/cover;
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 20px;
-    padding-bottom: 50px; /* 하단에 더 많은 여백 추가 */
-    color: white;
+}
+
+.banner-content {
+    width: 100%;
+    max-width: 410px; /* 450px - 좌우 패딩 40px */
 }
 
 .banner-text {
-    max-width: 300px;
+    text-align: left;
+    margin-bottom: 30px;
 }
 
-.banner h1 {
+.banner-text h1 {
     font-size: 24px;
-    margin-bottom: 5px; /* 위아래 여백 줄임 */
+    color: white;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
-
-.banner p {
-    font-size: 14px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    margin: 0; /* 여백 제거 */
+    line-height: 1.3;
 }
 
 /* 검색 섹션 */
 .search-section {
     background-color: #1a5490;
-    padding: 20px;
-    margin: -50px 20px 20px 20px; /* 위로 올리고 좌우 여백 추가 */
-    position: relative;
-    z-index: 10;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     display: grid;
-    grid-template-columns: 1fr 1fr; /* 2개씩 균등 분할 */
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
-    border-radius: 10px; /* 라운드 처리 */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* 그림자 효과 추가 */
-}
-.search-selects {
-    display: contents; /* 부모 그리드에 직접 배치 */
 }
 
-.search-selects select,
-.search-bar {
-    height: 48px; /* 동일한 높이 지정 */
-    border: none;
+.search-selects {
+    display: contents;
+}
+
+/* 커스텀 셀렉트 박스 */
+.custom-select {
+    position: relative;
+    height: 48px;
+    background-color: white;
     border-radius: 5px;
     font-size: 14px;
+}
+
+.select-selected {
+    height: 100%;
+    padding: 0 35px 0 12px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: #666;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+}
+
+.select-selected.select-arrow-active {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='18 15 12 9 6 15'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+.select-selected.has-value {
+    color: #333;
+}
+
+/* 드롭다운 아이템 */
+.select-items {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 99;
     background-color: white;
+    border-radius: 5px;
+    margin-top: 4px;
+    max-height: 240px;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.search-selects select {
-    padding: 0 12px;
+.select-items div {
+    padding: 12px;
+    cursor: pointer;
+    color: #333;
+    transition: background-color 0.2s;
 }
 
+.select-items div:hover {
+    background-color: #f0f0f0;
+}
+
+.select-items div.same-as-selected {
+    background-color: #1a5490;
+    color: white;
+}
+
+.select-hide {
+    display: none;
+}
+
+/* 스크롤바 스타일 */
+.select-items::-webkit-scrollbar {
+    width: 6px;
+}
+
+.select-items::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.select-items::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.select-items::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* 검색바 */
 .search-bar {
     position: relative;
+    height: 48px;
+    background-color: white;
+    border-radius: 5px;
 }
 
 .search-bar input {
     width: 100%;
-    height: 100%; /* 부모 높이에 맞춤 */
-    padding: 0 40px 0 12px; /* 좌우 패딩만 설정 */
+    height: 100%;
+    padding: 0 40px 0 12px;
     border: none;
     border-radius: 5px;
     font-size: 14px;
