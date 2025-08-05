@@ -35,15 +35,16 @@
 /* 검색 섹션 */
 .search-section {
     background-color: #1a5490;
-    padding: 15px 20px; /* 상하 패딩 줄임 */
-    margin-top: -30px; /* 배너와 겹치도록 위로 올림 */
+    padding: 20px;
+    margin: -50px 20px 20px 20px; /* 위로 올리고 좌우 여백 추가 */
     position: relative;
     z-index: 10;
     display: grid;
     grid-template-columns: 1fr 1fr; /* 2개씩 균등 분할 */
     gap: 10px;
+    border-radius: 10px; /* 라운드 처리 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* 그림자 효과 추가 */
 }
-
 .search-selects {
     display: contents; /* 부모 그리드에 직접 배치 */
 }
