@@ -251,7 +251,7 @@ const SideMenu = {
         // 페이지 이동 매핑
         const pageMap = {
             '홈으로 가기': '/main/main.html',
-            '공고 관리': '/job-posting/job-posting.html',
+            '광고 관리': '/ad-posting/ad-management.html',
             '1:1 고객센터': '/support/support.html',
             'FAQ': '/faq/faq.html',
             '공지사항': '/notice/notice.html',

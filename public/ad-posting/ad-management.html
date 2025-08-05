@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>광고 관리 - 유흥마블</title>
+    <meta name="description" content="유흥마블 업체회원 광고 관리 페이지">
+    
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/sidemenu.css">
+    <link rel="stylesheet" href="css/ad-management.css">
+    
+    <script src="/js/seo.js"></script>
+</head>
+<body>
+    <main>
+        <div class="ad-management-container">
+            <!-- 탭 네비게이션 -->
+            <div class="tab-navigation">
+                <button class="tab-button active" onclick="location.href='/ad-posting/ad-management.html'">광고 관리</button>
+                <button class="tab-button" onclick="location.href='/ad-posting/ad-posting.html'">광고 추가</button>
+            </div>
+            
+            <!-- 광고 관리 내용 -->
+            <div class="ad-management-content">
+                <div class="ad-list-header">
+                    <h2>내 광고 목록</h2>
+                    <div class="ad-count">총 <span id="total-ads">0</span>개</div>
+                </div>
+                
+                <div class="ad-list" id="ad-list">
+                    <!-- 광고 목록이 여기에 동적으로 로드됩니다 -->
+                </div>
+                
+                <!-- 빈 상태 메시지 -->
+                <div class="empty-state" id="empty-state" style="display: none;">
+                    <p>등록된 광고가 없습니다.</p>
+                    <button class="btn-add-first" onclick="location.href='/ad-posting/ad-posting.html'">첫 광고 등록하기</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="/js/header.js"></script>
+    <script type="module" src="/ad-posting/js/ad-management.js"></script>
+</body>
+</html>
