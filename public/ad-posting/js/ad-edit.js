@@ -8,10 +8,10 @@ import { uploadBusinessAdImages } from '/js/imagekit-upload.js';
 let currentUser = null;
 let adId = null;
 let currentAd = null;
-let selectedFiles = [];
-let deletedExistingImages = [];
 let regionData = {};
 let cityData = {};
+let quill = null;
+let previewImages = new Map(); // base64 -> File 객체 매핑
 
 // DOM 요소
 const form = document.getElementById('ad-edit-form');
@@ -19,9 +19,7 @@ const authorInput = document.getElementById('author');
 const regionSelect = document.getElementById('region');
 const citySelect = document.getElementById('city');
 const businessTypeSelect = document.getElementById('business-type');
-const fileInput = document.getElementById('file-upload');
-const filePreview = document.getElementById('file-preview');
-const existingImagesDiv = document.getElementById('existing-images');
+const contentInput = document.getElementById('content');
 
 // 초기화
 document.addEventListener('DOMContentLoaded', async function() {
@@ -35,6 +33,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
     
+    // Quill 에디터 초기화
+    initializeQuillEditor();
+    
     // 인증 상태 확인
     checkAuth();
     
@@ -45,6 +46,68 @@ document.addEventListener('DOMContentLoaded', async function() {
     // 이벤트 리스너 설정
     setupEventListeners();
 });
+
+// Quill 에디터 초기화
+function initializeQuillEditor() {
+    quill = new Quill('#editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'align': [] }],
+                ['link', 'image'],
+                ['clean']
+            ]
+        },
+        placeholder: '광고 상세 내용을 입력하세요...'
+    });
+    
+    // 에디터 내용 변경 시 hidden input 업데이트
+    quill.on('text-change', function() {
+        contentInput.value = quill.root.innerHTML;
+    });
+    
+    // 이미지 핸들러 커스터마이징
+    const toolbar = quill.getModule('toolbar');
+    toolbar.addHandler('image', selectLocalImage);
+}
+
+// 로컬 이미지 선택
+function selectLocalImage() {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+    
+    input.onchange = () => {
+        const file = input.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64 = e.target.result;
+                const range = quill.getSelection();
+                
+                // 에디터에 미리보기 이미지 삽입
+                quill.insertEmbed(range.index, 'image', base64);
+                
+                // base64와 파일 객체 매핑 저장
+                previewImages.set(base64, file);
+                
+                // 미리보기 표시를 위한 data 속성 추가
+                setTimeout(() => {
+                    const img = quill.root.querySelector(`img[src="${base64}"]`);
+                    if (img) {
+                        img.setAttribute('data-preview', 'true');
+                    }
+                }, 100);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+}
 
 // 인증 상태 확인
 function checkAuth() {
@@ -95,7 +158,12 @@ function fillFormData() {
     // 기본 정보
     document.getElementById('title').value = currentAd.title || '';
     authorInput.value = currentAd.author || '';
-    document.getElementById('content').value = currentAd.content || '';
+    
+    // Quill 에디터에 내용 설정
+    if (currentAd.content) {
+        quill.root.innerHTML = currentAd.content;
+        contentInput.value = currentAd.content;
+    }
     
     // 연락처 정보
     document.getElementById('phone').value = currentAd.phone || '';
@@ -119,53 +187,7 @@ function fillFormData() {
             }
         }, 100);
     }
-    
-    // 기존 이미지 표시
-    displayExistingImages();
 }
-
-// 기존 이미지 표시
-function displayExistingImages() {
-    const images = [];
-    
-    // 썸네일 추가
-    if (currentAd.thumbnail) {
-        images.push({ url: currentAd.thumbnail, type: 'thumbnail' });
-    }
-    
-    // 상세 이미지 추가
-    if (currentAd.images && currentAd.images.length > 0) {
-        currentAd.images.forEach((url, index) => {
-            images.push({ url, type: 'detail', index });
-        });
-    }
-    
-    existingImagesDiv.innerHTML = images.map((img, index) => `
-        <div class="existing-image-item" data-index="${index}" data-type="${img.type}">
-            <img src="${img.url}" alt="기존 이미지 ${index + 1}">
-            <button class="delete-btn" onclick="deleteExistingImage(${index})">&times;</button>
-        </div>
-    `).join('');
-}
-
-// 기존 이미지 삭제 표시
-window.deleteExistingImage = function(index) {
-    const item = existingImagesDiv.querySelector(`[data-index="${index}"]`);
-    const type = item.getAttribute('data-type');
-    
-    if (item.classList.contains('deleted')) {
-        // 삭제 취소
-        item.classList.remove('deleted');
-        deletedExistingImages = deletedExistingImages.filter(i => i !== index);
-    } else {
-        // 삭제 표시
-        item.classList.add('deleted');
-        deletedExistingImages.push(index);
-    }
-    
-    // 전체 이미지 개수 체크
-    checkTotalImageCount();
-};
 
 // 지역 데이터 로드
 async function loadRegionData() {
@@ -212,9 +234,6 @@ function setupEventListeners() {
     // 지역 선택 변경
     regionSelect.addEventListener('change', updateCityOptions);
     
-    // 파일 선택
-    fileInput.addEventListener('change', handleFileSelect);
-    
     // 폼 제출
     form.addEventListener('submit', handleSubmit);
     
@@ -251,76 +270,6 @@ function updateCityOptions() {
     }
 }
 
-// 전체 이미지 개수 체크
-function checkTotalImageCount() {
-    const existingCount = document.querySelectorAll('.existing-image-item:not(.deleted)').length;
-    const newCount = selectedFiles.length;
-    const totalCount = existingCount + newCount;
-    
-    if (totalCount > 5) {
-        alert(`전체 이미지는 최대 5개까지 가능합니다. (현재: ${totalCount}개)`);
-        return false;
-    }
-    
-    return true;
-}
-
-// 파일 선택 처리
-function handleFileSelect(e) {
-    const files = Array.from(e.target.files);
-    
-    // 전체 이미지 개수 체크
-    const existingCount = document.querySelectorAll('.existing-image-item:not(.deleted)').length;
-    const totalCount = existingCount + selectedFiles.length + files.length;
-    
-    if (totalCount > 5) {
-        alert(`전체 이미지는 최대 5개까지 가능합니다. (현재 기존: ${existingCount}개, 새 이미지: ${selectedFiles.length + files.length}개)`);
-        fileInput.value = '';
-        return;
-    }
-    
-    selectedFiles = [...selectedFiles, ...files];
-    displayFilePreview();
-}
-
-// 파일 미리보기 표시
-function displayFilePreview() {
-    filePreview.innerHTML = '';
-    
-    selectedFiles.forEach((file, index) => {
-        if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const previewItem = document.createElement('div');
-                previewItem.className = 'file-preview-item';
-                
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.alt = `이미지 ${index + 1}`;
-                
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'delete-btn';
-                deleteBtn.innerHTML = '×';
-                deleteBtn.onclick = () => removeFile(index);
-                
-                previewItem.appendChild(img);
-                previewItem.appendChild(deleteBtn);
-                filePreview.appendChild(previewItem);
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-    
-    // 파일 input 초기화
-    fileInput.value = '';
-}
-
-// 파일 삭제
-function removeFile(index) {
-    selectedFiles.splice(index, 1);
-    displayFilePreview();
-}
-
 // 폼 제출 처리
 async function handleSubmit(e) {
     e.preventDefault();
@@ -330,8 +279,46 @@ async function handleSubmit(e) {
     submitButton.textContent = '수정 중...';
     
     try {
-        // 이미지 처리
-        let finalImages = await processImages();
+        // 에디터 내용 가져오기
+        let editorContent = quill.root.innerHTML;
+        
+        // 미리보기 이미지들을 실제 URL로 교체
+        const uploadedImages = [];
+        
+        // 모든 이미지 태그 찾기
+        const imgElements = quill.root.querySelectorAll('img');
+        const imagesToUpload = [];
+        
+        imgElements.forEach(img => {
+            const src = img.src;
+            if (src.startsWith('data:') && previewImages.has(src)) {
+                imagesToUpload.push({
+                    element: img,
+                    file: previewImages.get(src),
+                    base64: src
+                });
+            } else if (src.startsWith('http')) {
+                // 기존 이미지는 그대로 유지
+                uploadedImages.push(src);
+            }
+        });
+        
+        // 새 이미지들을 ImageKit에 업로드
+        if (imagesToUpload.length > 0) {
+            const files = imagesToUpload.map(item => item.file);
+            const imageData = await uploadBusinessAdImages(files, currentUser.uid);
+            
+            // 업로드된 URL들
+            const urls = [imageData.thumbnail, ...imageData.details].filter(url => url);
+            
+            // 에디터 내용에서 base64를 실제 URL로 교체
+            imagesToUpload.forEach((item, index) => {
+                if (urls[index]) {
+                    editorContent = editorContent.replace(item.base64, urls[index]);
+                    uploadedImages.push(urls[index]);
+                }
+            });
+        }
         
         // 광고 데이터 준비
         const adData = {
@@ -339,12 +326,12 @@ async function handleSubmit(e) {
             businessType: businessTypeSelect.value,
             region: regionSelect.value,
             city: citySelect.value,
-            content: document.getElementById('content').value,
+            content: editorContent,
             phone: document.getElementById('phone').value,
             kakao: document.getElementById('kakao').value || '',
             telegram: document.getElementById('telegram').value || '',
-            thumbnail: finalImages.thumbnail,
-            images: finalImages.details,
+            thumbnail: uploadedImages[0] || null,
+            images: uploadedImages,
             updatedAt: Date.now()
         };
         
@@ -360,45 +347,4 @@ async function handleSubmit(e) {
         submitButton.disabled = false;
         submitButton.textContent = '수정 완료';
     }
-}
-
-// 이미지 처리
-async function processImages() {
-    let finalThumbnail = currentAd.thumbnail;
-    let finalDetails = [...(currentAd.images || [])];
-    
-    // 삭제된 이미지 처리
-    deletedExistingImages.forEach(index => {
-        const item = existingImagesDiv.querySelector(`[data-index="${index}"]`);
-        const type = item.getAttribute('data-type');
-        
-        if (type === 'thumbnail') {
-            finalThumbnail = null;
-        } else if (type === 'detail') {
-            const detailIndex = parseInt(item.getAttribute('data-index')) - 1; // 썸네일이 0번이므로
-            finalDetails[detailIndex] = null;
-        }
-    });
-    
-    // null 값 제거
-    finalDetails = finalDetails.filter(url => url !== null);
-    
-    // 새 이미지 업로드
-    if (selectedFiles.length > 0) {
-        const imageData = await uploadBusinessAdImages(selectedFiles, currentUser.uid);
-        
-        // 썸네일이 없으면 첫 번째 새 이미지를 썸네일로
-        if (!finalThumbnail && imageData.thumbnail) {
-            finalThumbnail = imageData.thumbnail;
-            finalDetails = [...finalDetails, ...imageData.details];
-        } else {
-            // 기존 썸네일이 있으면 모든 새 이미지를 상세 이미지로
-            finalDetails = [...finalDetails, imageData.thumbnail, ...imageData.details].filter(url => url);
-        }
-    }
-    
-    return {
-        thumbnail: finalThumbnail,
-        details: finalDetails
-    };
 }
