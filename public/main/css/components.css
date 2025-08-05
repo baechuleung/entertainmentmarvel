@@ -1,0 +1,87 @@
+/* 메인 헤더 섹션 */
+.main-header-section {
+    background-color: #131217;
+}
+
+/* 배너 섹션 */
+.banner {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background: url('/img/main/main_top_bg.png') center/cover;
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    padding-bottom: 50px; /* 하단에 더 많은 여백 추가 */
+    color: white;
+}
+
+.banner-text {
+    max-width: 300px;
+}
+
+.banner h1 {
+    font-size: 24px;
+    margin-bottom: 5px; /* 위아래 여백 줄임 */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.banner p {
+    font-size: 14px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    margin: 0; /* 여백 제거 */
+}
+
+/* 검색 섹션 */
+.search-section {
+    background-color: #1a5490;
+    padding: 15px 20px; /* 상하 패딩 줄임 */
+    margin-top: -30px; /* 배너와 겹치도록 위로 올림 */
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2개씩 균등 분할 */
+    gap: 10px;
+}
+
+.search-selects {
+    display: contents; /* 부모 그리드에 직접 배치 */
+}
+
+.search-selects select,
+.search-bar {
+    height: 48px; /* 동일한 높이 지정 */
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: white;
+}
+
+.search-selects select {
+    padding: 0 12px;
+}
+
+.search-bar {
+    position: relative;
+}
+
+.search-bar input {
+    width: 100%;
+    height: 100%; /* 부모 높이에 맞춤 */
+    padding: 0 40px 0 12px; /* 좌우 패딩만 설정 */
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.search-bar button {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 18px;
+}

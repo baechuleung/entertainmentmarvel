@@ -3,117 +3,9 @@ main {
     padding-bottom: 20px;
 }
 
-/* 메인 헤더 섹션 */
-.main-header-section {
-    background-color: white;
-    margin-bottom: 10px;
-}
-
-/* 배너 섹션 */
-.banner {
-    position: relative;
-    width: 100%;
-    height: 200px;
-    background: url('/img/main/main_top_bg.png') center/cover;
-    display: flex;
-    align-items: center;
-    padding: 20px;
-    color: white;
-}
-
-.banner-text {
-    max-width: 300px;
-}
-
-.banner h1 {
-    font-size: 24px;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
-
-.banner p {
-    font-size: 14px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-}
-
-/* 검색 섹션 */
-.search-section {
-    background-color: #1a5490;
-    padding: 20px;
-}
-
-.search-selects {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.search-selects select {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    border-radius: 5px;
-    font-size: 14px;
-    background-color: white;
-}
-
-.search-bar {
-    position: relative;
-}
-
-.search-bar input {
-    width: 100%;
-    padding: 12px;
-    padding-right: 40px;
-    border: none;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-.search-bar button {
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-    font-size: 18px;
-}
-
-/* 카테고리 탭 */
-.category-tabs {
-    display: flex;
-    background-color: white;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-
-.category-tabs::-webkit-scrollbar {
-    display: none;
-}
-
-.category-tabs button {
-    flex: 0 0 auto;
-    padding: 15px 20px;
-    border: none;
-    background: none;
-    font-size: 14px;
-    color: #666;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.category-tabs button.active {
-    color: #1a5490;
-    border-bottom: 2px solid #1a5490;
-}
-
 /* 업종 목록 섹션 */
 .business-list-section {
-    background-color: #f5f5f5;
+    background-color: #131217;
 }
 
 .business-list {
@@ -124,10 +16,19 @@ main {
     display: flex;
     gap: 15px;
     margin-bottom: 15px;
-    background: white;
-    border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.business-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #202020;
 }
 
 .business-item img {
@@ -142,7 +43,30 @@ main {
     padding: 15px;
     display: flex;
     flex-direction: column;
+}
+
+.ad-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.ad-meta {
+    display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: #999;
+}
+
+.ad-type-author {
+    color: #1a5490;
+}
+
+.ad-location {
+    color: #999;
 }
 
 .business-header {
@@ -183,29 +107,12 @@ main {
     margin-bottom: 10px;
 }
 
-.business-actions {
-    display: flex;
-    gap: 10px;
-}
 
-.btn-reservation {
-    background-color: #1a5490;
-    color: white;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 5px;
-    font-size: 13px;
-    cursor: pointer;
-}
 
-.btn-wishlist {
-    background: none;
-    border: 1px solid #ddd;
-    padding: 8px 15px;
-    border-radius: 5px;
-    font-size: 13px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+/* 결과 없음 메시지 */
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+    font-size: 16px;
 }

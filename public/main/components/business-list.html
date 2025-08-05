@@ -1,17 +1,12 @@
-<div class="business-item">
-    <img src="{{image}}" alt="{{name}}">
+<div class="business-item" data-id="{{id}}">
+    <img src="{{thumbnail}}" alt="{{title}}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 120 120&quot;><rect fill=&quot;%23ddd&quot; width=&quot;120&quot; height=&quot;120&quot;/><text x=&quot;50%&quot; y=&quot;50%&quot; text-anchor=&quot;middle&quot; dy=&quot;.3em&quot; fill=&quot;%23999&quot; font-size=&quot;16&quot;>No Image</text></svg>'">
     <div class="business-info">
         <div>
-            <div class="business-header">
-                <span class="business-badge">{{category}}</span>
-                <span class="business-name">{{name}}</span>
+            <h3 class="ad-title">{{title}}</h3>
+            <div class="ad-meta">
+                <span class="ad-type-author">{{businessType}} - {{author}}</span>
+                <span class="ad-location">{{region}} {{city}}</span>
             </div>
-            <div class="business-location">📍 {{location}}</div>
-            <div class="business-phone">📞 {{phone}}</div>
-        </div>
-        <div class="business-actions">
-            <button class="btn-reservation" data-id="{{id}}">상세보기</button>
-            <button class="btn-wishlist" data-id="{{id}}">⭐ 찜하기</button>
         </div>
     </div>
 </div>
