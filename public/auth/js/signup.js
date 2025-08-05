@@ -1,5 +1,5 @@
 import { auth, db } from '/js/firebase-config.js';
-import { createUserWithEmailAndPassword, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // DOM 요소
@@ -11,6 +11,14 @@ const nicknameInput = document.getElementById('nickname');
 const agreeAllCheckbox = document.getElementById('agree-all');
 const agreeItems = document.querySelectorAll('.agree-item');
 const submitButton = document.querySelector('.btn-signup-submit');
+
+// 로그인 상태 확인
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // 이미 로그인된 경우 메인 페이지로 이동
+        window.location.href = '/main/main.html';
+    }
+});
 
 // 에러 메시지 표시
 function showError(message) {

@@ -1,0 +1,206 @@
+/* 업체 상세 페이지 스타일 */
+.business-detail-container {
+    min-height: calc(100vh - 60px);
+    background-color: #1a1a1a;
+}
+
+/* 이미지 슬라이더 */
+.image-slider {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    background-color: #2a2a2a;
+    overflow: hidden;
+}
+
+.slider-wrapper {
+    display: flex;
+    transition: transform 0.3s ease;
+    height: 100%;
+}
+
+.slide {
+    min-width: 100%;
+    height: 100%;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.slider-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+}
+
+.dot.active {
+    background-color: #ffffff;
+}
+
+/* 업체 정보 섹션 */
+.business-info-section {
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.business-title {
+    font-size: 24px;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.business-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    color: #888;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.business-type-badge {
+    background-color: #1a5490;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* 상세 내용 섹션 */
+.detail-content-section {
+    padding: 20px;
+    background-color: #2a2a2a;
+    margin-bottom: 20px;
+}
+
+.detail-content {
+    color: #ffffff;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.detail-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+/* 연락처 섹션 */
+.contact-section {
+    padding: 20px;
+    background-color: #2a2a2a;
+}
+
+.contact-title {
+    font-size: 18px;
+    color: #ffffff;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.contact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background-color: #3a3a3a;
+    border-radius: 5px;
+}
+
+.contact-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a5490;
+}
+
+.contact-label {
+    color: #888;
+    font-size: 14px;
+    min-width: 60px;
+}
+
+.contact-value {
+    color: #ffffff;
+    font-size: 14px;
+    flex: 1;
+}
+
+.contact-value a {
+    color: #1a5490;
+    text-decoration: none;
+}
+
+/* 하단 버튼 */
+.bottom-actions {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 450px;
+    padding: 16px;
+    background-color: #1a1a1a;
+    border-top: 1px solid #3a3a3a;
+}
+
+.btn-call {
+    width: 100%;
+    padding: 16px;
+    background-color: #1a5490;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-call:hover {
+    background-color: #144170;
+}
+
+/* 로딩 상태 */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    color: #888;
+}
+
+/* 에러 상태 */
+.error {
+    text-align: center;
+    padding: 60px 20px;
+    color: #ff6b6b;
+}
