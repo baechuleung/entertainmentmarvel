@@ -8,8 +8,9 @@ import { uploadBusinessAdImages } from '/js/imagekit-upload.js';
 let currentUser = null;
 let regionData = {};
 let cityData = {};
+let businessTypes = {}; // 업종 코드 매핑 저장
 let quill = null;
-let previewImages = new Map(); // base64 -> File 객체 매핑
+let previewImages = new Map();
 
 // DOM 요소
 const form = document.getElementById('ad-posting-form');
@@ -134,7 +135,7 @@ async function loadRegionData() {
         // 지역 선택 옵션 추가
         region1Data.regions.forEach(region => {
             const option = document.createElement('option');
-            option.value = region.name;  // code 대신 name을 value로 사용
+            option.value = region.name;
             option.textContent = region.name;
             regionSelect.appendChild(option);
         });
@@ -149,9 +150,11 @@ async function loadBusinessTypes() {
         const response = await fetch('/data/business-types.json');
         const data = await response.json();
         
+        // 업종 코드 매핑 저장
         data.businessTypes.forEach(type => {
+            businessTypes[type.name] = type.code;
             const option = document.createElement('option');
-            option.value = type.name;  // code 대신 name을 value로 사용
+            option.value = type.name;
             option.textContent = type.name;
             businessTypeSelect.appendChild(option);
         });
@@ -248,19 +251,24 @@ async function handleSubmit(e) {
             });
         }
         
+        // 선택된 업종의 코드 가져오기
+        const selectedBusinessType = businessTypeSelect.value;
+        const businessTypeCode = businessTypes[selectedBusinessType];
+        
         // 광고 데이터 준비
         const adPostingData = {
             title: document.getElementById('title').value,
             author: authorInput.value,
             authorId: currentUser.uid,
-            businessType: businessTypeSelect.value,
+            businessType: selectedBusinessType,
+            businessTypeCode: businessTypeCode, // 업종 코드 추가
             region: regionSelect.value,
             city: citySelect.value,
             content: editorContent,
             phone: document.getElementById('phone').value,
             kakao: document.getElementById('kakao').value || '',
             telegram: document.getElementById('telegram').value || '',
-            thumbnail: uploadedImages[0] || null,
+            thumbnail: `/img/business-type/${businessTypeCode}.png`, // 업종별 썸네일
             images: uploadedImages,
             createdAt: Date.now(),
             updatedAt: Date.now(),

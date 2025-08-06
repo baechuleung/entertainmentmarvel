@@ -376,9 +376,14 @@ function createAdvertisementItem(ad) {
         // 템플릿이 로드되지 않은 경우 기본 HTML 반환
         const defaultImage = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23ddd' width='100' height='100'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%23999' font-size='14'>No Image</text></svg>";
         
+        // 업종 코드가 있으면 업종별 썸네일 사용, 없으면 기존 썸네일 또는 기본 이미지
+        const thumbnailSrc = ad.businessTypeCode ? 
+            `/img/business-type/${ad.businessTypeCode}.png` : 
+            (ad.thumbnail || defaultImage);
+        
         return `
             <div class="business-item" data-id="${ad.id}">
-                <img src="${ad.thumbnail || defaultImage}" alt="${ad.title}" onerror="this.src='${defaultImage}'">
+                <img src="${thumbnailSrc}" alt="${ad.title}" onerror="this.src='${defaultImage}'">
                 <div class="business-info">
                     <div class="ad-title">${ad.title}</div>
                     <div class="ad-meta">
@@ -391,9 +396,16 @@ function createAdvertisementItem(ad) {
     }
     
     // 템플릿 사용
+    const defaultImage = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23ddd' width='100' height='100'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%23999' font-size='14'>No Image</text></svg>";
+    
+    // 업종 코드가 있으면 업종별 썸네일 사용
+    const thumbnailSrc = ad.businessTypeCode ? 
+        `/img/business-type/${ad.businessTypeCode}.png` : 
+        (ad.thumbnail || defaultImage);
+    
     return replaceTemplate(businessItemTemplate, {
         id: ad.id,
-        thumbnail: ad.thumbnail || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23ddd' width='100' height='100'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%23999' font-size='14'>No Image</text></svg>",
+        thumbnail: thumbnailSrc,
         title: ad.title,
         businessType: ad.businessType,
         author: ad.author,

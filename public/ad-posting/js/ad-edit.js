@@ -218,12 +218,18 @@ async function loadBusinessTypes() {
         const response = await fetch('/data/business-types.json');
         const data = await response.json();
         
+        // 업종 코드 매핑 저장
+        const businessTypes = {};
         data.businessTypes.forEach(type => {
+            businessTypes[type.name] = type.code;
             const option = document.createElement('option');
-            option.value = type.name;  // code 대신 name을 value로 사용
+            option.value = type.name;
             option.textContent = type.name;
             businessTypeSelect.appendChild(option);
         });
+        
+        // 전역으로 사용할 수 있도록 window 객체에 저장
+        window.businessTypes = businessTypes;
     } catch (error) {
         console.error('업종 데이터 로드 실패:', error);
     }
@@ -320,17 +326,22 @@ async function handleSubmit(e) {
             });
         }
         
+        // 선택된 업종의 코드 가져오기
+        const selectedBusinessType = businessTypeSelect.value;
+        const businessTypeCode = window.businessTypes ? window.businessTypes[selectedBusinessType] : null;
+        
         // 광고 데이터 준비
         const adData = {
             title: document.getElementById('title').value,
             businessType: businessTypeSelect.value,
+            businessTypeCode: businessTypeCode, // 업종 코드 추가
             region: regionSelect.value,
             city: citySelect.value,
             content: editorContent,
             phone: document.getElementById('phone').value,
             kakao: document.getElementById('kakao').value || '',
             telegram: document.getElementById('telegram').value || '',
-            thumbnail: uploadedImages[0] || null,
+            thumbnail: businessTypeCode ? `/img/business-type/${businessTypeCode}.png` : uploadedImages[0] || null, // 업종별 썸네일
             images: uploadedImages,
             updatedAt: Date.now()
         };

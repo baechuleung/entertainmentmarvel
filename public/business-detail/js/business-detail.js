@@ -99,12 +99,19 @@ function setBusinessHeader(data) {
     const location = document.getElementById('business-location');
     const views = document.getElementById('business-views');
     
-    if (thumbnail && data.thumbnail) {
-        thumbnail.src = data.thumbnail;
-        thumbnail.style.display = 'block';
-        thumbnail.onerror = function() {
-            this.style.display = 'none';
-        };
+    if (thumbnail) {
+        // 업종 코드가 있으면 업종별 썸네일 사용
+        const thumbnailSrc = data.businessTypeCode ? 
+            `/img/business-type/${data.businessTypeCode}.png` : 
+            data.thumbnail;
+            
+        if (thumbnailSrc) {
+            thumbnail.src = thumbnailSrc;
+            thumbnail.style.display = 'block';
+            thumbnail.onerror = function() {
+                this.style.display = 'none';
+            };
+        }
     }
     
     if (title) title.textContent = data.title || '';
