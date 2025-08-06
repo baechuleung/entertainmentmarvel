@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>FAQ - 유흥마블</title>
+    <meta name="description" content="유흥마블 자주 묻는 질문과 답변">
+    <meta name="keywords" content="유흥마블 FAQ, 자주 묻는 질문, 도움말">
+    <meta name="author" content="유흥마블">
+    
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/sidemenu.css">
+    <link rel="stylesheet" href="css/faq.css">
+    
+    <script src="/js/seo.js"></script>
+</head>
+<body>
+    <main>
+        <div class="faq-container">
+            <div class="faq-header">
+                <h1>자주 묻는 질문</h1>
+                <p>궁금하신 내용을 확인해보세요</p>
+            </div>
+            
+            <!-- 카테고리 탭 -->
+            <div class="category-tabs">
+                <button class="category-tab active" data-category="all">전체</button>
+                <button class="category-tab" data-category="general">일반</button>
+                <button class="category-tab" data-category="service">서비스</button>
+                <button class="category-tab" data-category="payment">결제</button>
+                <button class="category-tab" data-category="account">계정</button>
+            </div>
+            
+            <!-- FAQ 목록 -->
+            <div class="faq-list" id="faq-list">
+                <!-- FAQ 아이템이 여기에 동적으로 로드됩니다 -->
+            </div>
+            
+            <div class="empty-state" id="empty-state" style="display: none;">
+                <p>등록된 FAQ가 없습니다.</p>
+            </div>
+        </div>
+    </main>
+    
+    <script src="/js/header.js"></script>
+    <script type="module" src="js/faq.js"></script>
+</body>
+</html>
