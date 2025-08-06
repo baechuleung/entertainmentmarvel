@@ -20,6 +20,81 @@
     font-size: 16px;
 }
 
+/* 후기 목록 - 제목만 표시 */
+.review-item {
+    padding: 15px;
+    background-color: #3a3a3a;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.review-item:hover {
+    background-color: #4a4a4a;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.review-author {
+    color: #888;
+    font-size: 13px;
+}
+
+.review-date {
+    color: #888;
+    font-size: 12px;
+}
+
+.review-title {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 8px;
+}
+
+/* 모달 헤더 버튼들 */
+.modal-header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-edit, .btn-delete {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-edit {
+    background-color: #f39c12;
+    color: white;
+}
+
+.btn-delete {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* 후기 상세 내용 */
+.review-detail-content {
+    color: #ffffff;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.review-detail-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
 /* 후기 작성 모달 */
 .review-modal {
     display: none;

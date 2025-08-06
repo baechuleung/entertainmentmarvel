@@ -113,6 +113,17 @@ function setupModalEvents() {
     document.getElementById('modal-close')?.addEventListener('click', closeModal);
     document.querySelector('.btn-cancel')?.addEventListener('click', closeModal);
     
+    // 상세 모달 닫기
+    document.getElementById('detail-modal-close')?.addEventListener('click', () => {
+        document.getElementById('review-detail-modal').classList.remove('show');
+    });
+    
+    // 수정 버튼
+    document.getElementById('btn-edit-review')?.addEventListener('click', handleEditReview);
+    
+    // 삭제 버튼
+    document.getElementById('btn-delete-review')?.addEventListener('click', handleDeleteReview);
+    
     // 모달 외부 클릭
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('review-modal')) {
@@ -122,6 +133,29 @@ function setupModalEvents() {
     
     // 폼 제출
     document.getElementById('review-form')?.addEventListener('submit', handleReviewSubmit);
+}
+
+// 후기 수정
+async function handleEditReview() {
+    alert('수정 기능은 준비 중입니다.');
+}
+
+// 후기 삭제
+async function handleDeleteReview() {
+    const reviewId = this.getAttribute('data-review-id');
+    
+    if (confirm('정말 이 후기를 삭제하시겠습니까?')) {
+        try {
+            const { remove } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js');
+            await remove(ref(rtdb, `advertisements/${adId}/reviews/${reviewId}`));
+            
+            alert('후기가 삭제되었습니다.');
+            document.getElementById('review-detail-modal').classList.remove('show');
+        } catch (error) {
+            console.error('후기 삭제 실패:', error);
+            alert('후기 삭제에 실패했습니다.');
+        }
+    }
 }
 
 // Quill 에디터 초기화
@@ -266,16 +300,46 @@ function displayReviews(reviews) {
             new Date(review.createdAt).toLocaleDateString('ko-KR') : '-';
         
         return `
-            <div class="review-item">
+            <div class="review-item" data-review-id="${review.id}" data-review='${JSON.stringify(review).replace(/'/g, "&apos;")}'>
                 <div class="review-header">
                     <span class="review-author">${review.authorNickname || '익명'}</span>
                     <span class="review-date">${createdDate}</span>
                 </div>
                 <div class="review-title">${review.title || '제목 없음'}</div>
-                <div class="review-content">${review.content}</div>
             </div>
         `;
     }).join('');
+    
+    // 후기 클릭 이벤트 추가
+    document.querySelectorAll('.review-item').forEach(item => {
+        item.addEventListener('click', handleReviewClick);
+    });
+}
+
+// 후기 클릭 핸들러
+function handleReviewClick(e) {
+    const reviewItem = e.currentTarget;
+    const reviewData = JSON.parse(reviewItem.getAttribute('data-review'));
+    
+    // 상세 모달에 내용 표시
+    document.getElementById('detail-modal-title').textContent = reviewData.title || '제목 없음';
+    document.getElementById('review-detail-content').innerHTML = reviewData.content || '';
+    
+    // 수정/삭제 버튼에 데이터 저장
+    document.getElementById('btn-edit-review').setAttribute('data-review-id', reviewData.id);
+    document.getElementById('btn-delete-review').setAttribute('data-review-id', reviewData.id);
+    
+    // 본인 작성 후기인지 확인
+    if (currentUser && currentUser.uid === reviewData.userId) {
+        document.getElementById('btn-edit-review').style.display = 'block';
+        document.getElementById('btn-delete-review').style.display = 'block';
+    } else {
+        document.getElementById('btn-edit-review').style.display = 'none';
+        document.getElementById('btn-delete-review').style.display = 'none';
+    }
+    
+    // 상세 모달 열기
+    document.getElementById('review-detail-modal').classList.add('show');
 }
 
 // 후기 제출
