@@ -1,11 +1,15 @@
-import { rtdb } from '/js/firebase-config.js';
+import { rtdb, auth, db } from '/js/firebase-config.js';
 import { ref, get, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { setupReviews } from './reviews.js';
 import { setupModals } from './modals.js';
 
 // 전역 변수
 export let currentAd = null;
 export let adId = null;
+let currentUser = null;
+let isBookmarked = false;
 
 // 초기화
 document.addEventListener('DOMContentLoaded', async function() {
@@ -17,6 +21,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         showError('잘못된 접근입니다.');
         return;
     }
+    
+    // 인증 상태 확인
+    onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        if (user) {
+            await checkBookmarkStatus();
+        }
+    });
     
     // 컴포넌트 로드
     await loadComponents();
@@ -32,6 +44,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // 탭 설정
     setupTabs();
+    
+    // 즐겨찾기 버튼 설정
+    setupBookmarkButton();
 });
 
 // 컴포넌트 로드
@@ -199,4 +214,80 @@ function setupTabs() {
 function showError(message) {
     const container = document.querySelector('.business-detail-container');
     container.innerHTML = `<div class="error">${message}</div>`;
+}
+
+// 즐겨찾기 상태 확인
+async function checkBookmarkStatus() {
+    if (!currentUser || !adId) return;
+    
+    try {
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const bookmarks = userData.bookmarks || [];
+            isBookmarked = bookmarks.includes(adId);
+            updateBookmarkButton();
+        }
+    } catch (error) {
+        console.error('즐겨찾기 상태 확인 실패:', error);
+    }
+}
+
+// 즐겨찾기 버튼 업데이트
+function updateBookmarkButton() {
+    const bookmarkBtn = document.getElementById('btn-bookmark');
+    if (bookmarkBtn) {
+        if (isBookmarked) {
+            bookmarkBtn.classList.add('active');
+            bookmarkBtn.innerHTML = '⭐';
+        } else {
+            bookmarkBtn.classList.remove('active');
+            bookmarkBtn.innerHTML = '⭐';
+        }
+    }
+}
+
+// 즐겨찾기 버튼 설정
+function setupBookmarkButton() {
+    const bookmarkBtn = document.getElementById('btn-bookmark');
+    if (bookmarkBtn) {
+        bookmarkBtn.addEventListener('click', handleBookmark);
+    }
+}
+
+// 즐겨찾기 처리
+async function handleBookmark() {
+    if (!currentUser) {
+        if (confirm('즐겨찾기는 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+            const currentUrl = window.location.href;
+            window.location.href = `/auth/login.html?returnUrl=${encodeURIComponent(currentUrl)}`;
+        }
+        return;
+    }
+    
+    try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        
+        if (isBookmarked) {
+            // 즐겨찾기 제거
+            await updateDoc(userRef, {
+                bookmarks: arrayRemove(adId)
+            });
+            isBookmarked = false;
+            alert('즐겨찾기가 해제되었습니다.');
+        } else {
+            // 즐겨찾기 추가
+            await updateDoc(userRef, {
+                bookmarks: arrayUnion(adId)
+            });
+            isBookmarked = true;
+            alert('즐겨찾기에 추가되었습니다.');
+        }
+        
+        updateBookmarkButton();
+        
+    } catch (error) {
+        console.error('즐겨찾기 처리 실패:', error);
+        alert('즐겨찾기 처리에 실패했습니다.');
+    }
 }

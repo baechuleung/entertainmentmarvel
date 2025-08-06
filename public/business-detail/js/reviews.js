@@ -1,7 +1,7 @@
 import { rtdb, auth, db } from '/js/firebase-config.js';
 import { ref, push, set, onValue, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { doc, getDoc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { uploadSingleImage } from '/js/imagekit-upload.js';
 import { initQuillEditor } from './quill-handler.js';
 import { openModal, closeModal } from './modals.js';
@@ -224,6 +224,29 @@ async function handleReviewSubmit(e) {
         
         await set(newReviewRef, reviewData);
         
+        // Firestore에서 사용자 정보 업데이트
+        const userRef = doc(db, 'users', currentUser.uid);
+        const pointsToAdd = 100; // 후기 작성 포인트
+        const timestamp = Date.now();
+        
+        // reviews_history 맵에 추가할 데이터
+        const historyKey = `review_${timestamp}`;
+        const historyData = {
+            type: 'earned',
+            amount: pointsToAdd,
+            title: '후기 작성',
+            createdAt: new Date(timestamp),
+            adId: currentAdId,
+            reviewTitle: reviewTitle
+        };
+        
+        // 사용자 데이터 업데이트
+        await updateDoc(userRef, {
+            reviews_count: increment(1),
+            points: increment(pointsToAdd),
+            [`reviews_history.${historyKey}`]: historyData
+        });
+        
         alert('후기가 등록되었습니다.');
         closeModal('review-modal');
         
@@ -324,6 +347,28 @@ async function handleDeleteReview() {
     if (confirm('정말 이 후기를 삭제하시겠습니까?')) {
         try {
             await remove(ref(rtdb, `advertisements/${currentAdId}/reviews/${reviewId}`));
+            
+            // Firestore에서 사용자 정보 업데이트 (포인트 차감 및 이력 추가)
+            const userRef = doc(db, 'users', currentUser.uid);
+            const pointsToDeduct = -100; // 후기 삭제 시 포인트 차감
+            const timestamp = Date.now();
+            
+            // reviews_history 맵에 추가할 데이터 (차감 기록)
+            const historyKey = `review_delete_${timestamp}`;
+            const historyData = {
+                type: 'used',
+                amount: 100, // 차감되는 포인트 (양수로 저장)
+                title: '후기 삭제',
+                createdAt: new Date(timestamp),
+                adId: currentAdId
+            };
+            
+            // 사용자 데이터 업데이트
+            await updateDoc(userRef, {
+                reviews_count: increment(-1),
+                points: increment(pointsToDeduct),
+                [`reviews_history.${historyKey}`]: historyData
+            });
             
             alert('후기가 삭제되었습니다.');
             closeModal('review-detail-modal');

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>보유포인트 - 유흥마블</title>
+    <meta name="description" content="유흥마블 포인트 내역">
+    
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/sidemenu.css">
+    <link rel="stylesheet" href="css/point.css">
+    
+    <script src="/js/seo.js"></script>
+</head>
+<body>
+    <main>
+        <div class="point-container">
+            <!-- 포인트 헤더 -->
+            <div class="point-header">
+                <div class="point-info">
+                    <div class="point-label">
+                        <span>보유포인트</span>
+                        <span class="info-icon">ⓘ</span>
+                    </div>
+                    <div class="point-amount">
+                        <span class="point-icon">P</span>
+                        <span id="total-points">0 P</span>
+                    </div>
+                </div>
+                
+                <div class="event-banner">
+                    <span>이벤트 소멸예정 포인트</span>
+                    <span class="event-points">500 P</span>
+                </div>
+            </div>
+            
+            <!-- 탭 버튼 -->
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="all">전체</button>
+                <button class="tab-btn" data-tab="earned">적립</button>
+                <button class="tab-btn" data-tab="used">사용</button>
+            </div>
+            
+            <!-- 기간 표시 -->
+            <div class="period-section">
+                <span id="period-text">2025.07.15 ~ 2025.08.04</span>
+                <button class="period-btn">⋮</button>
+            </div>
+            
+            <!-- 포인트 내역 -->
+            <div class="point-history" id="point-history">
+                <!-- 포인트 내역이 여기에 동적으로 로드됩니다 -->
+            </div>
+            
+            <!-- 빈 상태 -->
+            <div class="empty-state" id="empty-state" style="display: none;">
+                <p>포인트 내역이 없습니다.</p>
+            </div>
+        </div>
+    </main>
+    
+    <script src="/js/header.js"></script>
+    <script type="module" src="js/point.js"></script>
+</body>
+</html>

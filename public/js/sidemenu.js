@@ -109,7 +109,7 @@ const SideMenu = {
                         userIconImg.alt = `레벨 ${userData.level}`;
                     } else if (userData.userType === 'business') {
                         // 업체회원인 경우 기본 업체 이미지
-                        userIconImg.src = '/img/business.png';
+                        userIconImg.src = '/img/level/business.png';
                         userIconImg.alt = '업체회원';
                     } else {
                         // 기본 이미지

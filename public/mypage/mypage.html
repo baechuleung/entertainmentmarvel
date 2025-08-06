@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>마이페이지 - 유흥마블</title>
+    <meta name="description" content="유흥마블 마이페이지">
+    
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/sidemenu.css">
+    <link rel="stylesheet" href="css/mypage.css">
+    
+    <script src="/js/seo.js"></script>
+</head>
+<body>
+    <main>
+        <div class="mypage-container">
+            <!-- 프로필 섹션 -->
+            <div class="profile-section" style="display: none;">
+                <div class="profile-header">
+                    <div class="profile-image">
+                        <img id="profile-img" src="" alt="프로필">
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-level">
+                            <span class="level-badge" id="user-level"></span>
+                            <span class="member-type" id="member-type"></span>
+                        </div>
+                        <div class="profile-name" id="user-nickname"></div>
+                    </div>
+                </div>
+                
+                <!-- 포인트 정보 -->
+                <div class="point-grid" style="display: none;">
+                    <div class="point-item" onclick="location.href='/point/point.html'" style="cursor: pointer;">
+                        <div class="point-icon">💳</div>
+                        <div class="point-value">0 P</div>
+                        <div class="point-label">보유 포인트</div>
+                    </div>
+                    <div class="point-item">
+                        <div class="point-icon">✏️</div>
+                        <div class="point-value" id="review-count">0개</div>
+                        <div class="point-label">후기작성</div>
+                    </div>
+                    <div class="point-item">
+                        <div class="point-icon">⭐</div>
+                        <div class="point-value" id="bookmark-count">0개</div>
+                        <div class="point-label">즐겨찾기</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 계정정보 관리 섹션 -->
+            <div class="menu-section">
+                <h3 class="section-title">계정정보 관리</h3>
+                <div class="menu-item" onclick="location.href='/mypage/edit-profile.html'">
+                    <span>회원정보 수정</span>
+                    <span class="arrow">›</span>
+                </div>
+            </div>
+            
+            <!-- 회원관리 섹션 -->
+            <div class="menu-section">
+                <h3 class="section-title">회원관리</h3>
+                <div class="menu-item" onclick="location.href='/mypage/withdrawal.html'">
+                    <span>회원탈퇴</span>
+                    <span class="arrow">›</span>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="/js/header.js"></script>
+    <script type="module" src="js/mypage.js"></script>
+</body>
+</html>

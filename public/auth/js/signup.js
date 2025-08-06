@@ -179,6 +179,7 @@ signupForm.addEventListener('submit', async (e) => {
             email: emailInput.value,
             nickname: nicknameInput.value,
             userType: memberType,
+            points: 0,  // 포인트 필드 추가 (기본값 0)
             marketingAgreed: document.getElementById('agree-marketing').checked,
             createdAt: new Date(),
             lastLogin: new Date()
