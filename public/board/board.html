@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>게시판 - 유흥마블</title>
+    <meta name="description" content="유흥마블 공지사항과 이벤트를 확인하세요.">
+    <meta name="keywords" content="유흥마블 공지사항, 이벤트, 소식, 업데이트">
+    <meta name="author" content="유흥마블">
+    
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/sidemenu.css">
+    <link rel="stylesheet" href="css/board.css">
+    
+    <script src="/js/seo.js"></script>
+</head>
+<body>
+    <main>
+        <div class="board-container">
+            <!-- 탭 네비게이션 -->
+            <div class="tab-navigation">
+                <button class="tab-button active" data-tab="notice">공지사항</button>
+                <button class="tab-button" data-tab="event">이벤트</button>
+            </div>
+            
+            <!-- 탭 컨텐츠 -->
+            <div class="tab-contents">
+                <!-- 공지사항 탭 -->
+                <div class="tab-content active" id="notice-tab">
+                    <div class="board-list" id="notice-list">
+                        <!-- 공지사항 목록이 여기에 로드됩니다 -->
+                    </div>
+                    <div class="empty-state" id="notice-empty" style="display: none;">
+                        <p>등록된 공지사항이 없습니다.</p>
+                    </div>
+                </div>
+                
+                <!-- 이벤트 탭 -->
+                <div class="tab-content" id="event-tab">
+                    <div class="board-list" id="event-list">
+                        <!-- 이벤트 목록이 여기에 로드됩니다 -->
+                    </div>
+                    <div class="empty-state" id="event-empty" style="display: none;">
+                        <p>진행 중인 이벤트가 없습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- 게시글 상세 모달 -->
+    <div class="board-modal" id="board-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"></h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-meta">
+                    <span class="modal-date" id="modal-date"></span>
+                    <span class="modal-views" id="modal-views"></span>
+                </div>
+                <div class="modal-content-text" id="modal-content">
+                    <!-- 게시글 내용이 여기에 표시됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/header.js"></script>
+    <script type="module" src="js/board.js"></script>
+</body>
+</html>

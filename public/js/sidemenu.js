@@ -254,8 +254,8 @@ const SideMenu = {
             '광고 관리': '/ad-posting/ad-management.html',
             '1:1 고객센터': '/support/support.html',
             'FAQ': '/faq/faq.html',
-            '공지사항': '/notice/notice.html',
-            '이벤트': '/event/event.html',
+            '공지사항': '/board/board.html',
+            '이벤트': '/board/board.html?tab=event',
             '약관 및 정책': '/policy/policy.html'
         };
 
