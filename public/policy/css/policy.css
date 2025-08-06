@@ -5,26 +5,6 @@
     padding: 16px;
 }
 
-/* 정책 헤더 */
-.policy-header {
-    text-align: center;
-    padding: 30px 20px;
-    background-color: #2a2a2a;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-.policy-header h1 {
-    color: #ffffff;
-    font-size: 28px;
-    margin-bottom: 10px;
-}
-
-.policy-header p {
-    color: #888;
-    font-size: 14px;
-}
-
 /* 정책 목록 */
 .policy-list {
     display: flex;

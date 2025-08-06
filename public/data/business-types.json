@@ -1,17 +1,11 @@
 {
   "businessTypes": [
     {
-      "code": "public",
-      "name": "퍼블릭",
-      "description": "퍼블릭 룸",
-      "keywords": ["퍼블릭", "public", "퍼블릭룸"]
-    },
-    {
-      "code": "bar",
-      "name": "바",
-      "description": "바",
-      "keywords": ["바", "bar"]
-    },
+      "code": "hyperpublic",
+      "name": "하이퍼블릭",
+      "description": "하이퍼블릭",
+      "keywords": ["하이퍼블릭", "하이퍼", "hyperpublic"]
+    },    
     {
       "code": "shirt",
       "name": "셔츠룸",
@@ -49,10 +43,16 @@
       "keywords": ["텐프로", "10프로", "tenpro"]
     },
     {
-      "code": "hyperpublic",
-      "name": "하이퍼블릭",
-      "description": "하이퍼블릭",
-      "keywords": ["하이퍼블릭", "하이퍼", "hyperpublic"]
+      "code": "public",
+      "name": "퍼블릭",
+      "description": "퍼블릭 룸",
+      "keywords": ["퍼블릭", "public", "퍼블릭룸"]
+    },
+    {
+      "code": "bar",
+      "name": "바",
+      "description": "바",
+      "keywords": ["바", "bar"]
     },
     {
       "code": "hobba",
