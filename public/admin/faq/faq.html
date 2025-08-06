@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ 관리 - 유흥마블 관리자</title>
+    <link rel="stylesheet" href="/admin/css/admin-common.css">
+    <link rel="stylesheet" href="/admin/css/admin-header.css">
+    <link rel="stylesheet" href="css/faq.css">
+</head>
+<body class="loading">
+    <div class="admin-container">
+        <!-- 관리자 헤더가 여기에 동적으로 로드됩니다 -->
+        
+        <!-- 컨텐츠 -->
+        <main class="admin-content">
+            <div class="page-header">
+                <h1 class="page-title">FAQ 관리</h1>
+                <button class="btn btn-primary" id="btn-new-faq">새 FAQ 작성</button>
+            </div>
+            
+            <div class="filters">
+                <select id="filter-category">
+                    <option value="">전체 카테고리</option>
+                    <option value="general">일반</option>
+                    <option value="service">서비스</option>
+                    <option value="payment">결제</option>
+                    <option value="account">계정</option>
+                </select>
+                
+                <input type="text" id="search-input" placeholder="질문, 답변 검색">
+                <button class="btn btn-primary" id="btn-search">검색</button>
+            </div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">번호</th>
+                        <th style="width: 100px;">카테고리</th>
+                        <th>질문</th>
+                        <th style="width: 100px;">작성일</th>
+                        <th style="width: 80px;">조회수</th>
+                        <th style="width: 120px;">관리</th>
+                    </tr>
+                </thead>
+                <tbody id="faq-tbody">
+                    <!-- FAQ 목록이 여기에 표시됩니다 -->
+                </tbody>
+            </table>
+        </main>
+    </div>
+    
+    <!-- FAQ 작성/수정 모달 -->
+    <div class="modal" id="faq-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">새 FAQ 작성</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="faq-form">
+                    <div class="form-group">
+                        <label for="faq-category">카테고리 *</label>
+                        <select id="faq-category" required>
+                            <option value="">선택하세요</option>
+                            <option value="general">일반</option>
+                            <option value="service">서비스</option>
+                            <option value="payment">결제</option>
+                            <option value="account">계정</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="faq-question">질문 *</label>
+                        <input type="text" id="faq-question" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="faq-answer">답변 *</label>
+                        <textarea id="faq-answer" rows="10" required></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="btn-save">저장</button>
+                        <button type="button" class="btn btn-secondary" id="btn-cancel">취소</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="js/faq.js"></script>
+</body>
+</html>

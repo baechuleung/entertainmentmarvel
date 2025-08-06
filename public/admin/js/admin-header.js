@@ -108,6 +108,8 @@ function setActiveNav() {
         document.getElementById('nav-ads')?.classList.add('active');
     } else if (currentPath.includes('/admin/board/')) {
         document.getElementById('nav-board')?.classList.add('active');
+    } else if (currentPath.includes('/admin/faq/')) {
+        document.getElementById('nav-faq')?.classList.add('active');
     } else if (currentPath.includes('/admin/members/')) {
         document.getElementById('nav-members')?.classList.add('active');
     }

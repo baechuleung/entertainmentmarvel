@@ -346,7 +346,17 @@ const policies = {
 
 // 초기화
 document.addEventListener('DOMContentLoaded', function() {
-    setupEventListeners();
+    // URL 파라미터 확인
+    const urlParams = new URLSearchParams(window.location.search);
+    const policyType = urlParams.get('type');
+    
+    // 특정 정책 타입이 전달된 경우 해당 정책 바로 표시
+    if (policyType && policies[policyType]) {
+        showPolicyModal(policies[policyType]);
+    } else {
+        // 일반적인 정책 페이지 표시
+        setupEventListeners();
+    }
 });
 
 // 이벤트 리스너 설정

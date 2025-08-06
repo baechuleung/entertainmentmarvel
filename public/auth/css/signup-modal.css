@@ -1,0 +1,94 @@
+/* 정책 레이어 팝업 스타일 */
+.policy-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.policy-modal.show {
+    display: block;
+}
+
+.policy-modal .modal-content {
+    background-color: #131217;
+    margin: 50px auto;
+    width: 90%;
+    max-width: 420px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.policy-modal .modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #2a2a2a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background-color: #131217;
+    z-index: 10;
+    border-radius: 10px 10px 0 0;
+}
+
+.policy-modal .modal-header h2 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 20px;
+}
+
+.policy-modal .modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #888;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.policy-modal .modal-close:hover {
+    color: #ffffff;
+}
+
+.policy-modal .modal-body {
+    padding: 20px;
+}
+
+.policy-modal .modal-content-text {
+    color: #ffffff;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.policy-modal .modal-content-text h3 {
+    color: #ffffff;
+    font-size: 16px;
+    margin: 20px 0 10px 0;
+    font-weight: 600;
+}
+
+.policy-modal .modal-content-text p {
+    margin-bottom: 15px;
+    color: #ffffff;
+}
+
+.policy-modal .modal-content-text ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.policy-modal .modal-content-text li {
+    margin: 5px 0;
+    color: #cccccc;
+}

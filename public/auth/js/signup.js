@@ -12,9 +12,11 @@ const agreeAllCheckbox = document.getElementById('agree-all');
 const agreeItems = document.querySelectorAll('.agree-item');
 const submitButton = document.querySelector('.btn-signup-submit');
 
-// 로그인 상태 확인
+// 로그인 상태 확인 - 회원가입 중에는 리다이렉트 막기
+let isSigningUp = false;
+
 onAuthStateChanged(auth, (user) => {
-    if (user) {
+    if (user && !isSigningUp) {
         // 이미 로그인된 경우 메인 페이지로 이동
         window.location.href = '/main/main.html';
     }
@@ -73,9 +75,10 @@ function validateForm() {
         emailInput.classList.remove('error');
     }
     
-    // 비밀번호 검증
-    if (passwordInput.value.length < 6) {
-        document.getElementById('password-error').textContent = '비밀번호는 6자 이상이어야 합니다.';
+    // 비밀번호 검증 - 특수문자, 영어, 숫자 포함 8자리 이상
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+    if (!passwordRegex.test(passwordInput.value)) {
+        document.getElementById('password-error').textContent = '비밀번호는 영문, 숫자, 특수문자를 포함하여 8자 이상이어야 합니다.';
         passwordInput.classList.add('error');
         isValid = false;
     } else {
@@ -138,13 +141,20 @@ signupForm.addEventListener('submit', async (e) => {
         return;
     }
     
+    // 회원가입 시작 플래그
+    isSigningUp = true;
     setLoading(true);
     
+    // 선택된 회원 유형 가져오기
+    const memberType = document.querySelector('input[name="member-type"]:checked').value;
+    
+    console.log('=== 회원가입 시작 ===');
+    console.log('이메일:', emailInput.value);
+    console.log('회원 유형:', memberType);
+    
     try {
-        // 선택된 회원 유형 가져오기
-        const memberType = document.querySelector('input[name="member-type"]:checked').value;
-        
-        // Firebase Auth 회원가입
+        // 1단계: Firebase Auth 회원가입
+        console.log('1단계: Authentication 시작...');
         const userCredential = await createUserWithEmailAndPassword(
             auth,
             emailInput.value,
@@ -152,18 +162,23 @@ signupForm.addEventListener('submit', async (e) => {
         );
         
         const user = userCredential.user;
+        console.log('Auth 회원가입 성공, UID:', user.uid);
         
-        // 프로필 업데이트 (닉네임을 displayName으로 사용)
+        // 2단계: 프로필 업데이트
+        console.log('2단계: 프로필 업데이트...');
         await updateProfile(user, {
             displayName: nicknameInput.value
         });
+        console.log('프로필 업데이트 완료');
         
-        // Firestore에 사용자 정보 저장
+        // 3단계: Firestore에 저장
+        console.log('3단계: Firestore 저장 시작...');
+        
         const userDataToSave = {
             uid: user.uid,
             email: emailInput.value,
             nickname: nicknameInput.value,
-            userType: memberType, // 'member' 또는 'business'
+            userType: memberType,
             marketingAgreed: document.getElementById('agree-marketing').checked,
             createdAt: new Date(),
             lastLogin: new Date()
@@ -174,38 +189,57 @@ signupForm.addEventListener('submit', async (e) => {
             userDataToSave.level = 1;
         }
         
+        console.log('저장할 데이터:', JSON.stringify(userDataToSave, null, 2));
+        console.log('문서 경로:', `users/${user.uid}`);
+        
+        // Firestore 저장 시도
         await setDoc(doc(db, 'users', user.uid), userDataToSave);
         
-        // 회원가입 성공 - 자동으로 로그인된 상태이므로 메인 페이지로 이동
+        console.log('✅ Firestore 저장 성공!');
+        
+        // 바로 리다이렉트
         window.location.href = '/main/main.html';
         
     } catch (error) {
-        setLoading(false);
-        
-        console.error('회원가입 에러:', error);
+        console.error('❌ 회원가입 에러 발생!');
+        console.error('에러 전체:', error);
         console.error('에러 코드:', error.code);
         console.error('에러 메시지:', error.message);
+        console.error('에러 스택:', error.stack);
         
-        // Firebase 에러 메시지 한글화
-        let errorMessage = '회원가입에 실패했습니다.';
-        
-        switch (error.code) {
-            case 'auth/email-already-in-use':
-                errorMessage = '이미 사용 중인 이메일입니다.';
-                break;
-            case 'auth/invalid-email':
-                errorMessage = '유효하지 않은 이메일 형식입니다.';
-                break;
-            case 'auth/operation-not-allowed':
-                errorMessage = '이메일/비밀번호 계정이 비활성화되어 있습니다. Firebase Console에서 활성화해주세요.';
-                break;
-            case 'auth/weak-password':
-                errorMessage = '비밀번호가 너무 약합니다.';
-                break;
-            default:
-                errorMessage = `회원가입 실패: ${error.message}`;
+        // 에러 타입별 처리
+        if (error.code && error.code.startsWith('auth/')) {
+            // Authentication 에러
+            let errorMessage = '회원가입에 실패했습니다.';
+            
+            switch (error.code) {
+                case 'auth/email-already-in-use':
+                    errorMessage = '이미 사용 중인 이메일입니다.';
+                    break;
+                case 'auth/invalid-email':
+                    errorMessage = '유효하지 않은 이메일 형식입니다.';
+                    break;
+                case 'auth/weak-password':
+                    errorMessage = '비밀번호가 너무 약합니다.';
+                    break;
+                default:
+                    errorMessage = `인증 실패: ${error.message}`;
+            }
+            
+            showError(errorMessage);
+            
+        } else {
+            // Firestore 에러
+            console.error('Firestore 저장 에러!');
+            
+            // Firestore 에러지만 Auth는 성공한 경우
+            if (auth.currentUser) {
+                console.log('Auth 사용자는 생성됨:', auth.currentUser.uid);
+                showError('데이터베이스 저장에 실패했습니다. 관리자에게 문의하세요.');
+            }
         }
         
-        showError(errorMessage);
+        setLoading(false);
+        isSigningUp = false;
     }
 });

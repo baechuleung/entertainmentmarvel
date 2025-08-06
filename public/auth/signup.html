@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/sidemenu.css">
     <link rel="stylesheet" href="css/signup.css">
+    <link rel="stylesheet" href="css/signup-modal.css">
     
     <!-- Scripts -->
     <script src="/js/seo.js"></script>
@@ -53,7 +54,7 @@
                     
                     <div class="form-group">
                         <label for="password">비밀번호 *</label>
-                        <input type="password" id="password" name="password" placeholder="6자 이상 입력해주세요" required>
+                        <input type="password" id="password" name="password" placeholder="영문, 숫자, 특수문자 포함 8자 이상" required>
                         <span class="error-text" id="password-error"></span>
                     </div>
                     
@@ -79,13 +80,13 @@
                             <label class="checkbox-label">
                                 <input type="checkbox" id="agree-terms" class="agree-item" required>
                                 <span>[필수] 이용약관 동의</span>
-                                <a href="/policy/terms.html" target="_blank">보기</a>
+                                <a href="#" class="policy-link" data-policy="terms">보기</a>
                             </label>
                             
                             <label class="checkbox-label">
                                 <input type="checkbox" id="agree-privacy" class="agree-item" required>
                                 <span>[필수] 개인정보 처리방침 동의</span>
-                                <a href="/policy/privacy.html" target="_blank">보기</a>
+                                <a href="#" class="policy-link" data-policy="privacy">보기</a>
                             </label>
                             
                             <label class="checkbox-label">
@@ -106,8 +107,81 @@
         </div>
     </main>
     
+    <!-- 정책 레이어 팝업 -->
+    <div class="policy-modal" id="signup-policy-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="policy-modal-title"></h2>
+                <button class="modal-close" id="policy-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-content-text" id="policy-modal-content">
+                    <!-- 약관 내용이 여기에 표시됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Scripts -->
     <script src="/js/header.js"></script>
     <script type="module" src="js/signup.js"></script>
+    <script type="module">
+        // /policy/js/policy.js의 정책 데이터를 가져와서 사용
+        async function loadPolicies() {
+            const response = await fetch('/policy/js/policy.js');
+            const scriptText = await response.text();
+            
+            // policies 객체 추출
+            const policiesMatch = scriptText.match(/const policies = ({[\s\S]*?});/);
+            if (policiesMatch) {
+                const policiesCode = policiesMatch[1];
+                return new Function('return ' + policiesCode)();
+            }
+            return null;
+        }
+        
+        // 레이어 팝업 표시
+        async function showPolicyModal(type) {
+            const policies = await loadPolicies();
+            if (!policies || !policies[type]) return;
+            
+            const policy = policies[type];
+            document.getElementById('policy-modal-title').textContent = policy.title;
+            document.getElementById('policy-modal-content').innerHTML = policy.content;
+            document.getElementById('signup-policy-modal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('signup-policy-modal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        
+        // 이벤트 리스너
+        document.addEventListener('DOMContentLoaded', function() {
+            // 정책 링크 클릭
+            document.querySelectorAll('.policy-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const type = this.getAttribute('data-policy');
+                    showPolicyModal(type);
+                });
+            });
+            
+            // 모달 닫기 버튼
+            document.getElementById('policy-modal-close').addEventListener('click', closeModal);
+            
+            // 모달 외부 클릭
+            document.getElementById('signup-policy-modal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+            
+            // ESC 키
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeModal();
+            });
+        });
+    </script>
 </body>
 </html>
