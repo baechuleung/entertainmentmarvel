@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>게시판 관리 - 유흥마블 관리자</title>
     <link rel="stylesheet" href="/admin/css/admin-common.css">
+    <link rel="stylesheet" href="/admin/css/admin-header.css">
     <link rel="stylesheet" href="css/board.css">
 </head>
-<body>
+<body class="loading">
     <div class="admin-container">
         <!-- 관리자 헤더가 여기에 동적으로 로드됩니다 -->
         
@@ -15,10 +16,84 @@
         <main class="admin-content">
             <div class="page-header">
                 <h1 class="page-title">게시판 관리</h1>
+                <button class="btn btn-primary" id="btn-new-post">새 글 작성</button>
             </div>
             
-            <p>게시판 관리 기능은 준비 중입니다.</p>
+            <div class="filters">
+                <select id="filter-category">
+                    <option value="">전체 카테고리</option>
+                    <option value="notice">공지사항</option>
+                    <option value="event">이벤트</option>
+                </select>
+                
+                <input type="text" id="search-input" placeholder="제목, 내용 검색">
+                <button class="btn btn-primary" id="btn-search">검색</button>
+            </div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">번호</th>
+                        <th style="width: 100px;">카테고리</th>
+                        <th>제목</th>
+                        <th style="width: 100px;">작성자</th>
+                        <th style="width: 100px;">작성일</th>
+                        <th style="width: 80px;">조회수</th>
+                        <th style="width: 120px;">관리</th>
+                    </tr>
+                </thead>
+                <tbody id="board-tbody">
+                    <!-- 게시판 목록이 여기에 표시됩니다 -->
+                </tbody>
+            </table>
         </main>
+    </div>
+    
+    <!-- 글쓰기/수정 모달 -->
+    <div class="modal" id="post-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">새 글 작성</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="post-form">
+                    <div class="form-group">
+                        <label for="post-category">카테고리 *</label>
+                        <select id="post-category" required>
+                            <option value="">선택하세요</option>
+                            <option value="notice">공지사항</option>
+                            <option value="event">이벤트</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="post-title">제목 *</label>
+                        <input type="text" id="post-title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="post-content">내용 *</label>
+                        <div id="editor-container">
+                            <div id="editor"></div>
+                        </div>
+                        <input type="hidden" id="post-content" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="btn-save">저장</button>
+                        <button type="button" class="btn btn-secondary" id="btn-cancel">취소</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quill 에디터 -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <!-- ImageKit SDK -->
+    <script src="https://unpkg.com/imagekit-javascript/dist/imagekit.min.js"></script>
     </div>
     
     <script type="module" src="js/board.js"></script>

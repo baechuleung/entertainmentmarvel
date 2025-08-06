@@ -11,6 +11,18 @@ body {
     color: #333;
 }
 
+/* 페이지 로드 전 숨김 처리 */
+body.loading {
+    visibility: hidden;
+    opacity: 0;
+}
+
+body.loaded {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
 /* 컨테이너 */
 .admin-container {
     max-width: 1440px;

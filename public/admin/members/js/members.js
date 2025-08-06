@@ -1,20 +1,29 @@
-import { loadAdminHeader } from '/admin/js/admin-header.js';
+import { checkAuthFirst, loadAdminHeader } from '/admin/js/admin-header.js';
 import { db } from '/js/firebase-config.js';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 let allMembers = [];
 
-// 페이지 초기화
-document.addEventListener('DOMContentLoaded', async () => {
-    // 관리자 헤더 로드 (권한 체크 포함)
-    await loadAdminHeader();
-    
-    // 회원 목록 로드
-    loadMembers();
-    
-    // 이벤트 리스너 설정
-    setupEventListeners();
-});
+// 페이지 초기화 - 권한 체크 먼저!
+(async function init() {
+    try {
+        // 1. 권한 체크 먼저 (페이지 표시 전)
+        const user = await checkAuthFirst();
+        
+        // 2. 권한 확인 후 헤더 로드
+        await loadAdminHeader(user);
+        
+        // 3. 회원 목록 로드
+        loadMembers();
+        
+        // 4. 이벤트 리스너 설정
+        setupEventListeners();
+        
+    } catch (error) {
+        // 권한 없음 - checkAuthFirst에서 이미 리다이렉트 처리됨
+        console.error('권한 체크 실패:', error);
+    }
+})();
 
 // 회원 목록 로드
 async function loadMembers() {

@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>광고 관리 - 유흥마블 관리자</title>
     <link rel="stylesheet" href="/admin/css/admin-common.css">
+    <link rel="stylesheet" href="/admin/css/admin-header.css">
     <link rel="stylesheet" href="css/ads.css">
 </head>
-<body>
+<body class="loading">
     <div class="admin-container">
         <!-- 관리자 헤더가 여기에 동적으로 로드됩니다 -->
         
@@ -41,6 +42,8 @@
                         <th>업종</th>
                         <th>지역</th>
                         <th>상태</th>
+                        <th>마감일</th>
+                        <th>입금</th>
                         <th>등록일</th>
                         <th>조회수</th>
                         <th>관리</th>
@@ -50,6 +53,49 @@
                     <!-- 광고 목록이 여기에 표시됩니다 -->
                 </tbody>
             </table>
+        </main>
+    </div>
+    
+    <!-- 광고 상세 관리 모달 -->
+    <div class="modal" id="ad-detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>광고 상세 관리</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="ad-detail-form">
+                    <input type="hidden" id="ad-id">
+                    
+                    <div class="form-group">
+                        <label>광고 제목</label>
+                        <input type="text" id="ad-title" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>작성자</label>
+                        <input type="text" id="ad-author" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ad-end-date">마감 날짜</label>
+                        <input type="date" id="ad-end-date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="ad-payment-status">
+                            광고비 입금 완료
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">저장</button>
+                        <button type="button" class="btn btn-secondary" id="btn-cancel">취소</button>
+                    </div>
+                </form>
+            </div>
+        </div>
         </main>
     </div>
     
