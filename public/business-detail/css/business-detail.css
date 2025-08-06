@@ -1,26 +1,232 @@
-/* 업체 상세 페이지 스타일 */
+/* ===== 기본 컨테이너 ===== */
 .business-detail-container {
     min-height: calc(100vh - 60px);
     background-color: #1a1a1a;
-    padding-bottom: 80px; /* 하단 버튼 공간 */
+    padding-bottom: 80px;
 }
 
-/* 로딩 컨테이너 */
-.loading-container {
-    min-height: calc(100vh - 60px);
+.error {
+    text-align: center;
+    padding: 60px 20px;
+    color: #ff6b6b;
+}
+
+/* ===== 업체 헤더 섹션 ===== */
+.business-header-section {
+    background-color: #131217;
+    padding: 15px;
+    border-bottom: 2px solid #202020;
+}
+
+.business-item-detail {
+    display: flex;
+    gap: 15px;
+}
+
+.business-item-detail img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border-radius: 8px;
+}
+
+.business-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.ad-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #FFF;
+    margin-bottom: 10px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ad-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.ad-type-author {
+    color: #1a5490;
+    font-weight: 500;
+}
+
+.ad-location {
+    color: #999;
+}
+
+.ad-views {
+    font-size: 12px;
+    color: #888;
+}
+
+/* ===== 탭 네비게이션 ===== */
+.tab-navigation {
+    display: flex;
     background-color: #1a1a1a;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 15px;
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-button:hover {
+    color: #fff;
+}
+
+.tab-button.active {
+    color: #ffffff;
+    border-bottom-color: #1a5490;
+}
+
+.tab-content {
+    display: none;
+    background-color: #1a1a1a;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ===== 상세내용 탭 ===== */
+.detail-content-section {
+    padding: 20px;
+    background-color: #2a2a2a;
+    margin-bottom: 20px;
+}
+
+.detail-content {
+    color: #ffffff;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.detail-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+/* ===== 연락처 섹션 ===== */
+.contact-section {
+    padding: 20px;
+    background-color: #2a2a2a;
+}
+
+.contact-title {
+    font-size: 18px;
+    color: #ffffff;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.contact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background-color: #3a3a3a;
+    border-radius: 5px;
+}
+
+.contact-icon {
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #1a5490;
 }
 
-.loading {
-    text-align: center;
+.contact-label {
     color: #888;
-    font-size: 16px;
+    font-size: 14px;
+    min-width: 60px;
 }
 
-/* 후기 목록 - 제목만 표시 */
+.contact-value {
+    color: #ffffff;
+    font-size: 14px;
+    flex: 1;
+}
+
+.contact-value a {
+    color: #1a5490;
+    text-decoration: none;
+}
+
+/* ===== 후기 탭 ===== */
+.reviews-tab-content {
+    padding: 20px;
+    background-color: #2a2a2a;
+}
+
+.reviews-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.reviews-title {
+    font-size: 20px;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.btn-write-review {
+    padding: 8px 16px;
+    background-color: #1a5490;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-write-review:hover {
+    background-color: #144170;
+}
+
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* ===== 후기 아이템 ===== */
 .review-item {
     padding: 15px;
     background-color: #3a3a3a;
@@ -56,46 +262,13 @@
     margin-top: 8px;
 }
 
-/* 모달 헤더 버튼들 */
-.modal-header-buttons {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+.no-reviews {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
 }
 
-.btn-edit, .btn-delete {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    font-size: 13px;
-    cursor: pointer;
-}
-
-.btn-edit {
-    background-color: #f39c12;
-    color: white;
-}
-
-.btn-delete {
-    background-color: #e74c3c;
-    color: white;
-}
-
-/* 후기 상세 내용 */
-.review-detail-content {
-    color: #ffffff;
-    font-size: 15px;
-    line-height: 1.6;
-}
-
-.review-detail-content img {
-    max-width: 100%;
-    height: auto;
-    margin: 10px 0;
-    border-radius: 5px;
-}
-
-/* 후기 작성 모달 */
+/* ===== 모달 공통 ===== */
 .review-modal {
     display: none;
     position: fixed;
@@ -136,6 +309,12 @@
     font-size: 20px;
 }
 
+.modal-header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
 .modal-close {
     background: none;
     border: none;
@@ -157,7 +336,48 @@
     padding: 20px;
 }
 
-/* 폼 스타일 */
+/* ===== 모달 버튼 ===== */
+.btn-edit, .btn-delete {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-edit {
+    background-color: #f39c12;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #e67e22;
+}
+
+.btn-delete {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #c0392b;
+}
+
+/* ===== 후기 상세 내용 ===== */
+.review-detail-content {
+    color: #ffffff;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.review-detail-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+/* ===== 폼 스타일 ===== */
 .form-group {
     margin-bottom: 20px;
 }
@@ -185,19 +405,20 @@
     border-color: #1a5490;
 }
 
-/* Quill 에디터 스타일 */
-#editor-container {
+/* ===== Quill 에디터 ===== */
+#editor-container,
+#editor-edit-container {
     background-color: #3a3a3a;
     border: 1px solid #4a4a4a;
     border-radius: 5px;
 }
 
-#editor {
+#editor,
+#editor-edit {
     min-height: 200px;
     color: #ffffff;
 }
 
-/* Quill 에디터 다크 테마 */
 .ql-toolbar.ql-snow {
     background-color: #2a2a2a;
     border: none;
@@ -221,6 +442,16 @@
     color: #1a5490;
 }
 
+.ql-toolbar.ql-snow button:hover .ql-fill,
+.ql-toolbar.ql-snow button.ql-active .ql-fill {
+    fill: #1a5490;
+}
+
+.ql-toolbar.ql-snow button:hover .ql-stroke,
+.ql-toolbar.ql-snow button.ql-active .ql-stroke {
+    stroke: #1a5490;
+}
+
 .ql-container.ql-snow {
     border: none;
 }
@@ -234,7 +465,6 @@
 
 .ql-editor.ql-blank::before {
     color: #888;
-    content: "후기를 작성해주세요...";
     font-style: normal;
 }
 
@@ -243,7 +473,7 @@
     border: 2px dashed #1a5490;
 }
 
-/* 폼 액션 */
+/* ===== 폼 액션 ===== */
 .form-actions {
     display: flex;
     gap: 10px;
@@ -285,9 +515,31 @@
     background-color: #5a5a5a;
 }
 
-/* 에러 메시지 */
-.error {
-    text-align: center;
-    padding: 60px 20px;
-    color: #ff6b6b;
+/* ===== 하단 버튼 ===== */
+.bottom-actions {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 450px;
+    padding: 16px;
+    background-color: #1a1a1a;
+    border-top: 1px solid #3a3a3a;
+}
+
+.btn-call {
+    width: 100%;
+    padding: 16px;
+    background-color: #1a5490;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-call:hover {
+    background-color: #144170;
 }

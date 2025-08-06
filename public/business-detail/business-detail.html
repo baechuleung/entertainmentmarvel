@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/sidemenu.css">
-    <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/business-detail.css">
     
     <!-- Quill 에디터 -->
@@ -23,7 +22,7 @@
 </head>
 <body>
     <main>
-        <div class="business-detail-container" style="display: none;">
+        <div class="business-detail-container">
             <!-- 업체 헤더 컴포넌트 -->
             <div id="business-header-container"></div>
             
@@ -31,17 +30,12 @@
             <div id="business-tabs-container"></div>
         </div>
         
-        <!-- 로딩 중 표시 -->
-        <div class="loading-container" id="loading-container">
-            <div class="loading">데이터를 불러오는 중...</div>
-        </div>
-        
         <!-- 후기 작성 모달 -->
         <div class="review-modal" id="review-modal">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>후기 작성</h2>
-                    <button class="modal-close" id="modal-close">&times;</button>
+                    <button class="modal-close" data-modal="review-modal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <form id="review-form">
@@ -60,7 +54,7 @@
                         
                         <div class="form-actions">
                             <button type="submit" class="btn-submit">등록</button>
-                            <button type="button" class="btn-cancel">취소</button>
+                            <button type="button" class="btn-cancel" data-modal="review-modal">취소</button>
                         </div>
                     </form>
                 </div>
@@ -75,7 +69,7 @@
                     <div class="modal-header-buttons">
                         <button class="btn-edit" id="btn-edit-review">수정</button>
                         <button class="btn-delete" id="btn-delete-review">삭제</button>
-                        <button class="modal-close" id="detail-modal-close">&times;</button>
+                        <button class="modal-close" data-modal="review-detail-modal">&times;</button>
                     </div>
                 </div>
                 <div class="modal-body">
@@ -85,10 +79,43 @@
                 </div>
             </div>
         </div>
+        
+        <!-- 후기 수정 모달 -->
+        <div class="review-modal" id="review-edit-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>후기 수정</h2>
+                    <button class="modal-close" data-modal="review-edit-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="review-edit-form">
+                        <div class="form-group">
+                            <label>제목</label>
+                            <input type="text" id="review-edit-title" placeholder="후기 제목을 입력하세요" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>후기 내용</label>
+                            <div id="editor-edit-container">
+                                <div id="editor-edit"></div>
+                            </div>
+                            <input type="hidden" id="review-edit-content" required>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn-submit">수정 완료</button>
+                            <button type="button" class="btn-cancel" data-modal="review-edit-modal">취소</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </main>
     
     <script src="/js/header.js"></script>
-    <script type="module" src="js/components.js"></script>
+    <script type="module" src="js/quill-handler.js"></script>
+    <script type="module" src="js/modals.js"></script>
+    <script type="module" src="js/reviews.js"></script>
     <script type="module" src="js/business-detail.js"></script>
 </body>
 </html>
