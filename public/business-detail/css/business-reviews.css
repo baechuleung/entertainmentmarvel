@@ -1,22 +1,111 @@
-/* 업체 상세 페이지 스타일 */
-.business-detail-container {
+/* 독립 후기 페이지 스타일 */
+.reviews-container {
     min-height: calc(100vh - 60px);
     background-color: #1a1a1a;
-    padding-bottom: 80px; /* 하단 버튼 공간 */
+    padding: 20px;
 }
 
-/* 로딩 컨테이너 */
-.loading-container {
-    min-height: calc(100vh - 60px);
-    background-color: #1a1a1a;
+/* 후기 헤더 */
+.reviews-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #3a3a3a;
 }
 
+.reviews-title {
+    font-size: 24px;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.btn-write-review {
+    padding: 10px 20px;
+    background-color: #1a5490;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btn-write-review:hover {
+    background-color: #144170;
+}
+
+/* 후기 목록 */
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.review-item {
+    padding: 20px;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    border: 1px solid #3a3a3a;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.review-author {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.review-date {
+    color: #888;
+    font-size: 13px;
+}
+
+.review-content {
+    color: #ddd;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.review-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+/* 빈 상태 */
+.no-reviews {
+    text-align: center;
+    padding: 60px 20px;
+    color: #888;
+}
+
+.no-reviews p {
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+/* 로딩 상태 */
 .loading {
     text-align: center;
+    padding: 60px 20px;
     color: #888;
+    font-size: 16px;
+}
+
+/* 에러 상태 */
+.error {
+    text-align: center;
+    padding: 60px 20px;
+    color: #ff6b6b;
     font-size: 16px;
 }
 
@@ -122,7 +211,6 @@
     color: #ffffff;
 }
 
-/* Quill 에디터 다크 테마 */
 .ql-toolbar.ql-snow {
     background-color: #2a2a2a;
     border: none;
@@ -135,15 +223,6 @@
 
 .ql-toolbar.ql-snow .ql-fill {
     fill: #aaa;
-}
-
-.ql-toolbar.ql-snow .ql-picker {
-    color: #aaa;
-}
-
-.ql-toolbar.ql-snow button:hover,
-.ql-toolbar.ql-snow button.ql-active {
-    color: #1a5490;
 }
 
 .ql-container.ql-snow {
@@ -208,11 +287,4 @@
 
 .btn-cancel:hover {
     background-color: #5a5a5a;
-}
-
-/* 에러 메시지 */
-.error {
-    text-align: center;
-    padding: 60px 20px;
-    color: #ff6b6b;
 }

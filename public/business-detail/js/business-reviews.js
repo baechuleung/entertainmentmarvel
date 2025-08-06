@@ -1,24 +1,22 @@
-import { rtdb, auth, db } from '/js/firebase-config.js';
-import { ref, get, update, push, set, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { auth, db, rtdb } from '/js/firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { ref, push, set, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 import { uploadSingleImage } from '/js/imagekit-upload.js';
-import { loadComponent, setBusinessHeader, setDetailContent, setupTabs } from './components.js';
 
 // 전역 변수
-let currentAd = null;
 let currentUser = null;
-let adId = null;
+let currentAdId = null;
 let quill = null;
 let previewImages = new Map();
 
 // 초기화
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', function() {
     // URL에서 광고 ID 가져오기
     const urlParams = new URLSearchParams(window.location.search);
-    adId = urlParams.get('id');
+    currentAdId = urlParams.get('adId');
     
-    if (!adId) {
+    if (!currentAdId) {
         showError('잘못된 접근입니다.');
         return;
     }
@@ -28,128 +26,40 @@ document.addEventListener('DOMContentLoaded', async function() {
         currentUser = user;
     });
     
-    // 컴포넌트 로드
-    await loadComponent('business-header-container', 'components/business-header.html');
-    await loadComponent('business-tabs-container', 'components/business-tabs.html');
+    // Quill 에디터 초기화
+    initializeQuillEditor();
     
-    // 광고 데이터 로드
-    await loadAdDetail(adId);
+    // 후기 로드
+    loadReviews(currentAdId);
     
-    // 이벤트 설정
-    setupEvents();
+    // 이벤트 리스너 설정
+    setupEventListeners();
 });
-
-// 광고 상세 정보 로드
-async function loadAdDetail(adId) {
-    try {
-        const adRef = ref(rtdb, `advertisements/${adId}`);
-        const snapshot = await get(adRef);
-        
-        if (!snapshot.exists()) {
-            showError('광고를 찾을 수 없습니다.');
-            return;
-        }
-        
-        currentAd = snapshot.val();
-        
-        // 조회수 증가
-        await updateViewCount(adId, currentAd.views || 0);
-        
-        // 페이지 타이틀 업데이트
-        document.title = `${currentAd.title} - 유흥마블`;
-        
-        // 컴포넌트에 데이터 설정
-        setBusinessHeader(currentAd);
-        setDetailContent(currentAd);
-        
-        // 탭 설정
-        setupTabs();
-        
-        // Quill 에디터 초기화
-        initializeQuillEditor();
-        
-        // 로딩 숨기고 콘텐츠 표시
-        document.getElementById('loading-container').style.display = 'none';
-        document.querySelector('.business-detail-container').style.display = 'block';
-        
-    } catch (error) {
-        console.error('광고 로드 실패:', error);
-        showError('광고를 불러오는데 실패했습니다.');
-    }
-}
-
-// 조회수 업데이트
-async function updateViewCount(adId, currentViews) {
-    try {
-        await update(ref(rtdb, `advertisements/${adId}`), {
-            views: currentViews + 1
-        });
-    } catch (error) {
-        console.error('조회수 업데이트 실패:', error);
-    }
-}
-
-// 이벤트 설정
-function setupEvents() {
-    // 후기 로드 이벤트
-    window.addEventListener('loadReviews', () => {
-        loadReviews(adId);
-    });
-    
-    // 후기 작성 버튼
-    document.addEventListener('click', (e) => {
-        if (e.target.id === 'btn-write-review-tab') {
-            handleWriteReview();
-        }
-    });
-    
-    // 모달 이벤트
-    setupModalEvents();
-}
-
-// 모달 이벤트 설정
-function setupModalEvents() {
-    // 모달 닫기
-    document.getElementById('modal-close')?.addEventListener('click', closeModal);
-    document.querySelector('.btn-cancel')?.addEventListener('click', closeModal);
-    
-    // 모달 외부 클릭
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('review-modal')) {
-            closeModal();
-        }
-    });
-    
-    // 폼 제출
-    document.getElementById('review-form')?.addEventListener('submit', handleReviewSubmit);
-}
 
 // Quill 에디터 초기화
 function initializeQuillEditor() {
-    if (document.getElementById('editor')) {
-        quill = new Quill('#editor', {
-            theme: 'snow',
-            modules: {
-                toolbar: [
-                    ['bold', 'italic', 'underline'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    ['link', 'image'],
-                    ['clean']
-                ]
-            },
-            placeholder: '후기를 작성해주세요...'
-        });
-        
-        quill.on('text-change', function() {
-            document.getElementById('review-content').value = quill.root.innerHTML;
-        });
-        
-        const toolbar = quill.getModule('toolbar');
-        toolbar.addHandler('image', selectLocalImage);
-    }
+    quill = new Quill('#editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link', 'image'],
+                ['clean']
+            ]
+        },
+        placeholder: '후기를 작성해주세요...'
+    });
+    
+    quill.on('text-change', function() {
+        document.getElementById('review-content').value = quill.root.innerHTML;
+    });
+    
+    const toolbar = quill.getModule('toolbar');
+    toolbar.addHandler('image', selectLocalImage);
 }
 
-// 이미지 선택
+// 로컬 이미지 선택
 function selectLocalImage() {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
@@ -179,17 +89,34 @@ function selectLocalImage() {
     };
 }
 
-// 후기 작성 처리
-function handleWriteReview() {
-    if (!currentUser) {
-        if (confirm('후기 작성은 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
-            const currentUrl = window.location.href;
-            window.location.href = `/auth/login.html?returnUrl=${encodeURIComponent(currentUrl)}`;
+// 이벤트 리스너 설정
+function setupEventListeners() {
+    // 후기 작성 버튼
+    document.getElementById('btn-write-review').addEventListener('click', () => {
+        if (!currentUser) {
+            if (confirm('후기 작성은 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+                const currentUrl = window.location.href;
+                window.location.href = `/auth/login.html?returnUrl=${encodeURIComponent(currentUrl)}`;
+            }
+            return;
         }
-        return;
-    }
+        
+        document.getElementById('review-modal').classList.add('show');
+    });
     
-    document.getElementById('review-modal').classList.add('show');
+    // 모달 닫기
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    document.querySelector('.btn-cancel').addEventListener('click', closeModal);
+    
+    // 모달 외부 클릭
+    window.addEventListener('click', (e) => {
+        if (e.target.id === 'review-modal') {
+            closeModal();
+        }
+    });
+    
+    // 폼 제출
+    document.getElementById('review-form').addEventListener('submit', handleReviewSubmit);
 }
 
 // 모달 닫기
@@ -199,9 +126,7 @@ function closeModal() {
 
 // 후기 목록 로드
 async function loadReviews(adId) {
-    const reviewsList = document.getElementById('reviews-list-tab');
-    if (!reviewsList) return;
-    
+    const reviewsList = document.getElementById('reviews-list');
     reviewsList.innerHTML = '<div class="loading">후기를 불러오는 중...</div>';
     
     try {
@@ -249,7 +174,7 @@ async function loadReviews(adId) {
 
 // 후기 표시
 function displayReviews(reviews) {
-    const reviewsList = document.getElementById('reviews-list-tab');
+    const reviewsList = document.getElementById('reviews-list');
     
     if (reviews.length === 0) {
         reviewsList.innerHTML = `
@@ -300,7 +225,7 @@ async function handleReviewSubmit(e) {
     submitButton.textContent = '등록 중...';
     
     try {
-        // 이미지 업로드
+        // 이미지 업로드 처리
         const imgElements = quill.root.querySelectorAll('img[data-preview="true"]');
         
         for (const img of imgElements) {
@@ -317,7 +242,7 @@ async function handleReviewSubmit(e) {
         }
         
         // 리얼타임 데이터베이스의 해당 광고 하위에 후기 저장
-        const reviewsRef = ref(rtdb, `advertisements/${adId}/reviews`);
+        const reviewsRef = ref(rtdb, `advertisements/${currentAdId}/reviews`);
         const newReviewRef = push(reviewsRef);
         
         const reviewData = {
@@ -332,7 +257,7 @@ async function handleReviewSubmit(e) {
         alert('후기가 등록되었습니다.');
         closeModal();
         
-        // 초기화
+        // 에디터 초기화
         document.getElementById('review-title').value = '';
         quill.setText('');
         previewImages.clear();
@@ -350,14 +275,6 @@ async function handleReviewSubmit(e) {
 
 // 에러 표시
 function showError(message) {
-    // 로딩 숨기기
-    const loadingContainer = document.getElementById('loading-container');
-    if (loadingContainer) {
-        loadingContainer.style.display = 'none';
-    }
-    
-    // 에러 메시지 표시
-    const container = document.querySelector('.business-detail-container');
-    container.style.display = 'block';
-    container.innerHTML = `<div class="error">${message}</div>`;
+    const reviewsList = document.getElementById('reviews-list');
+    reviewsList.innerHTML = `<div class="error">${message}</div>`;
 }
