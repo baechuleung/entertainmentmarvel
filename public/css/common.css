@@ -35,18 +35,6 @@ input:focus, select:focus, textarea:focus {
     font-size: 16px;
 }
 
-/* 폰트 크기 조정이 필요한 경우 transform 사용 */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="tel"],
-input[type="number"],
-textarea,
-select {
-    transform: scale(0.875); /* 14px 효과 (14/16 = 0.875) */
-    transform-origin: left center;
-    width: 114.3%; /* 100/0.875 = 114.3% */
-}
 
 /* 공통 링크 스타일 */
 a {
