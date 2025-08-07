@@ -8,8 +8,7 @@ let allAdvertisements = [];
 let currentFilters = {
     region: '',
     city: '',
-    businessType: '',
-    searchText: ''
+    businessType: ''
 };
 
 // 컴포넌트 로더
@@ -35,7 +34,6 @@ async function loadMainHeader() {
         await loadRegionData();
         await loadBusinessTypes();
         setupCustomSelects();
-        setupHeaderEventListeners();
     }, 100);
 }
 
@@ -101,7 +99,7 @@ async function loadRegionData() {
             });
             regionOptions.appendChild(allOption);
             
-            // 지역별 옵션 추가
+            // 각 지역 옵션 추가 - regions 배열 순회
             region1Data.regions.forEach(region => {
                 const option = document.createElement('div');
                 option.setAttribute('data-value', region.name);
@@ -113,10 +111,11 @@ async function loadRegionData() {
             });
         }
         
-        // regionData에 저장 (name -> code 매핑)
+        // regionData 저장 - name을 key로, code를 value로
         region1Data.regions.forEach(region => {
             regionData[region.name] = region.code;
         });
+        
     } catch (error) {
         console.error('지역 데이터 로드 실패:', error);
     }
@@ -128,7 +127,6 @@ async function loadBusinessTypes() {
         const response = await fetch('/data/business-types.json');
         const data = await response.json();
         
-        // 업종 옵션 추가
         const categoryOptions = document.getElementById('category-options');
         if (categoryOptions) {
             // 전체 옵션 추가
@@ -140,7 +138,7 @@ async function loadBusinessTypes() {
             });
             categoryOptions.appendChild(allOption);
             
-            // 업종별 옵션 추가
+            // 각 업종 옵션 추가 - businessTypes 배열 순회
             data.businessTypes.forEach(type => {
                 const option = document.createElement('div');
                 option.setAttribute('data-value', type.name);
@@ -158,7 +156,7 @@ async function loadBusinessTypes() {
 
 // 옵션 선택 처리
 function selectOption(element, type) {
-    const selectWrapper = element.parentNode.parentNode;
+    const selectWrapper = element.closest('.custom-select');
     const selected = selectWrapper.querySelector('.select-selected');
     const value = element.getAttribute('data-value');
     
@@ -167,17 +165,15 @@ function selectOption(element, type) {
     selected.setAttribute('data-value', value);
     
     // 값이 있으면 색상 변경
-    if (value && value !== '지역' && value !== '도시' && value !== '업종') {
+    if (value && value !== '전체') {
         selected.classList.add('has-value');
     } else {
         selected.classList.remove('has-value');
     }
     
-    // 이전 선택 제거
-    const sameAsSelected = element.parentNode.querySelector('.same-as-selected');
-    if (sameAsSelected) {
-        sameAsSelected.classList.remove('same-as-selected');
-    }
+    // 선택된 옵션 표시
+    const options = element.parentNode.querySelectorAll('div');
+    options.forEach(opt => opt.classList.remove('same-as-selected'));
     element.classList.add('same-as-selected');
     
     // 드롭다운 닫기
@@ -187,19 +183,7 @@ function selectOption(element, type) {
     // 필터 업데이트
     if (type === 'region') {
         currentFilters.region = (value === '지역' || value === '전체') ? '' : value;
-        currentFilters.city = '';
-        
-        if (value !== '전체' && value !== '지역') {
-            updateCityOptions(value);
-        }
-        
-        // 도시 초기화
-        const citySelected = document.querySelector('#city-select-wrapper .select-selected');
-        if (citySelected) {
-            citySelected.textContent = '도시';
-            citySelected.setAttribute('data-value', '');
-            citySelected.classList.remove('has-value');
-        }
+        updateCityOptions(value === '전체' ? '' : value);
     } else if (type === 'city') {
         currentFilters.city = (value === '도시' || value === '전체') ? '' : value;
     } else if (type === 'category') {
@@ -242,30 +226,6 @@ function updateCityOptions(regionName) {
     }
 }
 
-// 헤더 이벤트 리스너 설정
-function setupHeaderEventListeners() {
-    // 검색 버튼 클릭 이벤트
-    const searchButton = document.querySelector('.search-bar button');
-    if (searchButton) {
-        searchButton.addEventListener('click', function() {
-            const searchInput = document.querySelector('.search-bar input');
-            currentFilters.searchText = searchInput.value.trim();
-            applyFilters();
-        });
-    }
-    
-    // 검색 엔터키 이벤트
-    const searchInput = document.querySelector('.search-bar input');
-    if (searchInput) {
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                currentFilters.searchText = this.value.trim();
-                applyFilters();
-            }
-        });
-    }
-}
-
 // 필터 적용 함수
 function applyFilters() {
     const filteredAds = allAdvertisements.filter(ad => {
@@ -282,13 +242,6 @@ function applyFilters() {
         // 업종 필터
         if (currentFilters.businessType && ad.businessType !== currentFilters.businessType) {
             return false;
-        }
-        
-        // 검색어 필터
-        if (currentFilters.searchText) {
-            const searchLower = currentFilters.searchText.toLowerCase();
-            return ad.title.toLowerCase().includes(searchLower) || 
-                   ad.author.toLowerCase().includes(searchLower);
         }
         
         return true;
@@ -330,91 +283,75 @@ function loadAdvertisements() {
         allAdvertisements = []; // 전역 변수에 저장
         
         if (data) {
-            // 객체를 배열로 변환
-            Object.entries(data).forEach(([key, value]) => {
-                if (value.status === 'active') {
-                    allAdvertisements.push({ id: key, ...value });
+            Object.keys(data).forEach(key => {
+                const ad = { id: key, ...data[key] };
+                
+                // active 상태인 광고만 추가
+                if (ad.status === 'active') {
+                    allAdvertisements.push(ad);
                 }
             });
-            
-            console.log('활성 광고 수:', allAdvertisements.length);
-            
-            // 최신순으로 정렬
-            allAdvertisements.sort((a, b) => b.createdAt - a.createdAt);
-            
-            // 필터 적용하여 표시
-            applyFilters();
-        } else {
-            console.log('데이터가 없습니다');
-            displayAdvertisements([]);
         }
-    }, (error) => {
-        console.error('Firebase 데이터 로드 오류:', error);
+        
+        // 초기 표시
+        displayAdvertisements(allAdvertisements);
     });
 }
 
-// 광고 표시
-function displayAdvertisements(advertisements) {
-    console.log('광고 표시 시작, 개수:', advertisements.length);
-    
-    const listContainer = document.querySelector('.business-list');
-    if (listContainer) {
-        if (advertisements.length === 0) {
-            listContainer.innerHTML = '<div class="no-results">등록된 광고가 없습니다.</div>';
-            return;
-        }
-        
-        listContainer.innerHTML = advertisements.map(ad => createAdvertisementItem(ad)).join('');
-    } else {
-        console.error('business-list 컨테이너를 찾을 수 없습니다');
-    }
-}
-
-// 광고 아이템 생성
-function createAdvertisementItem(ad) {
+// 광고 목록 표시
+async function displayAdvertisements(ads) {
+    // 템플릿이 로드되지 않았으면 먼저 로드
     if (!businessItemTemplate) {
-        // 템플릿이 로드되지 않은 경우 기본 HTML 반환
-        const defaultImage = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23ddd' width='100' height='100'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%23999' font-size='14'>No Image</text></svg>";
-        
-        // 업종 코드가 있으면 업종별 썸네일 사용, 없으면 기존 썸네일 또는 기본 이미지
-        const thumbnailSrc = ad.businessTypeCode ? 
-            `/img/business-type/${ad.businessTypeCode}.png` : 
-            (ad.thumbnail || defaultImage);
-        
-        return `
-            <div class="business-item" data-id="${ad.id}">
-                <img src="${thumbnailSrc}" alt="${ad.title}" onerror="this.src='${defaultImage}'">
-                <div class="business-info">
-                    <div class="ad-title">${ad.title}</div>
-                    <div class="ad-meta">
-                        <span class="ad-type-author">${ad.businessType} - ${ad.author}</span>
-                        <span class="ad-location">${ad.region} ${ad.city}</span>
-                    </div>
-                </div>
-            </div>
-        `;
+        await loadBusinessItemTemplate();
     }
     
-    // 템플릿 사용
-    const defaultImage = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23ddd' width='100' height='100'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%23999' font-size='14'>No Image</text></svg>";
+    const businessList = document.querySelector('.business-list');
+    if (!businessList) {
+        console.error('business-list 요소를 찾을 수 없습니다');
+        return;
+    }
     
-    // 업종 코드가 있으면 업종별 썸네일 사용
-    const thumbnailSrc = ad.businessTypeCode ? 
-        `/img/business-type/${ad.businessTypeCode}.png` : 
-        (ad.thumbnail || defaultImage);
+    if (ads.length === 0) {
+        businessList.innerHTML = '<div class="no-results">등록된 업체가 없습니다.</div>';
+        return;
+    }
     
-    return replaceTemplate(businessItemTemplate, {
-        id: ad.id,
-        thumbnail: thumbnailSrc,
-        title: ad.title,
-        businessType: ad.businessType,
-        author: ad.author,
-        region: ad.region,
-        city: ad.city
+    // 광고 목록 HTML 생성
+    const html = ads.map(ad => {
+        // 템플릿에 데이터 바인딩
+        const data = {
+            id: ad.id,
+            thumbnail: ad.thumbnail || '/img/default-thumb.jpg',
+            title: ad.title || '제목 없음',
+            businessType: ad.businessType || '미분류',
+            author: ad.author || '작성자 없음',
+            region: ad.region || '',
+            city: ad.city || '',
+            location: [ad.region, ad.city].filter(Boolean).join(' ') || '위치 정보 없음',
+            views: ad.views || 0
+        };
+        
+        return replaceTemplate(businessItemTemplate, data);
+    }).join('');
+    
+    businessList.innerHTML = html;
+    
+    // 클릭 이벤트 추가
+    document.querySelectorAll('.business-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const adId = this.dataset.id;
+            window.location.href = `/business-detail/business-detail.html?id=${adId}`;
+        });
     });
 }
 
-// 초기화
+// 모듈 초기화
+export function initComponents() {
+    loadMainHeader();
+    loadAdvertisements();
+}
+
+// 초기화 - DOMContentLoaded 이벤트 추가
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOMContentLoaded 이벤트 발생');
     
