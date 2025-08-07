@@ -38,6 +38,66 @@
             return data;
         },
 
+        // 파비콘 생성 및 추가
+        generateFavicons: function() {
+            // 이미 파비콘이 있는지 확인
+            const existingFavicon = document.querySelector('link[rel="icon"]');
+            if (existingFavicon) {
+                console.log('파비콘이 이미 존재합니다.');
+                return;
+            }
+
+            // 파비콘 링크 태그들 생성
+            const faviconLinks = [
+                // 기본 파비콘
+                { rel: 'icon', type: 'image/x-icon', href: '/img/favicon/favicon.ico' },
+                { rel: 'shortcut icon', href: '/img/favicon/favicon.ico' },
+                
+                // PNG 파비콘
+                { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/img/favicon/favicon-16x16.png' },
+                { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/img/favicon/favicon-32x32.png' },
+                { rel: 'icon', type: 'image/png', sizes: '192x192', href: '/img/favicon/android-chrome-192x192.png' },
+                { rel: 'icon', type: 'image/png', sizes: '512x512', href: '/img/favicon/android-chrome-512x512.png' },
+                
+                // Apple Touch Icon
+                { rel: 'apple-touch-icon', sizes: '180x180', href: '/img/favicon/apple-touch-icon.png' },
+                
+                // Android Chrome Icons
+                { rel: 'icon', type: 'image/png', sizes: '192x192', href: '/img/favicon/android-chrome-192x192.png' },
+                { rel: 'icon', type: 'image/png', sizes: '512x512', href: '/img/favicon/android-chrome-512x512.png' }
+            ];
+
+            // 각 파비콘 링크 태그 추가
+            faviconLinks.forEach(favicon => {
+                const link = document.createElement('link');
+                link.rel = favicon.rel;
+                if (favicon.type) link.type = favicon.type;
+                if (favicon.sizes) link.sizes = favicon.sizes;
+                link.href = favicon.href;
+                document.head.appendChild(link);
+            });
+
+            // Web App Manifest 추가
+            const manifestLink = document.createElement('link');
+            manifestLink.rel = 'manifest';
+            manifestLink.href = '/img/favicon/site.webmanifest';
+            document.head.appendChild(manifestLink);
+
+            // MS Application 타일 색상
+            const msApplicationTileColor = document.createElement('meta');
+            msApplicationTileColor.name = 'msapplication-TileColor';
+            msApplicationTileColor.content = '#131217';
+            document.head.appendChild(msApplicationTileColor);
+
+            // Theme Color
+            const themeColor = document.createElement('meta');
+            themeColor.name = 'theme-color';
+            themeColor.content = '#131217';
+            document.head.appendChild(themeColor);
+
+            console.log('파비콘 추가 완료');
+        },
+
         // Canonical URL 생성 및 추가
         generateCanonical: function() {
             // 이미 canonical이 있는지 확인
@@ -142,6 +202,7 @@
 
         // 초기화
         init: function() {
+            this.generateFavicons();
             this.generateCanonical();
             this.generateSocialTags();
         }
