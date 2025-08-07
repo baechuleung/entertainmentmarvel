@@ -62,4 +62,6 @@ img {
 /* 메인 컨텐츠 영역 (헤더 높이만큼 여백) */
 main {
     margin-top: 60px;
+    min-height: calc(100vh - 160px);
+    background-color: #131217; /* 어두운 배경색 */
 }
