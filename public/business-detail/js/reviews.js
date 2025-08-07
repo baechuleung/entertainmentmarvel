@@ -229,8 +229,8 @@ async function handleReviewSubmit(e) {
         const pointsToAdd = 100; // 후기 작성 포인트
         const timestamp = Date.now();
         
-        // reviews_history 맵에 추가할 데이터
-        const historyKey = `review_${timestamp}`;
+        // point_history 맵에 추가할 데이터
+        const historyKey = `${timestamp}`;
         const historyData = {
             type: 'earned',
             amount: pointsToAdd,
@@ -244,7 +244,7 @@ async function handleReviewSubmit(e) {
         await updateDoc(userRef, {
             reviews_count: increment(1),
             points: increment(pointsToAdd),
-            [`reviews_history.${historyKey}`]: historyData
+            [`point_history.${historyKey}`]: historyData
         });
         
         alert('후기가 등록되었습니다.');
@@ -353,8 +353,8 @@ async function handleDeleteReview() {
             const pointsToDeduct = -100; // 후기 삭제 시 포인트 차감
             const timestamp = Date.now();
             
-            // reviews_history 맵에 추가할 데이터 (차감 기록)
-            const historyKey = `review_delete_${timestamp}`;
+            // point_history 맵에 추가할 데이터 (차감 기록)
+            const historyKey = `${timestamp}`;
             const historyData = {
                 type: 'used',
                 amount: 100, // 차감되는 포인트 (양수로 저장)
@@ -367,7 +367,7 @@ async function handleDeleteReview() {
             await updateDoc(userRef, {
                 reviews_count: increment(-1),
                 points: increment(pointsToDeduct),
-                [`reviews_history.${historyKey}`]: historyData
+                [`point_history.${historyKey}`]: historyData
             });
             
             alert('후기가 삭제되었습니다.');

@@ -272,7 +272,7 @@ async function handleSubmit(e) {
             images: uploadedImages,
             createdAt: Date.now(),
             updatedAt: Date.now(),
-            status: 'active',
+            status: 'pending',
             views: 0
         };
         

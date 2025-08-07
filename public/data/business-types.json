@@ -55,10 +55,10 @@
       "keywords": ["바", "bar"]
     },
     {
-      "code": "hobba",
-      "name": "호빠",
-      "description": "호빠",
-      "keywords": ["호빠", "호스트바", "hobba"]
+      "code": "kraoke",
+      "name": "가라오케",
+      "description": "가라오케",
+      "keywords": ["가라오케", "유흥주점", "kraoke"]
     }
   ]
 }

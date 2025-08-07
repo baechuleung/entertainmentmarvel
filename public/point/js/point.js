@@ -1,6 +1,6 @@
 import { auth, db } from '/js/firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { doc, getDoc, collection, query, where, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // 전역 변수
 let currentUser = null;
@@ -54,78 +54,68 @@ function displayTotalPoints() {
 // 포인트 내역 로드
 async function loadPointHistory() {
     try {
-        // Firestore에서 포인트 내역 가져오기
-        // point_history 컬렉션이 있다고 가정
-        const historyRef = collection(db, 'point_history');
-        const q = query(
-            historyRef, 
-            where('userId', '==', currentUser.uid),
-            orderBy('createdAt', 'desc')
-        );
+        // userData에서 point_history 맵 가져오기
+        const pointHistoryMap = userData.point_history || {};
         
-        const querySnapshot = await getDocs(q);
+        // 맵을 배열로 변환하고 정렬
         pointHistory = [];
         
-        querySnapshot.forEach((doc) => {
-            pointHistory.push({ id: doc.id, ...doc.data() });
-        });
+        for (const [key, value] of Object.entries(pointHistoryMap)) {
+            // createdAt을 Date 객체로 변환
+            const historyItem = {
+                ...value,
+                id: key,
+                createdAt: value.createdAt ? value.createdAt.toDate() : new Date(parseInt(key))
+            };
+            pointHistory.push(historyItem);
+        }
         
-        // 임시 데이터 (실제 데이터가 없을 경우)
+        // 최신순으로 정렬
+        pointHistory.sort((a, b) => b.createdAt - a.createdAt);
+        
+        // 포인트 내역이 없을 경우 기본 데이터 표시
         if (pointHistory.length === 0) {
-            pointHistory = [
-                {
-                    title: '출석보상',
-                    amount: 500,
-                    type: 'earned',
-                    createdAt: new Date('2025-07-31 01:38:46'),
-                    status: '적립'
-                },
-                {
-                    title: '출석보상',
-                    amount: 500,
-                    type: 'earned',
-                    createdAt: new Date('2025-07-31 01:38:46'),
-                    status: '적립'
-                },
-                {
-                    title: '첫 회원가입 보상',
+            // 회원가입 보너스가 있는지 확인
+            if (userData.createdAt) {
+                pointHistory.push({
+                    title: '회원가입 보너스',
                     amount: 1000,
                     type: 'earned',
-                    createdAt: new Date('2025-07-31 01:38:46'),
+                    createdAt: userData.createdAt.toDate(),
                     status: '적립'
-                }
-            ];
+                });
+            }
         }
         
         displayPointHistory();
+        updatePeriodText();
         
     } catch (error) {
         console.error('포인트 내역 로드 실패:', error);
-        // 에러 시 임시 데이터 표시
-        pointHistory = [
-            {
-                title: '출석보상',
-                amount: 500,
-                type: 'earned',
-                createdAt: new Date('2025-07-31 01:38:46'),
-                status: '적립'
-            },
-            {
-                title: '출석보상',
-                amount: 500,
-                type: 'earned',
-                createdAt: new Date('2025-07-31 01:38:46'),
-                status: '적립'
-            },
-            {
-                title: '첫 회원가입 보상',
-                amount: 1000,
-                type: 'earned',
-                createdAt: new Date('2025-07-31 01:38:46'),
-                status: '적립'
-            }
-        ];
+        
+        // 에러 시 빈 상태 표시
+        pointHistory = [];
         displayPointHistory();
+    }
+}
+
+// 기간 텍스트 업데이트
+function updatePeriodText() {
+    const periodText = document.getElementById('period-text');
+    if (periodText && pointHistory.length > 0) {
+        // 가장 오래된 날짜와 가장 최근 날짜 찾기
+        const dates = pointHistory.map(item => item.createdAt);
+        const oldestDate = new Date(Math.min(...dates));
+        const newestDate = new Date(Math.max(...dates));
+        
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}.${month}.${day}`;
+        };
+        
+        periodText.textContent = `${formatDate(oldestDate)} ~ ${formatDate(newestDate)}`;
     }
 }
 
@@ -145,6 +135,15 @@ function displayPointHistory() {
     if (filteredHistory.length === 0) {
         historyContainer.style.display = 'none';
         emptyState.style.display = 'block';
+        
+        // 탭에 따른 빈 상태 메시지
+        if (currentTab === 'earned') {
+            emptyState.innerHTML = '<p>적립 내역이 없습니다.</p>';
+        } else if (currentTab === 'used') {
+            emptyState.innerHTML = '<p>사용 내역이 없습니다.</p>';
+        } else {
+            emptyState.innerHTML = '<p>포인트 내역이 없습니다.</p>';
+        }
         return;
     }
     
@@ -152,17 +151,22 @@ function displayPointHistory() {
     emptyState.style.display = 'none';
     
     historyContainer.innerHTML = filteredHistory.map(item => {
-        const date = item.createdAt instanceof Date ? item.createdAt : item.createdAt.toDate();
-        const dateStr = formatDate(date);
+        const dateStr = formatDateTime(item.createdAt);
         const isPlus = item.type === 'earned';
         const sign = isPlus ? '+' : '-';
         const changeClass = isPlus ? 'plus' : 'minus';
+        
+        // 상세 정보 추가 (후기 제목 등)
+        let titleText = item.title;
+        if (item.reviewTitle) {
+            titleText += ` - ${item.reviewTitle}`;
+        }
         
         return `
             <div class="point-item">
                 <div class="point-item-header">
                     <div>
-                        <div class="point-title">${item.title}</div>
+                        <div class="point-title">${titleText}</div>
                         <div class="point-date">${dateStr}</div>
                     </div>
                     <div>
@@ -175,8 +179,8 @@ function displayPointHistory() {
     }).join('');
 }
 
-// 날짜 포맷팅
-function formatDate(date) {
+// 날짜 시간 포맷팅
+function formatDateTime(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -206,11 +210,12 @@ function setupEventListeners() {
         });
     });
     
-    // 포인트 아이템 클릭 시 마이페이지의 포인트 페이지로 이동
-    const pointItems = document.querySelectorAll('.point-item:first-child');
-    pointItems.forEach(item => {
-        item.addEventListener('click', function() {
-            window.location.href = '/point/point.html';
+    // 기간 버튼 클릭 (추후 기능 추가 가능)
+    const periodBtn = document.querySelector('.period-btn');
+    if (periodBtn) {
+        periodBtn.addEventListener('click', function() {
+            // 추후 날짜 선택 기능 추가 가능
+            console.log('기간 설정 버튼 클릭');
         });
-    });
+    }
 }

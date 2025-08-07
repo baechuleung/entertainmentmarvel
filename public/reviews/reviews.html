@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>후기작성 - 유흥마블</title>
+    <meta name="description" content="유흥마블 후기 목록">
+    
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/sidemenu.css">
+    <link rel="stylesheet" href="css/reviews.css">
+    
+    <script src="/js/seo.js"></script>
+    <!-- Quill 에디터 -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.7/quill.js"></script>
+</head>
+<body>
+    <main>
+        <!-- 내가 쓴 후기 카운트 -->
+        <div class="review-count-section">
+            <span class="review-count">내가 쓴 후기 <span id="total-count">0</span>개</span>
+        </div>
+
+        <!-- 필터 태그 -->
+        <div class="filter-tags">
+            <!-- 업종 필터가 동적으로 로드됩니다 -->
+        </div>
+
+        <!-- 후기 리스트 -->
+        <div class="review-list" id="review-list">
+            <!-- 후기 목록이 여기에 동적으로 로드됩니다 -->
+        </div>
+
+        <!-- 빈 상태 -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <p>작성한 후기가 없습니다.</p>
+            <p>첫 번째 후기를 작성해보세요!</p>
+        </div>
+    </main>
+
+    <!-- 모달 컨테이너 -->
+    <div id="modal-container">
+        <!-- 후기 상세 보기 모달 -->
+        <div class="review-modal" id="review-detail-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="detail-modal-title">후기 상세</h2>
+                    <div class="modal-header-buttons">
+                        <button class="btn-edit" id="btn-edit-review">수정</button>
+                        <button class="btn-delete" id="btn-delete-review">삭제</button>
+                        <button class="modal-close" data-modal="review-detail-modal">&times;</button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="review-detail-content" id="review-detail-content">
+                        <!-- 후기 내용이 여기에 표시됩니다 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 후기 수정 모달 -->
+        <div class="review-modal" id="review-edit-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>후기 수정</h2>
+                    <button class="modal-close" data-modal="review-edit-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="review-edit-form">
+                        <div class="form-group">
+                            <label>후기 제목</label>
+                            <input type="text" id="review-edit-title" placeholder="후기 제목을 입력하세요" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>후기 내용</label>
+                            <div id="editor-edit-container">
+                                <div id="editor-edit"></div>
+                            </div>
+                            <input type="hidden" id="review-edit-content" required>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn-submit">수정 완료</button>
+                            <button type="button" class="btn-cancel" data-modal="review-edit-modal">취소</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/header.js"></script>
+    <script type="module" src="js/reviews.js"></script>
+</body>
+</html>

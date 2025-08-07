@@ -124,6 +124,13 @@ async function loadUserStats() {
             reviewCountEl.textContent = `${reviewCount}개`;
         }
         
+        // 즐겨찾기 개수 표시
+        const bookmarkCountEl = document.getElementById('bookmark-count');
+        if (bookmarkCountEl) {
+            const bookmarks = userData.bookmarks || [];
+            bookmarkCountEl.textContent = `${bookmarks.length}개`;
+        }
+        
     } catch (error) {
         console.error('통계 로드 실패:', error);
     }

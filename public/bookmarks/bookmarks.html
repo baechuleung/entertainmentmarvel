@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>즐겨찾기 - 유흥마블</title>
+    <meta name="description" content="유흥마블 즐겨찾기 목록">
+    
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/sidemenu.css">
+    <link rel="stylesheet" href="css/bookmarks.css">
+    
+    <script src="/js/seo.js"></script>
+</head>
+<body>
+    <main>
+        <!-- 상단 필터 섹션 -->
+        <div class="filter-section">
+            <!-- 서울/강남 드롭다운 -->
+            <div class="filter-row">
+                <div class="dropdown-wrapper">
+                    <select id="region-select" class="filter-dropdown">
+                        <option value="">서울</option>
+                    </select>
+                </div>
+                <div class="dropdown-wrapper">
+                    <select id="city-select" class="filter-dropdown">
+                        <option value="">강남</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- 하이퍼블릭/도파민 드롭다운 -->
+            <div class="filter-row">
+                <div class="dropdown-wrapper">
+                    <select id="type-select" class="filter-dropdown">
+                        <option value="">하이퍼블릭</option>
+                    </select>
+                </div>
+                <div class="search-wrapper">
+                    <input type="text" id="search-input" class="search-input" placeholder="도파민">
+                    <button class="search-btn">🔍</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 즐겨찾기 리스트 -->
+        <div class="bookmark-list" id="bookmark-list">
+            <!-- 즐겨찾기 목록이 여기에 동적으로 로드됩니다 -->
+        </div>
+
+        <!-- 빈 상태 -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <p>즐겨찾기한 업체가 없습니다.</p>
+            <p>마음에 드는 업체를 즐겨찾기에 추가해보세요!</p>
+        </div>
+    </main>
+
+    <script src="/js/header.js"></script>
+    <script type="module" src="js/bookmarks.js"></script>
+</body>
+</html>

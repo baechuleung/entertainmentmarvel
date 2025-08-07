@@ -252,7 +252,7 @@ const SideMenu = {
         const pageMap = {
             '홈으로 가기': '/main/main.html',
             '광고 관리': '/ad-posting/ad-management.html',
-            '1:1 고객센터': '/support/support.html',
+            '1:1 고객센터': 'https://open.kakao.com/o/skhPJeLh',
             'FAQ': '/faq/faq.html',
             '공지사항': '/board/board.html',
             '이벤트': '/board/board.html?tab=event',

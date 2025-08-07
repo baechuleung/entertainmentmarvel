@@ -1,0 +1,14 @@
+# 모든 검색 엔진 허용
+User-agent: *
+Allow: /
+Disallow: /admin/
+
+# 구글봇 설정
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+
+# 네이버봇 설정
+User-agent: Yeti
+Allow: /
+Disallow: /admin/

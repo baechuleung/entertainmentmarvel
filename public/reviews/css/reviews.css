@@ -1,0 +1,463 @@
+/* 후기 페이지 스타일 */
+.review-count-section {
+    padding: 20px;
+    font-size: 18px;
+    background-color: #1a1a1a;
+    color: #fff;
+}
+
+.review-count {
+    font-weight: 500;
+}
+
+/* 필터 태그 */
+.filter-tags {
+    display: flex;
+    gap: 10px;
+    padding: 0 20px 20px 20px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    background-color: #1a1a1a;
+    scroll-behavior: smooth;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.filter-tags.grabbing {
+    cursor: grabbing;
+}
+
+/* 스크롤바 스타일링 - PC에서 보이도록 */
+.filter-tags::-webkit-scrollbar {
+    height: 6px;
+}
+
+.filter-tags::-webkit-scrollbar-track {
+    background: #2a2a2a;
+    border-radius: 3px;
+}
+
+.filter-tags::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 3px;
+}
+
+.filter-tags::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+
+.filter-tag {
+    background-color: transparent;
+    border: 1px solid #333;
+    border-radius: 20px;
+    padding: 8px 16px;
+    color: #888;
+    font-size: 13px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.3s;
+    flex-shrink: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    pointer-events: auto;
+}
+
+.filter-tag.active {
+    background-color: #1a5490;
+    border-color: #1a5490;
+    color: #fff;
+}
+
+.filter-tag:hover:not(.active) {
+    border-color: #555;
+    color: #aaa;
+}
+
+/* 후기 리스트 */
+.review-list {
+    padding: 0 20px 80px 20px;
+    background-color: #1a1a1a;
+    min-height: calc(100vh - 300px);
+}
+
+.review-item {
+    background-color: #2a2a2a;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.review-item:hover {
+    background-color: #333;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.review-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.review-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 13px;
+    color: #888;
+}
+
+.review-date {
+    color: #888;
+    font-size: 13px;
+}
+
+.review-stat {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    color: #888;
+    font-size: 13px;
+}
+
+.review-actions {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.more-button {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.more-button:hover {
+    color: #fff;
+}
+
+/* 상태 배지 */
+.status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-left: 8px;
+}
+
+.status-badge.edit {
+    background-color: #ff9800;
+    color: #000;
+}
+
+.status-badge.delete {
+    background-color: #f44336;
+    color: #fff;
+}
+
+/* 사진 아이콘 */
+.photo-indicator {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background-color: #333;
+    border-radius: 5px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.photo-icon {
+    width: 18px;
+    height: 18px;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M4 4h3l2-2h6l2 2h3a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm8 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6z"/></svg>') center/contain no-repeat;
+}
+
+.photo-count {
+    color: #fff;
+    font-size: 12px;
+}
+
+/* 빈 상태 */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #888;
+    background-color: #1a1a1a;
+    min-height: calc(100vh - 300px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.empty-state p {
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+/* 옵션 메뉴 */
+.options-menu {
+    position: fixed;
+    bottom: -100%;
+    left: 0;
+    right: 0;
+    background-color: #2a2a2a;
+    border-radius: 20px 20px 0 0;
+    padding: 20px;
+    transition: bottom 0.3s;
+    z-index: 1000;
+}
+
+.options-menu.show {
+    bottom: 0;
+}
+
+.options-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 999;
+}
+
+.options-overlay.show {
+    display: block;
+}
+
+.option-item {
+    padding: 15px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background-color 0.2s;
+}
+
+.option-item:hover {
+    background-color: #333;
+}
+
+.option-item.delete {
+    color: #f44336;
+}
+
+/* 모달 스타일 */
+.review-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    overflow-y: auto;
+}
+
+.review-modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: #2a2a2a;
+    margin: 20px;
+    padding: 0;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    color: #fff;
+    font-size: 18px;
+    margin: 0;
+}
+
+.modal-header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-edit, .btn-delete {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-edit {
+    background-color: #1a5490;
+    color: #fff;
+}
+
+.btn-edit:hover {
+    background-color: #144170;
+}
+
+.btn-delete {
+    background-color: #f44336;
+    color: #fff;
+}
+
+.btn-delete:hover {
+    background-color: #d32f2f;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    color: #fff;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.review-detail-content {
+    color: #fff;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.review-detail-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+/* 폼 스타일 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: #aaa;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.form-group input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #333;
+    border: 1px solid #444;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 14px;
+}
+
+.form-group input[type="text"]:focus {
+    outline: none;
+    border-color: #1a5490;
+}
+
+/* Quill 에디터 스타일 */
+#editor-edit-container {
+    background-color: #fff;
+    border-radius: 5px;
+}
+
+#editor-edit {
+    min-height: 200px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.btn-submit, .btn-cancel {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-submit {
+    background-color: #1a5490;
+    color: #fff;
+}
+
+.btn-submit:hover {
+    background-color: #144170;
+}
+
+.btn-submit:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+}
+
+.btn-cancel {
+    background-color: #444;
+    color: #fff;
+}
+
+.btn-cancel:hover {
+    background-color: #555;
+}
