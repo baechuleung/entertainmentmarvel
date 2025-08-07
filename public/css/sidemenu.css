@@ -262,8 +262,10 @@
 }
 
 .menu-divider {
-    height: 8px;
-    background-color: #202020;
+    height: 1px;
+    background: transparent;
+    border-bottom: 1px solid #EBEBEB;
+    margin: 0 25px;
 }
 
 /* 로그아웃 섹션 */
