@@ -7,7 +7,7 @@ import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase
 
 const firebaseConfig = {
     apiKey: "AIzaSyBJzJPUU6pakcT6PdCCScNH1T0t4l-bN8Y",
-    authDomain: "entertainmentmarvel-2e9d6.firebaseapp.com",
+    authDomain: "entmarvel.com",
     projectId: "entertainmentmarvel-2e9d6",
     storageBucket: "entertainmentmarvel-2e9d6.firebasestorage.app",
     messagingSenderId: "734113665067",
