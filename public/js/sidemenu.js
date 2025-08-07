@@ -59,15 +59,20 @@ const SideMenu = {
 
     // 로그인 상태에 따른 UI 업데이트
     updateUserStatus: function(isLoggedIn, userData = null) {
+        const userInfoSection = document.querySelector('.user-info-section');
         const guestInfo = document.querySelector('.user-info.guest');
         const memberInfo = document.querySelector('.user-info.member');
-        const logoutBtn = document.querySelector('.footer-link');
-        const logoutArrow = document.querySelector('.menu-footer .arrow');
+        const logoutSection = document.querySelector('.logout-section');
         const businessOnlyMenu = document.querySelector('.business-only');
         const businessOnlyDivider = document.querySelector('.business-only-divider');
         
         if (isLoggedIn && userData) {
             // 회원인 경우
+            if (userInfoSection) {
+                userInfoSection.classList.remove('guest-section');
+                userInfoSection.classList.add('member-section');
+            }
+            
             if (guestInfo) guestInfo.style.display = 'none';
             if (memberInfo) {
                 memberInfo.style.display = 'flex';
@@ -81,7 +86,15 @@ const SideMenu = {
                 const levelTextEl = memberInfo.querySelector('.level-text');
                 
                 if (memberTypeEl) {
-                    memberTypeEl.textContent = userData.userType === 'business' ? '업체회원' : '일반회원';
+                    if (userData.userType === 'business') {
+                        memberTypeEl.textContent = '업체회원';
+                        memberTypeEl.classList.remove('general');
+                        memberTypeEl.classList.add('business');
+                    } else {
+                        memberTypeEl.textContent = '일반회원';
+                        memberTypeEl.classList.remove('business');
+                        memberTypeEl.classList.add('general');
+                    }
                 }
                 
                 // 업체회원인 경우 공고 관리 메뉴 표시
@@ -91,10 +104,10 @@ const SideMenu = {
                 }
                 
                 if (levelTextEl) {
-                    if (userData.userType === 'member') {
+                    if (userData.userType === 'member' || userData.userType === 'general') {
                         const level = userData.level || 1;
                         levelTextEl.textContent = `Lv.${level}`;
-                        levelTextEl.style.display = 'block';
+                        levelTextEl.style.display = 'inline-block';
                     } else {
                         levelTextEl.style.display = 'none';
                     }
@@ -118,14 +131,20 @@ const SideMenu = {
                     }
                 }
             }
-            if (logoutBtn) logoutBtn.style.display = 'block';
-            if (logoutArrow) logoutArrow.style.display = 'block';
+            
+            // 로그아웃 섹션 표시
+            if (logoutSection) logoutSection.style.display = 'block';
+            
         } else {
             // 비회원인 경우
+            if (userInfoSection) {
+                userInfoSection.classList.add('guest-section');
+                userInfoSection.classList.remove('member-section');
+            }
+            
             if (guestInfo) guestInfo.style.display = 'flex';
             if (memberInfo) memberInfo.style.display = 'none';
-            if (logoutBtn) logoutBtn.style.display = 'none';
-            if (logoutArrow) logoutArrow.style.display = 'none';
+            if (logoutSection) logoutSection.style.display = 'none';
             if (businessOnlyMenu) businessOnlyMenu.style.display = 'none';
             if (businessOnlyDivider) businessOnlyDivider.style.display = 'none';
         }
@@ -193,10 +212,17 @@ const SideMenu = {
                 window.location.href = '/auth/login.html';
             }
         });
+        
+        // 회원가입 버튼 클릭
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-signup')) {
+                window.location.href = '/auth/register.html';
+            }
+        });
 
         // 로그아웃 클릭
         document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('footer-link') && e.target.textContent === '로그아웃') {
+            if (e.target.closest('.logout-item')) {
                 e.preventDefault();
                 this.handleLogout();
             }
@@ -256,12 +282,17 @@ const SideMenu = {
             'FAQ': '/faq/faq.html',
             '공지사항': '/board/board.html',
             '이벤트': '/board/board.html?tab=event',
-            '약관 및 정책': '/policy/policy.html'
+            '약관 및 정책': '/policy/policy.html',
+            '로그아웃': null  // 로그아웃은 별도 처리
         };
 
-        const targetPage = pageMap[menuText];
-        if (targetPage) {
-            window.location.href = targetPage;
+        if (menuText === '로그아웃') {
+            this.handleLogout();
+        } else {
+            const targetPage = pageMap[menuText];
+            if (targetPage) {
+                window.location.href = targetPage;
+            }
         }
     },
 

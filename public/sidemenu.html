@@ -2,13 +2,23 @@
 
 <div id="side-menu" class="side-menu">
     <div class="side-menu-header">
+        <button class="close-menu">
+            <span>&times;</span>
+        </button>
+    </div>
+    
+    <!-- 유저 정보 섹션 -->
+    <div class="user-info-section guest-section">
         <!-- 비회원 상태 (기본 표시) -->
         <div class="user-info guest">
             <div class="user-text">
-                <span class="login-text">로그인이 필요합니다</span>
-                <span class="login-sub">더 많은 서비스를 이용해보세요</span>
+                <span class="login-text">로그인 해주세요</span>
+                <span class="login-sub">로그인하고 유흥마블 서비스를 자유롭게 이용해보세요</span>
             </div>
-                            <button class="btn-login">로그인</button>
+            <div class="button-group">
+                <button class="btn-login">로그인</button>
+                <button class="btn-signup">회원가입</button>
+            </div>
         </div>
         
         <!-- 회원 상태 (숨김) -->
@@ -17,15 +27,14 @@
                 <img src="/img/user-icon.png" alt="회원아이콘">
             </div>
             <div class="user-text">
-                <span class="member-type">일반회원</span>
+                <div class="member-info-row">
+                    <span class="level-text" style="display: none;">Lv.1</span>
+                    <span class="member-type general">일반회원</span>
+                </div>
                 <span class="username">유흥어린이</span>
             </div>
             <button class="btn-mypage">마이페이지</button>
         </div>
-        
-        <button class="close-menu">
-            <span>&times;</span>
-        </button>
     </div>
     
     <div class="side-menu-content">
@@ -79,10 +88,20 @@
             </a>
         </nav>
         
-        <div class="menu-footer">
-            <!-- 로그아웃 버튼 (기본 숨김) -->
-            <a href="#" class="footer-link" style="display: none;">로그아웃</a>
-            <span class="arrow" style="display: none;">›</span>
-        </div>
+        <div class="menu-divider"></div>
+        
+        <!-- 로그아웃 메뉴 (기본 숨김) -->
+        <nav class="menu-section logout-section" style="display: none;">
+            <a href="#" class="menu-item logout-item">
+                <span class="logout-text">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <polyline points="16 17 21 12 16 7" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="21" y1="12" x2="9" y2="12" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    로그아웃
+                </span>
+            </a>
+        </nav>
     </div>
 </div>
