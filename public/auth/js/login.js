@@ -10,7 +10,8 @@ import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/f
 
 // DOM 요소
 const loginForm = document.getElementById('login-form');
-const emailInput = document.getElementById('email');
+const emailIdInput = document.getElementById('email-id');
+const emailDomainSelect = document.getElementById('email-domain');
 const passwordInput = document.getElementById('password');
 const rememberCheckbox = document.getElementById('remember-me');
 const submitButton = document.querySelector('.btn-login-submit');
@@ -92,10 +93,11 @@ if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const email = emailInput.value.trim();
+        // 이메일 조합
+        const email = emailIdInput.value.trim() + '@' + emailDomainSelect.value;
         const password = passwordInput.value;
         
-        if (!email || !password) {
+        if (!emailIdInput.value.trim() || !password) {
             showError('이메일과 비밀번호를 입력해주세요.');
             return;
         }
@@ -103,54 +105,58 @@ if (loginForm) {
         setLoading(true);
         
         try {
-            // 브라우저를 닫아도 로그인 상태 유지 (로컬 스토리지)
-            await setPersistence(auth, browserLocalPersistence);
+            // 로그인 상태 유지 설정
+            const persistence = rememberCheckbox.checked ? 
+                browserLocalPersistence : browserSessionPersistence;
+            await setPersistence(auth, persistence);
             
-            // 로그인 시도
+            // 로그인
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
             
-            // 마지막 로그인 시간 업데이트 (실패해도 계속 진행)
-            await updateUserInfo(user);
+            console.log('로그인 성공:', userCredential.user.email);
             
-            // 이전 페이지로 이동 또는 메인 페이지로
+            // 사용자 정보 업데이트
+            await updateUserInfo(userCredential.user);
+            
+            // 리다이렉트 처리
             const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
-            window.location.replace(returnUrl || '/main/main.html');
+            
+            if (returnUrl) {
+                console.log('returnUrl로 리다이렉트:', returnUrl);
+                window.location.replace(returnUrl);
+            } else {
+                console.log('메인 페이지로 리다이렉트');
+                window.location.replace('/main/main.html');
+            }
             
         } catch (error) {
+            console.error('로그인 실패:', error);
             setLoading(false);
             
-            // Firebase 에러 메시지 한글화
+            // 에러 메시지 처리
             let errorMessage = '로그인에 실패했습니다.';
             
-            switch (error.code) {
+            switch(error.code) {
                 case 'auth/user-not-found':
-                    errorMessage = '존재하지 않는 이메일입니다.';
+                    errorMessage = '등록되지 않은 이메일입니다.';
                     break;
                 case 'auth/wrong-password':
                     errorMessage = '비밀번호가 올바르지 않습니다.';
                     break;
                 case 'auth/invalid-email':
-                    errorMessage = '유효하지 않은 이메일 형식입니다.';
-                    break;
-                case 'auth/user-disabled':
-                    errorMessage = '비활성화된 계정입니다.';
+                    errorMessage = '올바른 이메일 형식이 아닙니다.';
                     break;
                 case 'auth/too-many-requests':
                     errorMessage = '너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요.';
                     break;
+                case 'auth/network-request-failed':
+                    errorMessage = '네트워크 연결을 확인해주세요.';
+                    break;
+                default:
+                    errorMessage = '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.';
             }
             
             showError(errorMessage);
         }
     });
-
-    // 엔터키로 로그인
-    if (passwordInput) {
-        passwordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                loginForm.dispatchEvent(new Event('submit'));
-            }
-        });
-    }
 }

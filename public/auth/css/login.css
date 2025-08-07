@@ -3,12 +3,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 60px;
+    min-height: calc(100vh - 160px);
     padding: 20px;
     background-color: #131217;
 }
 
 .login-box {
     width: 100%;
+    max-width: 400px;
     margin: 0 auto;
 }
 
@@ -19,7 +22,8 @@
 }
 
 .login-header img {
-    margin-bottom: 10px;
+    display: block;
+    margin: 0 auto 10px auto;
 }
 
 .login-header p {
@@ -37,6 +41,43 @@
     margin-bottom: 15px;
 }
 
+/* 이메일 그룹 스타일 */
+.email-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.email-group input[type="text"] {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.email-at {
+    color: #FFF;
+    font-size: 16px;
+}
+
+.email-group select {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.email-group select:focus {
+    border-color: #1a5490;
+    outline: none;
+}
+
 .form-group input {
     width: 100%;
     padding: 15px;
@@ -46,7 +87,8 @@
     transition: border-color 0.3s;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.email-group input[type="text"]:focus {
     border-color: #1a5490;
     outline: none;
 }
