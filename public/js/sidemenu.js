@@ -216,7 +216,7 @@ const SideMenu = {
         // 회원가입 버튼 클릭
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('btn-signup')) {
-                window.location.href = '/auth/register.html';
+                window.location.href = '/auth/signup.html';
             }
         });
 

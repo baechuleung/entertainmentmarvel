@@ -51,9 +51,11 @@ function setupCustomSelects() {
             optionsList.classList.toggle('select-hide');
             this.classList.toggle('select-arrow-active');
         });
+        
+        // 옵션 클릭 이벤트는 동적으로 추가됨
     });
     
-    // 외부 클릭 시 모든 드롭다운 닫기
+    // 외부 클릭 시 모든 셀렉트 닫기
     document.addEventListener('click', closeAllSelect);
 }
 
@@ -69,56 +71,103 @@ function closeAllSelect(elmnt) {
     }
     
     for (let i = 0; i < selectItems.length; i++) {
-        if (elmnt && elmnt.parentNode && elmnt.parentNode.querySelector('.select-items') === selectItems[i]) {
-            continue;
+        if (elmnt !== selectSelected[i]) {
+            selectItems[i].classList.add('select-hide');
         }
-        selectItems[i].classList.add('select-hide');
     }
 }
 
 // 지역 데이터 로드
 async function loadRegionData() {
     try {
-        // region1.json 로드
-        const region1Response = await fetch('/data/region1.json');
-        const region1Data = await region1Response.json();
+        const response = await fetch('/data/regions.json');
+        const data = await response.json();
+        regionData = data.regions;
+        cityData = data.cities;
         
-        // region2.json 로드
-        const region2Response = await fetch('/data/region2.json');
-        cityData = await region2Response.json();
-        
-        // 지역 옵션 추가
-        const regionOptions = document.getElementById('region-options');
-        if (regionOptions) {
-            // 전체 옵션 추가
-            const allOption = document.createElement('div');
-            allOption.setAttribute('data-value', '전체');
-            allOption.textContent = '전체';
-            allOption.addEventListener('click', function() {
-                selectOption(this, 'region');
-            });
-            regionOptions.appendChild(allOption);
-            
-            // 각 지역 옵션 추가 - regions 배열 순회
-            region1Data.regions.forEach(region => {
-                const option = document.createElement('div');
-                option.setAttribute('data-value', region.name);
-                option.textContent = region.name;
-                option.addEventListener('click', function() {
-                    selectOption(this, 'region');
-                });
-                regionOptions.appendChild(option);
-            });
-        }
-        
-        // regionData 저장 - name을 key로, code를 value로
-        region1Data.regions.forEach(region => {
-            regionData[region.name] = region.code;
-        });
-        
+        updateRegionOptions();
     } catch (error) {
         console.error('지역 데이터 로드 실패:', error);
     }
+}
+
+// 지역 옵션 업데이트
+function updateRegionOptions() {
+    const regionOptions = document.getElementById('region-options');
+    if (!regionOptions) return;
+    
+    regionOptions.innerHTML = '<div data-value="">전체 지역</div>';
+    
+    Object.keys(regionData).forEach(regionCode => {
+        const div = document.createElement('div');
+        div.dataset.value = regionCode;
+        div.textContent = regionData[regionCode];
+        div.addEventListener('click', function() {
+            selectRegion(regionCode, regionData[regionCode]);
+        });
+        regionOptions.appendChild(div);
+    });
+}
+
+// 지역 선택
+function selectRegion(regionCode, regionName) {
+    const regionSelected = document.querySelector('#region-select-wrapper .select-selected');
+    regionSelected.textContent = regionName || '지역';
+    regionSelected.dataset.value = regionCode;
+    
+    // 필터 업데이트
+    currentFilters.region = regionCode;
+    
+    // 도시 옵션 업데이트
+    updateCityOptions(regionCode);
+    
+    // 도시 선택 초기화
+    const citySelected = document.querySelector('#city-select-wrapper .select-selected');
+    citySelected.textContent = '도시';
+    citySelected.dataset.value = '';
+    currentFilters.city = '';
+    
+    // 필터링
+    filterAdvertisements();
+    
+    // 셀렉트 닫기
+    closeAllSelect();
+}
+
+// 도시 옵션 업데이트
+function updateCityOptions(regionCode) {
+    const cityOptions = document.getElementById('city-options');
+    if (!cityOptions) return;
+    
+    cityOptions.innerHTML = '<div data-value="">전체 도시</div>';
+    
+    if (regionCode && cityData[regionCode]) {
+        cityData[regionCode].forEach(city => {
+            const div = document.createElement('div');
+            div.dataset.value = city;
+            div.textContent = city;
+            div.addEventListener('click', function() {
+                selectCity(city);
+            });
+            cityOptions.appendChild(div);
+        });
+    }
+}
+
+// 도시 선택
+function selectCity(cityName) {
+    const citySelected = document.querySelector('#city-select-wrapper .select-selected');
+    citySelected.textContent = cityName || '도시';
+    citySelected.dataset.value = cityName;
+    
+    // 필터 업데이트
+    currentFilters.city = cityName;
+    
+    // 필터링
+    filterAdvertisements();
+    
+    // 셀렉트 닫기
+    closeAllSelect();
 }
 
 // 업종 데이터 로드
@@ -128,106 +177,42 @@ async function loadBusinessTypes() {
         const data = await response.json();
         
         const categoryOptions = document.getElementById('category-options');
-        if (categoryOptions) {
-            // 전체 옵션 추가
-            const allOption = document.createElement('div');
-            allOption.setAttribute('data-value', '전체');
-            allOption.textContent = '전체';
-            allOption.addEventListener('click', function() {
-                selectOption(this, 'category');
+        if (!categoryOptions) return;
+        
+        categoryOptions.innerHTML = '<div data-value="">전체 업종</div>';
+        
+        data.businessTypes.forEach(type => {
+            const div = document.createElement('div');
+            div.dataset.value = type.name;
+            div.textContent = type.name;
+            div.addEventListener('click', function() {
+                selectCategory(type.name);
             });
-            categoryOptions.appendChild(allOption);
-            
-            // 각 업종 옵션 추가 - businessTypes 배열 순회
-            data.businessTypes.forEach(type => {
-                const option = document.createElement('div');
-                option.setAttribute('data-value', type.name);
-                option.textContent = type.name;
-                option.addEventListener('click', function() {
-                    selectOption(this, 'category');
-                });
-                categoryOptions.appendChild(option);
-            });
-        }
+            categoryOptions.appendChild(div);
+        });
     } catch (error) {
         console.error('업종 데이터 로드 실패:', error);
     }
 }
 
-// 옵션 선택 처리
-function selectOption(element, type) {
-    const selectWrapper = element.closest('.custom-select');
-    const selected = selectWrapper.querySelector('.select-selected');
-    const value = element.getAttribute('data-value');
-    
-    // 선택된 값 표시
-    selected.textContent = element.textContent;
-    selected.setAttribute('data-value', value);
-    
-    // 값이 있으면 색상 변경
-    if (value && value !== '전체') {
-        selected.classList.add('has-value');
-    } else {
-        selected.classList.remove('has-value');
-    }
-    
-    // 선택된 옵션 표시
-    const options = element.parentNode.querySelectorAll('div');
-    options.forEach(opt => opt.classList.remove('same-as-selected'));
-    element.classList.add('same-as-selected');
-    
-    // 드롭다운 닫기
-    element.parentNode.classList.add('select-hide');
-    selected.classList.remove('select-arrow-active');
+// 업종 선택
+function selectCategory(categoryName) {
+    const categorySelected = document.querySelector('#category-select-wrapper .select-selected');
+    categorySelected.textContent = categoryName || '업종';
+    categorySelected.dataset.value = categoryName;
     
     // 필터 업데이트
-    if (type === 'region') {
-        currentFilters.region = (value === '지역' || value === '전체') ? '' : value;
-        updateCityOptions(value === '전체' ? '' : value);
-    } else if (type === 'city') {
-        currentFilters.city = (value === '도시' || value === '전체') ? '' : value;
-    } else if (type === 'category') {
-        currentFilters.businessType = (value === '업종' || value === '전체') ? '' : value;
-    }
+    currentFilters.businessType = categoryName;
     
-    applyFilters();
+    // 필터링
+    filterAdvertisements();
+    
+    // 셀렉트 닫기
+    closeAllSelect();
 }
 
-// 도시 옵션 업데이트
-function updateCityOptions(regionName) {
-    const cityOptions = document.getElementById('city-options');
-    if (!cityOptions) return;
-    
-    // 기존 옵션 제거
-    cityOptions.innerHTML = '';
-    
-    // 전체 옵션 추가
-    const allOption = document.createElement('div');
-    allOption.setAttribute('data-value', '전체');
-    allOption.textContent = '전체';
-    allOption.addEventListener('click', function() {
-        selectOption(this, 'city');
-    });
-    cityOptions.appendChild(allOption);
-    
-    // 선택된 지역의 code 찾기
-    const regionCode = regionData[regionName];
-    
-    if (regionCode && cityData[regionCode]) {
-        cityData[regionCode].forEach(city => {
-            const option = document.createElement('div');
-            option.setAttribute('data-value', city);
-            option.textContent = city;
-            option.addEventListener('click', function() {
-                selectOption(this, 'city');
-            });
-            cityOptions.appendChild(option);
-        });
-    }
-}
-
-// 필터 적용 함수
-function applyFilters() {
+// 광고 필터링
+function filterAdvertisements() {
     const filteredAds = allAdvertisements.filter(ad => {
         // 지역 필터
         if (currentFilters.region && ad.region !== currentFilters.region) {
@@ -269,10 +254,28 @@ async function loadBusinessItemTemplate() {
     }
 }
 
-// 광고 목록 로드
+// 광고 목록 로드 (캐시 적용)
 function loadAdvertisements() {
     console.log('광고 목록 로드 시작');
     
+    // 캐시 확인
+    const cacheKey = 'mainPageAds';
+    const cacheTime = 2 * 60 * 60 * 1000; // 2시간
+    const cached = sessionStorage.getItem(cacheKey);
+    
+    if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        const isExpired = Date.now() - timestamp > cacheTime;
+        
+        if (!isExpired) {
+            console.log('캐시된 데이터 사용');
+            allAdvertisements = data;
+            displayAdvertisements(allAdvertisements);
+            return;
+        }
+    }
+    
+    // Firebase에서 새 데이터 로드
     const adsRef = ref(rtdb, 'advertisements');
     
     onValue(adsRef, (snapshot) => {
@@ -293,9 +296,17 @@ function loadAdvertisements() {
             });
         }
         
+        // 캐시에 저장
+        const dataToCache = {
+            data: allAdvertisements,
+            timestamp: Date.now()
+        };
+        sessionStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+        console.log('데이터 캐시 저장 완료');
+        
         // 초기 표시
         displayAdvertisements(allAdvertisements);
-    });
+    }, { onlyOnce: true }); // 한 번만 데이터 가져오기
 }
 
 // 광고 목록 표시
