@@ -193,7 +193,7 @@
     position: relative;
 }
 
-.checkbox-label input[type="checkbox"]:checked::after {
+.checkbox-label input[type="checkbox"]:checked:after {
     content: '✓';
     position: absolute;
     top: 50%;
@@ -218,10 +218,10 @@
 .btn-login-submit {
     width: 100%;
     padding: 15px;
-    background-color: #1a5490;
+    background: #3F3FF5;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
@@ -246,7 +246,7 @@
 }
 
 .signup-link a {
-    color: #1a5490;
+    color: #FFF;
     text-decoration: none;
     font-weight: bold;
     margin-left: 5px;
