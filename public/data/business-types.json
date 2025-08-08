@@ -5,7 +5,13 @@
       "name": "하이퍼블릭",
       "description": "하이퍼블릭",
       "keywords": ["하이퍼블릭", "하이퍼", "hyperpublic"]
-    },    
+    },
+    {
+      "code": "gunma",
+      "name": "건전마사지",
+      "description": "건전마사지",
+      "keywords": ["건전마사지", "건마", "gunma"]
+    },
     {
       "code": "shirt",
       "name": "셔츠룸",
