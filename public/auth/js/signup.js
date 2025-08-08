@@ -267,17 +267,27 @@ signupForm.addEventListener('submit', async (e) => {
             displayName: nicknameInput.value
         });
         
-        // Firestore에 사용자 정보 저장
-        await setDoc(doc(db, 'users', userCredential.user.uid), {
-            uid: userCredential.user.uid,
+        // 현재 시간 (타임스탬프)
+        const now = new Date();
+        
+        // Firestore에 사용자 정보 저장 - 요구사항에 맞는 필드만
+        const userData = {
+            createdAt: now,
             email: fullEmail,
-            nickname: nicknameInput.value,
-            userType: memberType,
+            lastLogin: now,
             marketingAgreed: document.getElementById('agree-marketing').checked,
-            createdAt: new Date().toISOString(),
-            profileImage: '',
-            bio: ''
-        });
+            nickname: nicknameInput.value,
+            uid: userCredential.user.uid,
+            userType: memberType
+        };
+        
+        // member로 가입하는 경우 level과 points 필드 추가
+        if (memberType === 'member') {
+            userData.level = 1;
+            userData.points = 0;
+        }
+        
+        await setDoc(doc(db, 'users', userCredential.user.uid), userData);
         
         showSuccess('회원가입이 완료되었습니다!');
         

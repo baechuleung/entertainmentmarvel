@@ -188,7 +188,7 @@
 
 .checkbox-label input[type="checkbox"]:checked {
     border-radius: 3px;
-    border: 1px solid #CECECE;
+    border: none;
     background-color: #1a5490;
     position: relative;
 }
