@@ -269,10 +269,28 @@ async function loadBusinessItemTemplate() {
     }
 }
 
-// 광고 목록 로드
+// 광고 목록 로드 (캐시 적용)
 function loadAdvertisements() {
     console.log('광고 목록 로드 시작');
     
+    // 캐시 확인
+    const cacheKey = 'mainPageAds';
+    const cacheTime = 2 * 60 * 60 * 1000; // 2시간
+    const cached = sessionStorage.getItem(cacheKey);
+    
+    if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        const isExpired = Date.now() - timestamp > cacheTime;
+        
+        if (!isExpired) {
+            console.log('캐시된 데이터 사용');
+            allAdvertisements = data;
+            displayAdvertisements(allAdvertisements);
+            return;
+        }
+    }
+    
+    // Firebase에서 새 데이터 로드
     const adsRef = ref(rtdb, 'advertisements');
     
     onValue(adsRef, (snapshot) => {
@@ -293,9 +311,17 @@ function loadAdvertisements() {
             });
         }
         
+        // 캐시에 저장
+        const dataToCache = {
+            data: allAdvertisements,
+            timestamp: Date.now()
+        };
+        sessionStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+        console.log('데이터 캐시 저장 완료');
+        
         // 초기 표시
         displayAdvertisements(allAdvertisements);
-    });
+    }, { onlyOnce: true }); // 한 번만 데이터 가져오기
 }
 
 // 광고 목록 표시
