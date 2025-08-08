@@ -44,10 +44,11 @@
                                 </div>
                             </div>
                         </label>
+                        
                         <label class="member-type-box">
                             <input type="radio" name="member-type" value="business">
                             <div class="box-content">
-                                <img src="/img/business.png" alt="업체회원" class="type-icon">
+                                <img src="/img/partner.png" alt="업체회원" class="type-icon">
                                 <span class="type-name">업체회원</span>
                                 <div class="check-mark">
                                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -61,24 +62,26 @@
                 
                 <div class="step-header">
                     <span class="step-number">STEP.02</span>
-                    <h2 class="step-title">회원 기본정보를 입력해주세요</h2>
+                    <h2 class="step-title">회원 정보를 입력해 주세요</h2>
                 </div>
                 
-                <div class="form-group email-group">
-                    <input type="text" id="email-id" name="email-id" placeholder="이메일 아이디" required>
-                    <span class="email-at">@</span>
-                    <div class="custom-dropdown">
-                        <div class="dropdown-selected" tabindex="0">
-                            <span class="selected-value">gmail.com</span>
-                            <svg class="dropdown-arrow" width="12" height="8" viewBox="0 0 12 8" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke="white" stroke-width="1" fill="none" d="M1 1l5 5 5-5"/>
-                            </svg>
-                        </div>
-                        <div class="dropdown-options">
-                            <div class="dropdown-option selected" data-value="gmail.com">gmail.com</div>
-                            <div class="dropdown-option" data-value="naver.com">naver.com</div>
-                            <div class="dropdown-option" data-value="daum.net">daum.net</div>
-                            <div class="dropdown-option" data-value="kakao.com">kakao.com</div>
+                <div class="form-group">
+                    <div class="email-group">
+                        <input type="text" id="email-id" name="email-id" placeholder="이메일" required>
+                        <span class="email-at">@</span>
+                        <div class="custom-dropdown">
+                            <div class="dropdown-selected">
+                                <span class="selected-value">gmail.com</span>
+                                <svg class="dropdown-arrow" width="12" height="8" viewBox="0 0 12 8" fill="none">
+                                    <path d="M1 1.5L6 6.5L11 1.5" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="dropdown-options">
+                                <div class="dropdown-option selected" data-value="gmail.com">gmail.com</div>
+                                <div class="dropdown-option" data-value="naver.com">naver.com</div>
+                                <div class="dropdown-option" data-value="daum.net">daum.net</div>
+                                <div class="dropdown-option" data-value="kakao.com">kakao.com</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -101,29 +104,38 @@
                 </div>
                 
                 <div class="terms-section">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="agree-all">
-                        <span>전체 동의</span>
-                    </label>
-                    
                     <div class="terms-list">
                         <label class="checkbox-label">
                             <input type="checkbox" id="agree-terms" class="agree-item" required>
-                            <span>[필수] 이용약관 동의</span>
+                            <span class="terms-text">
+                                <span class="required-tag">[필수]</span>
+                                <span class="terms-title">이용약관 동의</span>
+                            </span>
                             <a href="#" class="policy-link" data-policy="terms">보기</a>
                         </label>
                         
                         <label class="checkbox-label">
                             <input type="checkbox" id="agree-privacy" class="agree-item" required>
-                            <span>[필수] 개인정보 처리방침 동의</span>
+                            <span class="terms-text">
+                                <span class="required-tag">[필수]</span>
+                                <span class="terms-title">개인정보 처리방침 동의</span>
+                            </span>
                             <a href="#" class="policy-link" data-policy="privacy">보기</a>
                         </label>
                         
                         <label class="checkbox-label">
                             <input type="checkbox" id="agree-marketing" class="agree-item">
-                            <span>[선택] 마케팅 정보 수신 동의</span>
+                            <span class="terms-text">
+                                <span class="optional-tag">[선택]</span>
+                                <span class="terms-title">마케팅 정보 수신 동의</span>
+                            </span>
                         </label>
                     </div>
+                    
+                    <label class="checkbox-label all-agree">
+                        <input type="checkbox" id="agree-all">
+                        <span class="terms-title">전체 동의</span>
+                    </label>
                 </div>
                 
                 <button type="submit" class="btn-signup-submit">회원가입</button>

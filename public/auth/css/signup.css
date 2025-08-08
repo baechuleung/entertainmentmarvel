@@ -143,12 +143,12 @@
 /* STEP 헤더 스타일 */
 .step-header {
     margin-bottom: 20px;
-    text-align: left; /* 왼쪽 정렬 */
-    margin-top: 30px; /* STEP 간 간격 */
+    text-align: left;
+    margin-top: 30px;
 }
 
 .step-header:first-child {
-    margin-top: 0; /* 첫 번째 STEP은 상단 마진 없음 */
+    margin-top: 0;
 }
 
 .step-number {
@@ -165,11 +165,11 @@
     font-size: 18px;
     font-style: normal;
     font-weight: 700;
-    line-height: 150%; /* 27px */
+    line-height: 150%;
     margin: 0;
 }
 
-/* 회원 유형 선택 - signup만의 추가 스타일 */
+/* 회원 유형 선택 */
 .member-type-group {
     display: flex;
     flex-direction: column;
@@ -246,33 +246,65 @@
     display: none;
 }
 
-/* 약관 섹션 - signup만의 추가 스타일 */
+/* 약관 섹션 수정된 스타일 */
 .terms-section {
-    margin: 0 0 25px 0; /* 상단 마진 제거 */
+    margin: 0 0 25px 0;
 }
 
 .terms-list {
-    margin-top: 15px;
-    padding: 15px;
-    background: #202020;
-    border-radius: 10px;
+    margin-bottom: 15px;
 }
 
 .terms-list .checkbox-label {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .terms-list .checkbox-label:last-child {
     margin-bottom: 0;
 }
 
+/* 약관 텍스트 스타일 */
+.terms-text {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+}
+
+/* [필수] 태그 스타일 */
+.required-tag {
+    color: #3F3FF5;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 150%;
+}
+
+/* [선택] 태그 스타일 */
+.optional-tag {
+    color: #3F3FF5;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 150%;
+}
+
+/* 약관 제목 텍스트 스타일 */
+.terms-title {
+    color: #FFF;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 150%;
+}
+
+/* 보기 링크 스타일 */
 .policy-link {
     color: #3F3FF5;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 150%;
     text-decoration: none;
-    font-size: 13px;
     margin-left: auto;
     padding: 2px 8px;
 }
@@ -281,14 +313,21 @@
     text-decoration: underline;
 }
 
-/* 체크박스 스타일 */
+/* 전체 동의 체크박스 */
+.checkbox-label.all-agree {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 15px;
+    border-top: 1px solid #333;
+}
+
+/* 체크박스 기본 스타일 */
 .checkbox-label {
     display: flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
-    font-size: 14px;
-    color: #FFF;
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -301,13 +340,13 @@
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
+    position: relative;
 }
 
 .checkbox-label input[type="checkbox"]:checked {
     border-radius: 3px;
     border: 1px solid #CECECE;
     background-color: #1a5490;
-    position: relative;
 }
 
 .checkbox-label input[type="checkbox"]:checked:after {
