@@ -1,5 +1,5 @@
 import { rtdb, auth, db } from '/js/firebase-config.js';
-import { ref, get, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { ref, get, update, set } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { setupReviews } from './reviews.js';
@@ -267,19 +267,38 @@ async function handleBookmark() {
     
     try {
         const userRef = doc(db, 'users', currentUser.uid);
+        const advertiseRef = ref(rtdb, `advertisements/${adId}/bookmarks`);
         
         if (isBookmarked) {
-            // 즐겨찾기 제거
+            // 즐겨찾기 제거 - users 컬렉션
             await updateDoc(userRef, {
                 bookmarks: arrayRemove(adId)
             });
+            
+            // advertisements에서 해당 uid 제거
+            const snapshot = await get(advertiseRef);
+            if (snapshot.exists()) {
+                const bookmarks = snapshot.val() || [];
+                const updatedBookmarks = bookmarks.filter(uid => uid !== currentUser.uid);
+                await set(advertiseRef, updatedBookmarks);
+            }
+            
             isBookmarked = false;
             alert('즐겨찾기가 해제되었습니다.');
         } else {
-            // 즐겨찾기 추가
+            // 즐겨찾기 추가 - users 컬렉션
             await updateDoc(userRef, {
                 bookmarks: arrayUnion(adId)
             });
+            
+            // advertisements에 uid 추가
+            const snapshot = await get(advertiseRef);
+            const bookmarks = snapshot.exists() ? (snapshot.val() || []) : [];
+            if (!bookmarks.includes(currentUser.uid)) {
+                bookmarks.push(currentUser.uid);
+                await set(advertiseRef, bookmarks);
+            }
+            
             isBookmarked = true;
             alert('즐겨찾기에 추가되었습니다.');
         }

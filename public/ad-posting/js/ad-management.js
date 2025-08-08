@@ -6,17 +6,32 @@ import { ref, onValue, remove, update } from 'https://www.gstatic.com/firebasejs
 // 전역 변수
 let currentUser = null;
 let currentUserData = null;
-let userAds = [];
+let currentAd = null;
+let currentAdId = null;
+let currentImageIndex = 0;
+let adImages = [];
 
 // DOM 요소
-const adList = document.getElementById('ad-list');
-const totalAdsSpan = document.getElementById('total-ads');
+const adTitle = document.getElementById('ad-title');
+const businessTypeBadge = document.getElementById('business-type-badge');
+const locationBadge = document.getElementById('location-badge');
+const adMainImage = document.getElementById('ad-main-image');
+const adDescription = document.getElementById('ad-description');
+const favoriteCount = document.getElementById('favorite-count');
+const viewCount = document.getElementById('view-count');
+const reviewCount = document.getElementById('review-count');
+const approvalStatus = document.getElementById('approval-status');
 const emptyState = document.getElementById('empty-state');
+const adDetailContent = document.querySelector('.ad-detail-content');
+const imageDots = document.getElementById('image-dots');
 
 // 초기화
 document.addEventListener('DOMContentLoaded', function() {
     // 인증 상태 확인
     checkAuth();
+    
+    // 이벤트 리스너 설정
+    setupEventListeners();
 });
 
 // 인증 상태 확인
@@ -35,8 +50,8 @@ function checkAuth() {
                     return;
                 }
             }
-            // 광고 목록 로드
-            loadUserAds();
+            // 광고 로드
+            loadUserAd();
         } else {
             alert('로그인이 필요합니다.');
             window.location.href = '/auth/login.html';
@@ -44,16 +59,16 @@ function checkAuth() {
     });
 }
 
-// 사용자 광고 목록 로드
-function loadUserAds() {
+// 사용자의 첫 번째 광고 또는 최신 광고 로드
+function loadUserAd() {
     const adsRef = ref(rtdb, 'advertisements');
     
     onValue(adsRef, (snapshot) => {
-        userAds = [];
         const data = snapshot.val();
+        let userAds = [];
         
         if (data) {
-            // administrator는 모든 광고 보기, 일반 업체는 자신의 광고만 보기
+            // 사용자의 광고만 필터링
             Object.entries(data).forEach(([key, value]) => {
                 if (currentUserData.userType === 'administrator' || value.authorId === currentUser.uid) {
                     userAds.push({ id: key, ...value });
@@ -61,135 +76,181 @@ function loadUserAds() {
             });
         }
         
-        // 최신순으로 정렬
-        userAds.sort((a, b) => b.createdAt - a.createdAt);
-        
-        // UI 업데이트
-        updateAdList();
+        if (userAds.length > 0) {
+            // 최신 광고 선택 (가장 최근에 생성된 것)
+            userAds.sort((a, b) => b.createdAt - a.createdAt);
+            currentAd = userAds[0];
+            currentAdId = currentAd.id;
+            
+            // UI 업데이트
+            displayAdDetail();
+            emptyState.style.display = 'none';
+        } else {
+            // 광고가 없을 때
+            adDetailContent.style.display = 'none';
+            emptyState.style.display = 'block';
+        }
     });
 }
 
-// 광고 목록 UI 업데이트
-function updateAdList() {
-    // 총 개수 업데이트
-    totalAdsSpan.textContent = userAds.length;
+// 광고 상세 정보 표시
+function displayAdDetail() {
+    if (!currentAd) return;
     
-    if (userAds.length === 0) {
-        // 광고가 없을 때
-        adList.style.display = 'none';
-        emptyState.style.display = 'block';
+    // 제목
+    adTitle.textContent = currentAd.title || '제목 없음';
+    
+    // 업종 배지
+    businessTypeBadge.textContent = currentAd.businessType || '업종';
+    
+    // 지역 배지
+    const location = currentAd.city ? 
+        `📍 ${currentAd.region} ${currentAd.city}` : 
+        `📍 ${currentAd.region || '지역'}`;
+    locationBadge.textContent = location;
+    
+    // 이미지 설정
+    setupImages();
+    
+    // 광고 설명 (HTML 콘텐츠)
+    if (currentAd.content) {
+        adDescription.innerHTML = currentAd.content;
     } else {
-        // 광고가 있을 때
-        adList.style.display = 'flex';
-        emptyState.style.display = 'none';
-        
-        // 광고 목록 렌더링
-        adList.innerHTML = userAds.map(ad => createAdItem(ad)).join('');
-        
-        // 이벤트 리스너 추가
-        addEventListeners();
+        adDescription.innerHTML = '<p>광고 상세 내용이 없습니다.</p>';
+    }
+    
+    // 통계 정보
+    // bookmarks 배열의 길이 체크
+    const bookmarkCount = currentAd.bookmarks ? currentAd.bookmarks.length : 0;
+    favoriteCount.textContent = `${bookmarkCount} 회`;
+    
+    // views 표시
+    viewCount.textContent = `${currentAd.views || 0} 회`;
+    
+    // reviews 맵의 개수 체크
+    const reviewsCount = currentAd.reviews ? Object.keys(currentAd.reviews).length : 0;
+    reviewCount.textContent = `${reviewsCount} 회`;
+    
+    // 승인 상태
+    const statusText = {
+        'active': '광고중',
+        'pending': '승인대기',
+        'inactive': '비활성',
+        'rejected': '거절됨'
+    };
+    approvalStatus.textContent = statusText[currentAd.status] || '알 수 없음';
+    approvalStatus.style.color = currentAd.status === 'active' ? '#4CAF50' : 
+                                 currentAd.status === 'pending' ? '#FFA500' : '#888';
+}
+
+// 이미지 설정
+function setupImages() {
+    adImages = [];
+    
+    // 썸네일 추가
+    if (currentAd.thumbnail) {
+        adImages.push(currentAd.thumbnail);
+    }
+    
+    // 추가 이미지들
+    if (currentAd.images && Array.isArray(currentAd.images)) {
+        adImages = adImages.concat(currentAd.images);
+    }
+    
+    // 기본 이미지가 없으면
+    if (adImages.length === 0) {
+        adImages.push('/img/default-ad.jpg');
+    }
+    
+    // 첫 번째 이미지 표시
+    currentImageIndex = 0;
+    updateImage();
+    
+    // 이미지 도트 생성
+    createImageDots();
+    
+    // 이미지가 1개면 네비게이션 숨기기
+    const navButtons = document.querySelectorAll('.image-nav-btn');
+    if (adImages.length <= 1) {
+        navButtons.forEach(btn => btn.style.display = 'none');
+        imageDots.style.display = 'none';
+    } else {
+        navButtons.forEach(btn => btn.style.display = 'block');
+        imageDots.style.display = 'flex';
     }
 }
 
-// 광고 아이템 HTML 생성
-function createAdItem(ad) {
-    const createdDate = new Date(ad.createdAt).toLocaleDateString('ko-KR');
-    const status = ad.status === 'active' ? '활성' : '비활성';
-    const statusClass = ad.status === 'active' ? 'active' : 'inactive';
-    
-    // administrator인 경우 작성자 정보 추가 표시
-    const authorInfo = currentUserData.userType === 'administrator' ? 
-        `<span style="color: #1a5490;">작성자: ${ad.author}</span>` : '';
-    
-    return `
-        <div class="ad-item" data-id="${ad.id}">
-            ${ad.thumbnail ? 
-                `<img src="${ad.thumbnail}" alt="${ad.title}" class="ad-thumbnail">` :
-                `<div class="ad-thumbnail" style="background-color: #3a3a3a; display: flex; align-items: center; justify-content: center; color: #666;">
-                    <span>No Image</span>
-                </div>`
-            }
-            <div class="ad-info">
-                <h3 class="ad-title">${ad.title}</h3>
-                <div class="ad-meta">
-                    ${authorInfo}
-                    <span>조회수: ${ad.views || 0}</span>
-                    <span>등록일: ${createdDate}</span>
-                    <span class="ad-status ${statusClass}">${status}</span>
-                </div>
-                <div class="ad-actions">
-                    <button class="btn-edit" data-id="${ad.id}">수정</button>
-                    <button class="btn-delete" data-id="${ad.id}">삭제</button>
-                    <button class="btn-toggle-status" data-id="${ad.id}" data-status="${ad.status}">
-                        ${ad.status === 'active' ? '비활성화' : '활성화'}
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
+// 이미지 업데이트
+function updateImage() {
+    adMainImage.src = adImages[currentImageIndex];
+    updateDots();
 }
 
-// 이벤트 리스너 추가
-function addEventListeners() {
+// 이미지 도트 생성
+function createImageDots() {
+    imageDots.innerHTML = '';
+    adImages.forEach((_, index) => {
+        const dot = document.createElement('span');
+        dot.className = 'dot';
+        if (index === currentImageIndex) {
+            dot.classList.add('active');
+        }
+        dot.addEventListener('click', () => {
+            currentImageIndex = index;
+            updateImage();
+        });
+        imageDots.appendChild(dot);
+    });
+}
+
+// 도트 업데이트
+function updateDots() {
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach((dot, index) => {
+        if (index === currentImageIndex) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
+    });
+}
+
+// 이벤트 리스너 설정
+function setupEventListeners() {
+    // 이전 이미지
+    document.getElementById('prev-image').addEventListener('click', () => {
+        if (adImages.length > 1) {
+            currentImageIndex = (currentImageIndex - 1 + adImages.length) % adImages.length;
+            updateImage();
+        }
+    });
+    
+    // 다음 이미지
+    document.getElementById('next-image').addEventListener('click', () => {
+        if (adImages.length > 1) {
+            currentImageIndex = (currentImageIndex + 1) % adImages.length;
+            updateImage();
+        }
+    });
+    
     // 수정 버튼
-    document.querySelectorAll('.btn-edit').forEach(btn => {
-        btn.addEventListener('click', handleEdit);
+    document.getElementById('btn-edit').addEventListener('click', () => {
+        if (currentAdId) {
+            window.location.href = `/ad-posting/ad-edit.html?id=${currentAdId}`;
+        }
     });
     
     // 삭제 버튼
-    document.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', handleDelete);
-    });
-    
-    // 상태 토글 버튼
-    document.querySelectorAll('.btn-toggle-status').forEach(btn => {
-        btn.addEventListener('click', handleToggleStatus);
-    });
-}
-
-// 광고 수정
-function handleEdit(e) {
-    const adId = e.target.getAttribute('data-id');
-    // 수정 페이지로 이동
-    window.location.href = `/ad-posting/ad-edit.html?id=${adId}`;
-}
-
-// 광고 삭제
-async function handleDelete(e) {
-    const adId = e.target.getAttribute('data-id');
-    const ad = userAds.find(a => a.id === adId);
-    
-    if (confirm(`"${ad.title}" 광고를 삭제하시겠습니까?`)) {
-        try {
-            // 리얼타임 데이터베이스에서 삭제
-            await remove(ref(rtdb, `advertisements/${adId}`));
-            
-            // TODO: ImageKit에서 이미지도 삭제해야 함
-            
-            alert('광고가 삭제되었습니다.');
-        } catch (error) {
-            console.error('광고 삭제 실패:', error);
-            alert('광고 삭제에 실패했습니다.');
+    document.getElementById('btn-delete').addEventListener('click', async () => {
+        if (currentAdId && confirm(`"${currentAd.title}" 광고를 삭제하시겠습니까?`)) {
+            try {
+                await remove(ref(rtdb, `advertisements/${currentAdId}`));
+                alert('광고가 삭제되었습니다.');
+                window.location.reload();
+            } catch (error) {
+                console.error('광고 삭제 실패:', error);
+                alert('광고 삭제에 실패했습니다.');
+            }
         }
-    }
-}
-
-// 광고 상태 토글
-async function handleToggleStatus(e) {
-    const adId = e.target.getAttribute('data-id');
-    const currentStatus = e.target.getAttribute('data-status');
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-    
-    try {
-        // 상태 업데이트
-        await update(ref(rtdb, `advertisements/${adId}`), {
-            status: newStatus,
-            updatedAt: Date.now()
-        });
-        
-        alert(`광고가 ${newStatus === 'active' ? '활성화' : '비활성화'}되었습니다.`);
-    } catch (error) {
-        console.error('상태 변경 실패:', error);
-        alert('상태 변경에 실패했습니다.');
-    }
+    });
 }
