@@ -1,0 +1,28 @@
+{
+  "businessTypes": [
+    {
+      "code": "swedish",
+      "name": "스웨디시"
+    },
+    {
+      "code": "oneshop",
+      "name": "1인샵"
+    },
+    {
+      "code": "spa",
+      "name": "스파"
+    },
+    {
+      "code": "thai",
+      "name": "타이마사지"
+    },
+    {
+      "code": "waxing",
+      "name": "왁싱"
+    },
+    {
+      "code": "homecare",
+      "name": "홈케어"
+    }
+  ]
+}

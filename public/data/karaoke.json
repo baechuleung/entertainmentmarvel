@@ -1,0 +1,44 @@
+{
+  "businessTypes": [
+    {
+      "code": "hyperpublic",
+      "name": "하이퍼블릭"
+    },
+    {
+      "code": "shirt",
+      "name": "셔츠룸"
+    },
+    {
+      "code": "onepro",
+      "name": "일프로"
+    },
+    {
+      "code": "jjumoh",
+      "name": "쩜오"
+    },
+    {
+      "code": "club",
+      "name": "클럽"
+    },
+    {
+      "code": "tencafe",
+      "name": "텐카페"
+    },
+    {
+      "code": "tenpro",
+      "name": "텐프로"
+    },
+    {
+      "code": "public",
+      "name": "퍼블릭"
+    },
+    {
+      "code": "bar",
+      "name": "바"
+    },
+    {
+      "code": "kraoke",
+      "name": "가라오케"
+    }
+  ]
+}
