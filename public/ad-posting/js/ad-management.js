@@ -5,6 +5,7 @@ import { ref, onValue, remove, update } from 'https://www.gstatic.com/firebasejs
 
 // 전역 변수
 let currentUser = null;
+let currentUserData = null;
 let userAds = [];
 
 // DOM 요소
@@ -26,9 +27,10 @@ function checkAuth() {
             // 사용자 유형 확인
             const userDoc = await getDoc(doc(db, 'users', user.uid));
             if (userDoc.exists()) {
-                const userData = userDoc.data();
-                if (userData.userType !== 'business') {
-                    alert('업체회원만 접근 가능합니다.');
+                currentUserData = userDoc.data();
+                // business 또는 administrator만 접근 가능
+                if (currentUserData.userType !== 'business' && currentUserData.userType !== 'administrator') {
+                    alert('업체회원 또는 관리자만 접근 가능합니다.');
                     window.location.href = '/main/main.html';
                     return;
                 }
@@ -51,9 +53,9 @@ function loadUserAds() {
         const data = snapshot.val();
         
         if (data) {
-            // 현재 사용자의 광고만 필터링
+            // administrator는 모든 광고 보기, 일반 업체는 자신의 광고만 보기
             Object.entries(data).forEach(([key, value]) => {
-                if (value.authorId === currentUser.uid) {
+                if (currentUserData.userType === 'administrator' || value.authorId === currentUser.uid) {
                     userAds.push({ id: key, ...value });
                 }
             });
@@ -95,6 +97,10 @@ function createAdItem(ad) {
     const status = ad.status === 'active' ? '활성' : '비활성';
     const statusClass = ad.status === 'active' ? 'active' : 'inactive';
     
+    // administrator인 경우 작성자 정보 추가 표시
+    const authorInfo = currentUserData.userType === 'administrator' ? 
+        `<span style="color: #1a5490;">작성자: ${ad.author}</span>` : '';
+    
     return `
         <div class="ad-item" data-id="${ad.id}">
             ${ad.thumbnail ? 
@@ -106,6 +112,7 @@ function createAdItem(ad) {
             <div class="ad-info">
                 <h3 class="ad-title">${ad.title}</h3>
                 <div class="ad-meta">
+                    ${authorInfo}
                     <span>조회수: ${ad.views || 0}</span>
                     <span>등록일: ${createdDate}</span>
                     <span class="ad-status ${statusClass}">${status}</span>

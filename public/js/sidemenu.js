@@ -90,6 +90,10 @@ const SideMenu = {
                         memberTypeEl.textContent = '업체회원';
                         memberTypeEl.classList.remove('general');
                         memberTypeEl.classList.add('business');
+                    } else if (userData.userType === 'administrator') {
+                        memberTypeEl.textContent = '관리자회원';
+                        memberTypeEl.classList.remove('general');
+                        memberTypeEl.classList.add('business');
                     } else {
                         memberTypeEl.textContent = '일반회원';
                         memberTypeEl.classList.remove('business');
@@ -97,8 +101,8 @@ const SideMenu = {
                     }
                 }
                 
-                // 업체회원인 경우 공고 관리 메뉴 표시
-                if (userData.userType === 'business') {
+                // 업체회원 또는 관리자인 경우 광고 관리 메뉴 표시
+                if (userData.userType === 'business' || userData.userType === 'administrator') {
                     if (businessOnlyMenu) businessOnlyMenu.style.display = 'block';
                     if (businessOnlyDivider) businessOnlyDivider.style.display = 'block';
                 }
@@ -124,6 +128,10 @@ const SideMenu = {
                         // 업체회원인 경우 기본 업체 이미지
                         userIconImg.src = '/img/level/business.png';
                         userIconImg.alt = '업체회원';
+                    } else if (userData.userType === 'administrator') {
+                        // 관리자인 경우 관리자 이미지
+                        userIconImg.src = '/img/level/admin.png';
+                        userIconImg.alt = '관리자';
                     } else {
                         // 기본 이미지
                         userIconImg.src = '/img/user-icon.png';

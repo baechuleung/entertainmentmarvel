@@ -1,11 +1,12 @@
 import { auth, db, rtdb } from '/js/firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { ref, push, set } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { ref, push, set, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 import { uploadBusinessAdImages } from '/js/imagekit-upload.js';
 
 // 전역 변수
 let currentUser = null;
+let currentUserData = null;
 let regionData = {};
 let cityData = {};
 let businessTypes = {}; // 업종 코드 매핑 저장
@@ -106,19 +107,48 @@ function checkAuth() {
             // 사용자 닉네임 가져오기
             const userDoc = await getDoc(doc(db, 'users', user.uid));
             if (userDoc.exists()) {
-                const userData = userDoc.data();
-                if (userData.userType !== 'business') {
-                    alert('업체회원만 접근 가능합니다.');
+                currentUserData = userDoc.data();
+                if (currentUserData.userType !== 'business' && currentUserData.userType !== 'administrator') {
+                    alert('업체회원 또는 관리자만 접근 가능합니다.');
                     window.location.href = '/main/main.html';
                     return;
                 }
-                authorInput.value = userData.nickname || '작성자';
+                authorInput.value = currentUserData.nickname || '작성자';
+                
+                // administrator가 아닌 경우 광고 개수 체크
+                if (currentUserData.userType !== 'administrator') {
+                    checkExistingAds();
+                }
             }
         } else {
             alert('로그인이 필요합니다.');
             window.location.href = '/auth/login.html';
         }
     });
+}
+
+// 기존 광고 개수 체크 (일반 업체회원용)
+function checkExistingAds() {
+    const adsRef = ref(rtdb, 'advertisements');
+    
+    onValue(adsRef, (snapshot) => {
+        const data = snapshot.val();
+        let userAdCount = 0;
+        
+        if (data) {
+            Object.values(data).forEach(ad => {
+                if (ad.authorId === currentUser.uid) {
+                    userAdCount++;
+                }
+            });
+        }
+        
+        // 일반 업체회원은 1개만 등록 가능
+        if (userAdCount >= 1) {
+            alert('업체회원은 광고를 1개만 등록할 수 있습니다. 기존 광고를 삭제 후 등록해주세요.');
+            window.location.href = '/ad-posting/ad-management.html';
+        }
+    }, { once: true }); // 한 번만 체크
 }
 
 // 지역 데이터 로드
@@ -213,6 +243,32 @@ async function handleSubmit(e) {
     submitButton.textContent = '등록 중...';
     
     try {
+        // administrator가 아닌 경우 다시 한 번 광고 개수 체크
+        if (currentUserData.userType !== 'administrator') {
+            const adsRef = ref(rtdb, 'advertisements');
+            const snapshot = await new Promise((resolve) => {
+                onValue(adsRef, (snap) => resolve(snap), { once: true });
+            });
+            
+            const data = snapshot.val();
+            let userAdCount = 0;
+            
+            if (data) {
+                Object.values(data).forEach(ad => {
+                    if (ad.authorId === currentUser.uid) {
+                        userAdCount++;
+                    }
+                });
+            }
+            
+            if (userAdCount >= 1) {
+                alert('업체회원은 광고를 1개만 등록할 수 있습니다.');
+                submitButton.disabled = false;
+                submitButton.textContent = '광고 등록';
+                return;
+            }
+        }
+        
         // 에디터 내용 가져오기
         let editorContent = quill.root.innerHTML;
         
@@ -260,6 +316,7 @@ async function handleSubmit(e) {
             title: document.getElementById('title').value,
             author: authorInput.value,
             authorId: currentUser.uid,
+            userType: currentUserData.userType, // 사용자 타입 추가
             businessType: selectedBusinessType,
             businessTypeCode: businessTypeCode, // 업종 코드 추가
             region: regionSelect.value,
@@ -282,7 +339,13 @@ async function handleSubmit(e) {
         await set(newPostRef, adPostingData);
         
         alert('광고가 성공적으로 등록되었습니다.');
-        window.location.href = '/main/main.html';
+        
+        // administrator는 광고 관리 페이지로, 일반 업체는 메인으로
+        if (currentUserData.userType === 'administrator') {
+            window.location.href = '/ad-posting/ad-management.html';
+        } else {
+            window.location.href = '/main/main.html';
+        }
         
     } catch (error) {
         console.error('광고 등록 실패:', error);
