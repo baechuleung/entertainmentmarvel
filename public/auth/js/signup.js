@@ -4,13 +4,23 @@ import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-
 
 // DOM 요소
 const signupForm = document.getElementById('signup-form');
-const emailInput = document.getElementById('email');
+const emailIdInput = document.getElementById('email-id');
 const passwordInput = document.getElementById('password');
 const passwordConfirmInput = document.getElementById('password-confirm');
 const nicknameInput = document.getElementById('nickname');
 const agreeAllCheckbox = document.getElementById('agree-all');
 const agreeItems = document.querySelectorAll('.agree-item');
 const submitButton = document.querySelector('.btn-signup-submit');
+
+// 커스텀 드롭다운 요소
+const dropdown = document.querySelector('.custom-dropdown');
+const dropdownSelected = dropdown.querySelector('.dropdown-selected');
+const dropdownOptions = dropdown.querySelector('.dropdown-options');
+const dropdownArrow = dropdown.querySelector('.dropdown-arrow');
+const selectedValue = dropdown.querySelector('.selected-value');
+const options = dropdown.querySelectorAll('.dropdown-option');
+
+let selectedDomain = 'gmail.com'; // 기본값
 
 // 로그인 상태 확인 - 회원가입 중에는 리다이렉트 막기
 let isSigningUp = false;
@@ -20,6 +30,116 @@ onAuthStateChanged(auth, (user) => {
         // 이미 로그인된 경우 메인 페이지로 이동
         window.location.href = '/main/main.html';
     }
+});
+
+// 커스텀 드롭다운 기능
+function toggleDropdown() {
+    const isOpen = dropdownOptions.classList.contains('open');
+    if (isOpen) {
+        closeDropdown();
+    } else {
+        openDropdown();
+    }
+}
+
+function openDropdown() {
+    dropdownOptions.classList.add('open');
+    dropdownArrow.classList.add('open');
+    dropdownSelected.classList.add('open');
+}
+
+function closeDropdown() {
+    dropdownOptions.classList.remove('open');
+    dropdownArrow.classList.remove('open');
+    dropdownSelected.classList.remove('open');
+}
+
+// 드롭다운 이벤트 리스너
+dropdownSelected.addEventListener('click', toggleDropdown);
+
+options.forEach(option => {
+    option.addEventListener('click', function() {
+        options.forEach(opt => opt.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedValue.textContent = this.dataset.value;
+        selectedDomain = this.dataset.value;
+        closeDropdown();
+    });
+});
+
+// 외부 클릭시 드롭다운 닫기
+document.addEventListener('click', function(e) {
+    if (!dropdown.contains(e.target)) {
+        closeDropdown();
+    }
+});
+
+// 전체 동의 체크박스 기능
+agreeAllCheckbox.addEventListener('change', function() {
+    agreeItems.forEach(item => {
+        item.checked = this.checked;
+    });
+});
+
+agreeItems.forEach(item => {
+    item.addEventListener('change', function() {
+        const allChecked = Array.from(agreeItems).every(item => item.checked);
+        agreeAllCheckbox.checked = allChecked;
+    });
+});
+
+// 정책 모달 기능
+async function loadPolicies() {
+    const response = await fetch('/policy/js/policy.js');
+    const scriptText = await response.text();
+    
+    // policies 객체 추출
+    const policiesMatch = scriptText.match(/const policies = ({[\s\S]*?});/);
+    if (policiesMatch) {
+        const policiesCode = policiesMatch[1];
+        return new Function('return ' + policiesCode)();
+    }
+    return null;
+}
+
+// 레이어 팝업 표시
+async function showPolicyModal(type) {
+    const policies = await loadPolicies();
+    if (!policies || !policies[type]) return;
+    
+    const policy = policies[type];
+    document.getElementById('policy-modal-title').textContent = policy.title;
+    document.getElementById('policy-modal-content').innerHTML = policy.content;
+    document.getElementById('signup-policy-modal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+// 모달 닫기
+function closeModal() {
+    document.getElementById('signup-policy-modal').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+// 정책 링크 클릭 이벤트
+document.querySelectorAll('.policy-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const type = this.getAttribute('data-policy');
+        showPolicyModal(type);
+    });
+});
+
+// 모달 닫기 버튼
+document.getElementById('policy-modal-close').addEventListener('click', closeModal);
+
+// 모달 외부 클릭
+document.getElementById('signup-policy-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+// ESC 키로 모달 닫기
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
 });
 
 // 에러 메시지 표시
@@ -64,45 +184,44 @@ function setLoading(isLoading) {
 function validateForm() {
     let isValid = true;
     
+    // 이메일 조합
+    const fullEmail = emailIdInput.value + '@' + selectedDomain;
+    
     // 이메일 검증
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(emailInput.value)) {
-        document.getElementById('email-error').textContent = '유효한 이메일을 입력해주세요.';
-        emailInput.classList.add('error');
+    if (!emailRegex.test(fullEmail)) {
+        showError('유효한 이메일을 입력해주세요.');
+        emailIdInput.classList.add('error');
         isValid = false;
     } else {
-        document.getElementById('email-error').textContent = '';
-        emailInput.classList.remove('error');
+        emailIdInput.classList.remove('error');
     }
     
     // 비밀번호 검증 - 특수문자, 영어, 숫자 포함 8자리 이상
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
     if (!passwordRegex.test(passwordInput.value)) {
-        document.getElementById('password-error').textContent = '비밀번호는 영문, 숫자, 특수문자를 포함하여 8자 이상이어야 합니다.';
+        showError('비밀번호는 영문, 숫자, 특수문자를 포함하여 8자 이상이어야 합니다.');
         passwordInput.classList.add('error');
         isValid = false;
     } else {
-        document.getElementById('password-error').textContent = '';
         passwordInput.classList.remove('error');
     }
     
     // 비밀번호 확인 검증
     if (passwordInput.value !== passwordConfirmInput.value) {
-        document.getElementById('password-confirm-error').textContent = '비밀번호가 일치하지 않습니다.';
+        showError('비밀번호가 일치하지 않습니다.');
         passwordConfirmInput.classList.add('error');
         isValid = false;
     } else {
-        document.getElementById('password-confirm-error').textContent = '';
         passwordConfirmInput.classList.remove('error');
     }
     
     // 닉네임 검증
     if (nicknameInput.value.trim().length < 2) {
-        document.getElementById('nickname-error').textContent = '닉네임은 2자 이상이어야 합니다.';
+        showError('닉네임은 2자 이상이어야 합니다.');
         nicknameInput.classList.add('error');
         isValid = false;
     } else {
-        document.getElementById('nickname-error').textContent = '';
         nicknameInput.classList.remove('error');
     }
     
@@ -118,21 +237,6 @@ function validateForm() {
     return isValid;
 }
 
-// 전체 동의 체크박스
-agreeAllCheckbox.addEventListener('change', (e) => {
-    agreeItems.forEach(item => {
-        item.checked = e.target.checked;
-    });
-});
-
-// 개별 약관 체크 시 전체 동의 체크박스 업데이트
-agreeItems.forEach(item => {
-    item.addEventListener('change', () => {
-        const allChecked = Array.from(agreeItems).every(item => item.checked);
-        agreeAllCheckbox.checked = allChecked;
-    });
-});
-
 // 회원가입 처리
 signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -141,105 +245,62 @@ signupForm.addEventListener('submit', async (e) => {
         return;
     }
     
-    // 회원가입 시작 플래그
-    isSigningUp = true;
     setLoading(true);
-    
-    // 선택된 회원 유형 가져오기
-    const memberType = document.querySelector('input[name="member-type"]:checked').value;
-    
-    console.log('=== 회원가입 시작 ===');
-    console.log('이메일:', emailInput.value);
-    console.log('회원 유형:', memberType);
+    isSigningUp = true;
     
     try {
-        // 1단계: Firebase Auth 회원가입
-        console.log('1단계: Authentication 시작...');
+        // 이메일 조합
+        const fullEmail = emailIdInput.value + '@' + selectedDomain;
+        
+        // 회원 유형 확인
+        const memberType = document.querySelector('input[name="member-type"]:checked').value;
+        
+        // Firebase Auth로 사용자 생성
         const userCredential = await createUserWithEmailAndPassword(
             auth,
-            emailInput.value,
+            fullEmail,
             passwordInput.value
         );
         
-        const user = userCredential.user;
-        console.log('Auth 회원가입 성공, UID:', user.uid);
-        
-        // 2단계: 프로필 업데이트
-        console.log('2단계: 프로필 업데이트...');
-        await updateProfile(user, {
+        // 사용자 프로필 업데이트
+        await updateProfile(userCredential.user, {
             displayName: nicknameInput.value
         });
-        console.log('프로필 업데이트 완료');
         
-        // 3단계: Firestore에 저장
-        console.log('3단계: Firestore 저장 시작...');
-        
-        const userDataToSave = {
-            uid: user.uid,
-            email: emailInput.value,
+        // Firestore에 사용자 정보 저장
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+            uid: userCredential.user.uid,
+            email: fullEmail,
             nickname: nicknameInput.value,
             userType: memberType,
-            points: 0,  // 포인트 필드 추가 (기본값 0)
             marketingAgreed: document.getElementById('agree-marketing').checked,
-            createdAt: new Date(),
-            lastLogin: new Date()
-        };
+            createdAt: new Date().toISOString(),
+            profileImage: '',
+            bio: ''
+        });
         
-        // 일반회원인 경우 레벨 추가
-        if (memberType === 'member') {
-            userDataToSave.level = 1;
-        }
+        showSuccess('회원가입이 완료되었습니다!');
         
-        console.log('저장할 데이터:', JSON.stringify(userDataToSave, null, 2));
-        console.log('문서 경로:', `users/${user.uid}`);
-        
-        // Firestore 저장 시도
-        await setDoc(doc(db, 'users', user.uid), userDataToSave);
-        
-        console.log('✅ Firestore 저장 성공!');
-        
-        // 바로 리다이렉트
-        window.location.href = '/main/main.html';
+        // 2초 후 메인 페이지로 이동
+        setTimeout(() => {
+            window.location.href = '/main/main.html';
+        }, 2000);
         
     } catch (error) {
-        console.error('❌ 회원가입 에러 발생!');
-        console.error('에러 전체:', error);
-        console.error('에러 코드:', error.code);
-        console.error('에러 메시지:', error.message);
-        console.error('에러 스택:', error.stack);
+        console.error('회원가입 오류:', error);
         
-        // 에러 타입별 처리
-        if (error.code && error.code.startsWith('auth/')) {
-            // Authentication 에러
-            let errorMessage = '회원가입에 실패했습니다.';
-            
-            switch (error.code) {
-                case 'auth/email-already-in-use':
-                    errorMessage = '이미 사용 중인 이메일입니다.';
-                    break;
-                case 'auth/invalid-email':
-                    errorMessage = '유효하지 않은 이메일 형식입니다.';
-                    break;
-                case 'auth/weak-password':
-                    errorMessage = '비밀번호가 너무 약합니다.';
-                    break;
-                default:
-                    errorMessage = `인증 실패: ${error.message}`;
-            }
-            
-            showError(errorMessage);
-            
-        } else {
-            // Firestore 에러
-            console.error('Firestore 저장 에러!');
-            
-            // Firestore 에러지만 Auth는 성공한 경우
-            if (auth.currentUser) {
-                console.log('Auth 사용자는 생성됨:', auth.currentUser.uid);
-                showError('데이터베이스 저장에 실패했습니다. 관리자에게 문의하세요.');
-            }
+        // 에러 메시지 처리
+        let errorMessage = '회원가입 중 오류가 발생했습니다.';
+        
+        if (error.code === 'auth/email-already-in-use') {
+            errorMessage = '이미 사용 중인 이메일입니다.';
+        } else if (error.code === 'auth/weak-password') {
+            errorMessage = '비밀번호가 너무 약합니다.';
+        } else if (error.code === 'auth/invalid-email') {
+            errorMessage = '유효하지 않은 이메일 형식입니다.';
         }
         
+        showError(errorMessage);
         setLoading(false);
         isSigningUp = false;
     }

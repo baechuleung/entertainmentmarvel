@@ -33,7 +33,7 @@
 /* 검색 섹션 */
 .search-section {
     background-color: #131217;
-    padding: 10px 15px 15px 15px;
+    padding: 10px 15px 5px 15px;
     display: flex;
     gap: 10px;
 }
@@ -120,4 +120,60 @@
 
 .select-items::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+
+/* 업종 가로 슬라이드 섹션 */
+.category-slide-section {
+    background-color: #131217;
+    padding: 0 15px 15px 15px;
+    overflow: hidden;
+}
+
+.category-slide-wrapper {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.category-slide-container {
+    display: flex;
+    gap: 8px;
+    padding: 2px 0;
+    min-width: min-content;
+}
+
+/* 업종 버튼 */
+.category-btn {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    background-color: #202020;
+    border: 1px solid #333;
+    border-radius: 20px;
+    color: #999;
+    font-size: 14px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category-btn:hover {
+    background-color: #2a2a2a;
+    color: #fff;
+}
+
+.category-btn.active {
+    background-color: #1a5490;
+    border-color: #1a5490;
+    color: #fff;
+}
+
+/* 스크롤바 숨기기 */
+.category-slide-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.category-slide-wrapper {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }

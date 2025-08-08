@@ -1,5 +1,5 @@
 import { rtdb } from '/js/firebase-config.js';
-import { ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { ref, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
 // 전역 변수
 let regionData = {};
@@ -121,37 +121,99 @@ async function loadRegionData() {
     }
 }
 
-// 업종 데이터 로드
+// 업종 데이터 로드 - 가로 슬라이드로 변경
 async function loadBusinessTypes() {
     try {
         const response = await fetch('/data/business-types.json');
         const data = await response.json();
         
-        const categoryOptions = document.getElementById('category-options');
-        if (categoryOptions) {
-            // 전체 옵션 추가
-            const allOption = document.createElement('div');
-            allOption.setAttribute('data-value', '전체');
-            allOption.textContent = '전체';
-            allOption.addEventListener('click', function() {
-                selectOption(this, 'category');
+        // 가로 슬라이드 컨테이너 찾기
+        const categoryContainer = document.getElementById('category-slide-container');
+        if (categoryContainer) {
+            // 전체 버튼 추가
+            const allBtn = document.createElement('button');
+            allBtn.className = 'category-btn active';
+            allBtn.textContent = '전체';
+            allBtn.setAttribute('data-value', '');
+            allBtn.addEventListener('click', function() {
+                selectCategory(this);
             });
-            categoryOptions.appendChild(allOption);
+            categoryContainer.appendChild(allBtn);
             
-            // 각 업종 옵션 추가 - businessTypes 배열 순회
+            // 각 업종 버튼 추가
             data.businessTypes.forEach(type => {
-                const option = document.createElement('div');
-                option.setAttribute('data-value', type.name);
-                option.textContent = type.name;
-                option.addEventListener('click', function() {
-                    selectOption(this, 'category');
+                const btn = document.createElement('button');
+                btn.className = 'category-btn';
+                btn.textContent = type.name;
+                btn.setAttribute('data-value', type.name);
+                btn.addEventListener('click', function() {
+                    selectCategory(this);
                 });
-                categoryOptions.appendChild(option);
+                categoryContainer.appendChild(btn);
             });
+            
+            // PC 마우스 드래그 기능 추가
+            setupMouseDrag();
         }
     } catch (error) {
         console.error('업종 데이터 로드 실패:', error);
     }
+}
+
+// PC 마우스 드래그 설정
+function setupMouseDrag() {
+    const wrapper = document.querySelector('.category-slide-wrapper');
+    if (!wrapper) return;
+    
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+    
+    wrapper.addEventListener('mousedown', (e) => {
+        isDown = true;
+        wrapper.style.cursor = 'grabbing';
+        startX = e.pageX - wrapper.offsetLeft;
+        scrollLeft = wrapper.scrollLeft;
+    });
+    
+    wrapper.addEventListener('mouseleave', () => {
+        isDown = false;
+        wrapper.style.cursor = 'grab';
+    });
+    
+    wrapper.addEventListener('mouseup', () => {
+        isDown = false;
+        wrapper.style.cursor = 'grab';
+    });
+    
+    wrapper.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - wrapper.offsetLeft;
+        const walk = (x - startX) * 2;
+        wrapper.scrollLeft = scrollLeft - walk;
+    });
+    
+    // 기본 커서 스타일
+    wrapper.style.cursor = 'grab';
+}
+
+// 업종 선택 처리
+function selectCategory(button) {
+    // 모든 버튼에서 active 클래스 제거
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // 선택된 버튼에 active 클래스 추가
+    button.classList.add('active');
+    
+    // 필터 업데이트
+    const value = button.getAttribute('data-value');
+    currentFilters.businessType = value;
+    
+    // 필터 적용
+    applyFilters();
 }
 
 // 옵션 선택 처리
@@ -186,8 +248,6 @@ function selectOption(element, type) {
         updateCityOptions(value === '전체' ? '' : value);
     } else if (type === 'city') {
         currentFilters.city = (value === '도시' || value === '전체') ? '' : value;
-    } else if (type === 'category') {
-        currentFilters.businessType = (value === '업종' || value === '전체') ? '' : value;
     }
     
     applyFilters();
@@ -270,7 +330,7 @@ async function loadBusinessItemTemplate() {
 }
 
 // 광고 목록 로드 (캐시 적용)
-function loadAdvertisements() {
+async function loadAdvertisements() {
     console.log('광고 목록 로드 시작');
     
     // 캐시 확인
@@ -290,10 +350,11 @@ function loadAdvertisements() {
         }
     }
     
-    // Firebase에서 새 데이터 로드
+    // Firebase에서 새 데이터 로드 - get 사용으로 변경
     const adsRef = ref(rtdb, 'advertisements');
     
-    onValue(adsRef, (snapshot) => {
+    try {
+        const snapshot = await get(adsRef);
         console.log('Firebase 데이터 수신');
         const data = snapshot.val();
         console.log('받은 데이터:', data);
@@ -321,7 +382,11 @@ function loadAdvertisements() {
         
         // 초기 표시
         displayAdvertisements(allAdvertisements);
-    }, { onlyOnce: true }); // 한 번만 데이터 가져오기
+    } catch (error) {
+        console.error('데이터 로드 실패:', error);
+        allAdvertisements = [];
+        displayAdvertisements(allAdvertisements);
+    }
 }
 
 // 광고 목록 표시

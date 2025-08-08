@@ -1,37 +1,18 @@
 /* 회원가입 컨테이너 */
 .signup-container {
-    min-height: calc(100vh - 60px);
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 60px;
+    min-height: calc(100vh - 160px);
     padding: 20px;
-    background-color: #f5f5f5;
+    background-color: #131217;
 }
 
 .signup-box {
     width: 100%;
     max-width: 400px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 40px 30px;
-}
-
-/* 회원가입 헤더 */
-.signup-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.signup-header h1 {
-    font-size: 28px;
-    color: #333;
-    margin-bottom: 10px;
-}
-
-.signup-header p {
-    color: #666;
-    font-size: 14px;
+    margin: 0 auto;
 }
 
 /* 회원가입 폼 */
@@ -40,125 +21,314 @@
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
-.form-group label {
+/* 이메일 그룹 스타일 */
+.email-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.email-group input[type="text"] {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background: #202020;
+    color: white;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.email-group input[type="text"]::placeholder {
+    color: #888;
+}
+
+.email-at {
+    color: #FFF;
+    font-size: 16px;
+}
+
+/* 커스텀 드롭다운 스타일 */
+.custom-dropdown {
+    flex: 1;
+    position: relative;
+}
+
+.dropdown-selected {
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background: #202020;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropdown-selected:focus {
+    outline: none;
+}
+
+.dropdown-arrow {
+    transition: transform 0.3s;
+    width: 12px;
+    height: 8px;
+}
+
+.dropdown-arrow.open {
+    transform: rotate(180deg);
+}
+
+.dropdown-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #202020;
+    border: none;
+    border-radius: 0 0 10px 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.dropdown-options.open {
     display: block;
-    margin-bottom: 8px;
-    font-size: 14px;
-    color: #333;
-    font-weight: 500;
+}
+
+.dropdown-option {
+    padding: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 16px;
+    color: white;
+}
+
+.dropdown-option:hover {
+    background-color: #333;
+}
+
+.dropdown-option.selected {
+    background-color: #1a5490;
+    color: white;
 }
 
 .form-group input {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 15px;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background: #202020;
+    color: white;
+    font-size: 16px;
     transition: border-color 0.3s;
 }
 
-.form-group input:focus {
-    border-color: #1a5490;
+.form-group input::placeholder {
+    color: #888;
+}
+
+.form-group input:focus,
+.email-group input[type="text"]:focus {
     outline: none;
 }
 
-.form-group input.error {
-    border-color: #dc3545;
+/* STEP 헤더 스타일 */
+.step-header {
+    margin-bottom: 20px;
+    text-align: left; /* 왼쪽 정렬 */
+    margin-top: 30px; /* STEP 간 간격 */
 }
 
-/* 에러 텍스트 */
-.error-text {
+.step-header:first-child {
+    margin-top: 0; /* 첫 번째 STEP은 상단 마진 없음 */
+}
+
+.step-number {
+    color: #3F3FF5;
+    font-size: 14px;
+    font-weight: 700;
     display: block;
-    margin-top: 5px;
-    font-size: 12px;
-    color: #dc3545;
-    min-height: 16px;
+    margin-bottom: 8px;
 }
 
-/* 회원 유형 선택 */
+.step-title {
+    color: #FFF;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 150%; /* 27px */
+    margin: 0;
+}
+
+/* 회원 유형 선택 - signup만의 추가 스타일 */
 .member-type-group {
     display: flex;
-    gap: 20px;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.radio-label {
+.member-type-box {
+    display: block;
+    cursor: pointer;
+    position: relative;
+}
+
+.member-type-box input[type="radio"] {
+    display: none;
+}
+
+.box-content {
     display: flex;
     align-items: center;
-    cursor: pointer;
-    font-size: 15px;
+    padding: 16px;
+    background: #202020;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
-.radio-label input[type="radio"] {
-    width: 18px;
-    height: 18px;
-    margin-right: 8px;
-    cursor: pointer;
+.member-type-box input[type="radio"]:checked + .box-content {
+    border-color: #3F3FF5;
+    background: rgba(63, 63, 245, 0.1);
 }
 
-.radio-label span {
-    color: #333;
+.type-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+    flex-shrink: 0;
 }
 
-/* 약관 섹션 */
+.type-name {
+    color: #FFF;
+    font-size: 16px;
+    font-weight: 500;
+    flex: 1;
+}
+
+.check-mark {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+    flex-shrink: 0;
+}
+
+.member-type-box input[type="radio"]:checked + .box-content .check-mark {
+    background: #3F3FF5;
+}
+
+.check-mark svg {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.member-type-box input[type="radio"]:checked + .box-content .check-mark svg {
+    opacity: 1;
+}
+
+/* 기존 radio-label 스타일 제거 */
+.radio-label {
+    display: none;
+}
+
+/* 약관 섹션 - signup만의 추가 스타일 */
 .terms-section {
-    margin: 25px 0;
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
+    margin: 0 0 25px 0; /* 상단 마진 제거 */
 }
 
 .terms-list {
     margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid #dee2e6;
+    padding: 15px;
+    background: #202020;
+    border-radius: 10px;
 }
 
-.checkbox-label {
+.terms-list .checkbox-label {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
-    cursor: pointer;
-    font-size: 14px;
+    margin-bottom: 10px;
 }
 
-.checkbox-label:last-child {
+.terms-list .checkbox-label:last-child {
     margin-bottom: 0;
 }
 
-.checkbox-label input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    margin-right: 8px;
-    cursor: pointer;
-}
-
-.checkbox-label span {
-    flex: 1;
-    color: #333;
-}
-
-.checkbox-label a {
-    color: #1a5490;
+.policy-link {
+    color: #3F3FF5;
     text-decoration: none;
-    font-size: 12px;
-    margin-left: 5px;
+    font-size: 13px;
+    margin-left: auto;
+    padding: 2px 8px;
 }
 
-.checkbox-label a:hover {
+.policy-link:hover {
     text-decoration: underline;
+}
+
+/* 체크박스 스타일 */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #FFF;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    border-radius: 3px;
+    border: 1px solid #CECECE;
+    background-color: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.checkbox-label input[type="checkbox"]:checked {
+    border-radius: 3px;
+    border: 1px solid #CECECE;
+    background-color: #1a5490;
+    position: relative;
+}
+
+.checkbox-label input[type="checkbox"]:checked:after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
 }
 
 /* 회원가입 버튼 */
 .btn-signup-submit {
     width: 100%;
     padding: 15px;
-    background-color: #1a5490;
+    background: #3F3FF5;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
@@ -179,10 +349,11 @@
     text-align: center;
     font-size: 14px;
     color: #666;
+    margin-top: 25px;
 }
 
 .login-link a {
-    color: #1a5490;
+    color: #FFF;
     text-decoration: none;
     font-weight: bold;
     margin-left: 5px;
