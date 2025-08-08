@@ -33,12 +33,20 @@
                 <div class="form-group email-group">
                     <input type="text" id="email-id" name="email-id" placeholder="이메일" required>
                     <span class="email-at">@</span>
-                    <select id="email-domain" name="email-domain" required>
-                        <option value="gmail.com">gmail.com</option>
-                        <option value="naver.com">naver.com</option>
-                        <option value="daum.net">daum.net</option>
-                        <option value="kakao.com">kakao.com</option>
-                    </select>
+                    <div class="custom-dropdown">
+                        <div class="dropdown-selected" tabindex="0">
+                            <span class="selected-value">gmail.com</span>
+                            <svg class="dropdown-arrow" width="12" height="8" viewBox="0 0 12 8" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke="white" stroke-width="1" fill="none" d="M1 1l5 5 5-5"/>
+                            </svg>
+                        </div>
+                        <div class="dropdown-options">
+                            <div class="dropdown-option selected" data-value="gmail.com">gmail.com</div>
+                            <div class="dropdown-option" data-value="naver.com">naver.com</div>
+                            <div class="dropdown-option" data-value="daum.net">daum.net</div>
+                            <div class="dropdown-option" data-value="kakao.com">kakao.com</div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="form-group">

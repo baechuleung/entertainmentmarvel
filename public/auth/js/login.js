@@ -11,10 +11,82 @@ import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/f
 // DOM 요소
 const loginForm = document.getElementById('login-form');
 const emailIdInput = document.getElementById('email-id');
-const emailDomainSelect = document.getElementById('email-domain');
 const passwordInput = document.getElementById('password');
 const rememberCheckbox = document.getElementById('remember-me');
 const submitButton = document.querySelector('.btn-login-submit');
+
+// 커스텀 드롭다운 요소
+const dropdown = document.querySelector('.custom-dropdown');
+const dropdownSelected = dropdown.querySelector('.dropdown-selected');
+const dropdownOptions = dropdown.querySelector('.dropdown-options');
+const dropdownArrow = dropdown.querySelector('.dropdown-arrow');
+const selectedValue = dropdown.querySelector('.selected-value');
+const options = dropdown.querySelectorAll('.dropdown-option');
+
+let selectedDomain = 'gmail.com'; // 기본값
+
+// 커스텀 드롭다운 기능
+function toggleDropdown() {
+    const isOpen = dropdownOptions.classList.contains('open');
+    if (isOpen) {
+        closeDropdown();
+    } else {
+        openDropdown();
+    }
+}
+
+function openDropdown() {
+    dropdownOptions.classList.add('open');
+    dropdownArrow.classList.add('open');
+    dropdownSelected.classList.add('open');
+}
+
+function closeDropdown() {
+    dropdownOptions.classList.remove('open');
+    dropdownArrow.classList.remove('open');
+    dropdownSelected.classList.remove('open');
+}
+
+function selectOption(value, text) {
+    selectedDomain = value;
+    selectedValue.textContent = text;
+    
+    // 기존 selected 클래스 제거
+    options.forEach(opt => opt.classList.remove('selected'));
+    
+    // 새로 선택된 옵션에 selected 클래스 추가
+    const selectedOption = dropdown.querySelector(`[data-value="${value}"]`);
+    if (selectedOption) {
+        selectedOption.classList.add('selected');
+    }
+    
+    closeDropdown();
+}
+
+// 드롭다운 이벤트 리스너
+dropdownSelected.addEventListener('click', toggleDropdown);
+dropdownSelected.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleDropdown();
+    }
+});
+
+// 옵션 클릭 이벤트
+options.forEach(option => {
+    option.addEventListener('click', () => {
+        const value = option.getAttribute('data-value');
+        const text = option.textContent;
+        selectOption(value, text);
+    });
+});
+
+// 외부 클릭 시 드롭다운 닫기
+document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target)) {
+        closeDropdown();
+    }
+});
 
 // 페이지 로드 시 즉시 실행
 (function checkAuthImmediate() {
@@ -94,7 +166,7 @@ if (loginForm) {
         e.preventDefault();
         
         // 이메일 조합
-        const email = emailIdInput.value.trim() + '@' + emailDomainSelect.value;
+        const email = emailIdInput.value.trim() + '@' + selectedDomain;
         const password = passwordInput.value;
         
         if (!emailIdInput.value.trim() || !password) {

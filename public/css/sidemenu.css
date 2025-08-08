@@ -42,6 +42,7 @@
 .side-menu-header {
     padding: 20px;
     position: relative;
+    flex-shrink: 0;
 }
 
 .close-menu {
@@ -64,6 +65,7 @@
 .user-info-section {
     padding: 20px;
     margin-top: 20px;
+    flex-shrink: 0;
 }
 
 .user-info-section.guest-section {
@@ -97,63 +99,37 @@
     width: 100%;
 }
 
-.button-group button {
+.button-group .btn-login {
     flex: 1;
-}
-
-.login-text {
-    color: #FFF;
-    font-size: 18px;
-    font-weight: 600;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.login-sub {
-    color: #999;
-    font-size: 13px;
-    font-weight: 500;
-    display: block;
-}
-
-.btn-login {
+    padding: 10px 24px;
+    border: none;
     border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
     background: #3F3FF5;
     color: #FFF;
-    font-size: 16px;
-    font-weight: 600;
-    border: none;
-    padding: 10px 24px;
-    cursor: pointer;
 }
 
-.btn-signup {
-    border-radius: 5px;
+.button-group .btn-signup {
+    flex: 1;
+    padding: 10px 24px;
     border: 1px solid #FFF;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
     background: transparent;
     color: #FFF;
-    font-size: 16px;
-    font-weight: 600;
-    padding: 10px 24px;
-    cursor: pointer;
 }
 
-/* 회원 상태 스타일 */
-.user-info.member {
-    display: none;
-    align-items: center;
-    gap: 15px;
-}
-
+/* 회원 정보 스타일 */
 .user-icon {
-    width: 40px;
-    height: 40px;
-    background-color: #ddd;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .user-icon img {
@@ -163,45 +139,60 @@
 }
 
 .user-text {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+    flex-grow: 1;
+}
+
+.login-text {
+    color: #FFF;
+    font-size: 16px;
+    font-weight: 600;
+    display: block;
+}
+
+.login-sub {
+    color: #999;
+    font-size: 12px;
+    display: block;
+    margin-top: 5px;
 }
 
 .member-info-row {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-bottom: 5px;
 }
 
-/* 레벨 텍스트 */
 .level-text {
-    color: #999;
-    font-size: 13px;
-    font-weight: 500;
-}
-
-/* 일반회원 타입 */
-.member-type.general {
-    border-radius: 5px;
     background: #3F3FF5;
     color: #FFF;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 4px 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
     display: inline-block;
 }
 
-/* 업체회원 타입 */
-.member-type.business {
-    border-radius: 5px;
-    background: #00DD59;
-    color: #000;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 4px 10px;
+.member-type {
+    background: #666;
+    color: #FFF;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
     display: inline-block;
+}
+
+.member-type.business {
+    background: #1a5490;
+}
+
+.member-type.general {
+    background: #666;
+}
+
+.member-type.vip {
+    background: #d4af37;
 }
 
 .username {
@@ -221,11 +212,13 @@
     cursor: pointer;
 }
 
-/* 메뉴 컨텐츠 */
+/* 메뉴 컨텐츠 - 스크롤 가능하도록 수정 */
 .side-menu-content {
-    height: calc(100% - 60px);
+    flex: 1;
     overflow-y: auto;
-    position: relative;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
 }
 
 .menu-section {
@@ -307,4 +300,10 @@
 .business-only .menu-title {
     color: #1a5490;
     font-weight: 600;
+}
+
+/* 모바일에서 사이드 메뉴 전체 구조를 flexbox로 변경 */
+.side-menu {
+    display: flex;
+    flex-direction: column;
 }

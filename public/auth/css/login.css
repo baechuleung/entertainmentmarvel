@@ -51,10 +51,16 @@
 .email-group input[type="text"] {
     flex: 1;
     padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    border: none;
+    border-radius: 10px;
+    background: #202020;
+    color: white;
     font-size: 16px;
     transition: border-color 0.3s;
+}
+
+.email-group input[type="text"]::placeholder {
+    color: #888;
 }
 
 .email-at {
@@ -62,34 +68,92 @@
     font-size: 16px;
 }
 
-.email-group select {
+/* 커스텀 드롭다운 스타일 */
+.custom-dropdown {
     flex: 1;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-    background-color: #fff;
-    cursor: pointer;
-    transition: border-color 0.3s;
+    position: relative;
 }
 
-.email-group select:focus {
-    border-color: #1a5490;
+.dropdown-selected {
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background: #202020;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropdown-selected:focus {
     outline: none;
+}
+
+.dropdown-arrow {
+    transition: transform 0.3s;
+    width: 12px;
+    height: 8px;
+}
+
+.dropdown-arrow.open {
+    transform: rotate(180deg);
+}
+
+.dropdown-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #202020;
+    border: none;
+    border-radius: 0 0 10px 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.dropdown-options.open {
+    display: block;
+}
+
+.dropdown-option {
+    padding: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 16px;
+    color: white;
+}
+
+.dropdown-option:hover {
+    background-color: #333;
+}
+
+.dropdown-option.selected {
+    background-color: #1a5490;
+    color: white;
 }
 
 .form-group input {
     width: 100%;
     padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    border: none;
+    border-radius: 10px;
+    background: #202020;
+    color: white;
     font-size: 16px;
     transition: border-color 0.3s;
 }
 
+.form-group input::placeholder {
+    color: #888;
+}
+
 .form-group input:focus,
 .email-group input[type="text"]:focus {
-    border-color: #1a5490;
     outline: none;
 }
 
@@ -107,17 +171,41 @@
     gap: 8px;
     cursor: pointer;
     font-size: 14px;
-    color: #666;
+    color: #FFF;
 }
 
 .checkbox-label input[type="checkbox"] {
     width: 16px;
     height: 16px;
     cursor: pointer;
+    border-radius: 3px;
+    border: 1px solid #CECECE;
+    background-color: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.checkbox-label input[type="checkbox"]:checked {
+    border-radius: 3px;
+    border: 1px solid #CECECE;
+    background-color: #1a5490;
+    position: relative;
+}
+
+.checkbox-label input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
 }
 
 .find-password {
-    color: #1a5490;
+    color: #FFF;
     text-decoration: none;
     font-size: 14px;
 }
