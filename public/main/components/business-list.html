@@ -1,10 +1,15 @@
 <div class="business-item" data-id="{{id}}">
-    <img src="{{thumbnail}}" alt="{{title}}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;><rect fill=&quot;%23ddd&quot; width=&quot;100&quot; height=&quot;100&quot;/><text x=&quot;50%&quot; y=&quot;50%&quot; text-anchor=&quot;middle&quot; dy=&quot;.3em&quot; fill=&quot;%23999&quot; font-size=&quot;14&quot;>No Image</text></svg>'">
+    <img src="{{thumbnail}}" alt="{{businessName}}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 150 100&quot;><rect fill=&quot;%23ddd&quot; width=&quot;150&quot; height=&quot;100&quot;/><text x=&quot;50%&quot; y=&quot;50%&quot; text-anchor=&quot;middle&quot; dy=&quot;.3em&quot; fill=&quot;%23999&quot; font-size=&quot;14&quot;>No Image</text></svg>'">
     <div class="business-info">
-        <div class="ad-title">{{title}}</div>
-        <div class="ad-meta">
-            <span class="ad-type-author">{{businessType}} - {{author}}</span>
-            <span class="ad-location">{{region}} {{city}}</span>
+        <div>
+            <div class="ad-title">{{businessName}} - {{author}}</div>
+            <div class="ad-meta">
+                <span class="ad-type-author">{{businessType}} - {{region}} {{city}}</span>
+            </div>
+        </div>
+        <div class="business-buttons">
+            <button class="btn-detail" data-id="{{id}}">상세보기</button>
+            <button class="btn-review" data-id="{{id}}">후기</button>
         </div>
     </div>
 </div>

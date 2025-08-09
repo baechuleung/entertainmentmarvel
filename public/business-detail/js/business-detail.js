@@ -185,11 +185,37 @@ function setDetailContent(data) {
     }
 }
 
-// 탭 설정
+// 탭 설정 함수 수정
 function setupTabs() {
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
     
+    // URL 파라미터에서 탭 확인
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetTab = urlParams.get('tab');
+    
+    // URL에 탭 파라미터가 있으면 해당 탭 활성화
+    if (targetTab === 'reviews') {
+        // 모든 탭 버튼과 콘텐츠 비활성화
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        // 후기 탭 활성화
+        const reviewButton = document.querySelector('[data-tab="reviews"]');
+        const reviewContent = document.getElementById('reviews-tab');
+        
+        if (reviewButton && reviewContent) {
+            reviewButton.classList.add('active');
+            reviewContent.classList.add('active');
+            
+            // 후기 로드 이벤트 발생
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('loadReviews'));
+            }, 100);
+        }
+    }
+    
+    // 탭 버튼 클릭 이벤트
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
             const targetTab = button.getAttribute('data-tab');
@@ -202,6 +228,15 @@ function setupTabs() {
             button.classList.add('active');
             document.getElementById(`${targetTab}-tab`).classList.add('active');
             
+            // URL 업데이트 (히스토리 변경 없이)
+            const url = new URL(window.location);
+            if (targetTab === 'detail') {
+                url.searchParams.delete('tab');
+            } else {
+                url.searchParams.set('tab', targetTab);
+            }
+            window.history.replaceState({}, '', url);
+            
             // 후기 탭 선택 시 이벤트 발생
             if (targetTab === 'reviews') {
                 window.dispatchEvent(new CustomEvent('loadReviews'));
@@ -209,7 +244,6 @@ function setupTabs() {
         });
     });
 }
-
 // 에러 표시
 function showError(message) {
     const container = document.querySelector('.business-detail-container');

@@ -52,11 +52,10 @@
     height: 24px;
 }
 
-.ad-posting-header h1 {
-    color: #FFF;
+.ad-posting-header span {
+    color: #fff;
     font-size: 20px;
     font-weight: 700;
-    margin: 0;
 }
 
 /* 폼 스타일 */

@@ -7,7 +7,7 @@
 .banner {
     position: relative;
     width: 100%;
-    height: 200px;
+    height: 150px;
     overflow: hidden;
     background-color: #131217;
 }
@@ -165,7 +165,7 @@
 .category-select-section {
     display: flex;
     gap: 10px;
-    padding: 10px 15px;
+    padding: 15px 15px 0 15px;
     background-color: #131217;
 }
 
@@ -187,29 +187,38 @@
     border-color: #1a5490;
 }
 
-/* 업종 가로 슬라이드 */
+/* 카테고리 슬라이드 섹션 */
 .category-slide-section {
+    padding: 15px 0;
     background-color: #131217;
-    padding: 0 15px 15px;
     overflow: hidden;
 }
 
 .category-slide-wrapper {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-
-.category-slide-wrapper::-webkit-scrollbar {
-    display: none;
+    padding: 0 15px;
 }
 
 .category-slide-container {
     display: flex;
     gap: 10px;
-    padding: 2px 0;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding-bottom: 5px;
+    
+    /* 스크롤바 숨기기 */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    
+    /* 드래그 선택 방지 */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* 스크롤바 숨기기 - Chrome, Safari */
+.category-slide-container::-webkit-scrollbar {
+    display: none;
 }
 
 .category-btn {
@@ -236,10 +245,13 @@
     border-color: #1a5490;
 }
 
-/* PC에서 드래그 방지 */
-.category-btn {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+/* PC에서 드래그 가능한 커서 표시 */
+@media (min-width: 768px) {
+    .category-slide-container {
+        cursor: grab;
+    }
+    
+    .category-slide-container:active {
+        cursor: grabbing;
+    }
 }

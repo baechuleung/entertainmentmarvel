@@ -1,14 +1,15 @@
+/* ad-posting.css와 동일한 스타일 적용 */
+
 /* 다크 모드 스타일 */
 .ad-edit-container {
-    min-height: calc(100vh - 60px);
-    background-color: #1a1a1a;
+    background-color: #131217;
     padding: 16px;
 }
 
 /* 탭 네비게이션 */
 .tab-navigation {
     display: flex;
-    background-color: #2a2a2a;
+    background-color: #202020;
     border-radius: 8px;
     padding: 4px;
     margin-bottom: 20px;
@@ -34,14 +35,29 @@
     color: #fff;
 }
 
+.tab-button.active {
+    background-color: transparent;
+    color: #00DD59;
+    border: 1px solid #00DD59;
+}
+
 .ad-edit-header {
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
     margin-bottom: 30px;
 }
 
-.ad-edit-header h1 {
-    color: #ffffff;
-    font-size: 28px;
+.ad-edit-header img {
+    width: 24px;
+    height: 24px;
+}
+
+.ad-edit-header span {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
 }
 
 /* 폼 스타일 */
@@ -50,8 +66,45 @@
     margin: 0 auto;
 }
 
+/* 폼 섹션 스타일 */
+.form-section {
+    background: transparent;
+    padding: 20px 0;
+    margin-bottom: 20px;
+}
+
+.form-section:nth-child(1),
+.form-section:nth-child(2) {
+    border-bottom: 1px solid #3C3C3C;
+}
+
+.form-section:nth-child(3) {
+    border-bottom: none !important;
+    margin-bottom: 0;
+}
+
+/* 섹션 제목 스타일 */
+.section-title {
+    color: #00DD59;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+}
+
 .form-group {
     margin-bottom: 20px;
+}
+
+/* 한 줄에 표시할 폼 그룹 */
+.form-group-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.form-group-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
 }
 
 .form-group label {
@@ -60,6 +113,141 @@
     font-size: 14px;
     font-weight: 500;
     margin-bottom: 8px;
+}
+
+/* 카테고리 버튼 컨테이너 */
+.category-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+/* 카테고리 버튼 스타일 */
+.category-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid #4a4a4a;
+    background: #3a3a3a;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+/* 카테고리 버튼 호버 효과 */
+.category-btn:hover {
+    background: #4a4a4a;
+    border-color: #5a5a5a;
+}
+
+/* 카테고리 버튼 선택 상태 */
+.category-btn.active {
+    background: #00DD59;
+    color: #000;
+    border-color: #00DD59;
+}
+
+/* 카테고리 버튼 선택 상태 호버 */
+.category-btn.active:hover {
+    background: #00c94f;
+    border-color: #00c94f;
+    color: #000;
+}
+
+/* 커스텀 셀렉트 박스 */
+.custom-select {
+    position: relative;
+    width: 100%;
+    font-family: inherit;
+}
+
+.select-selected {
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    border-radius: 5px;
+    padding: 12px 35px 12px 12px;
+    cursor: pointer;
+    user-select: none;
+    color: #999;
+    font-size: 14px;
+    position: relative;
+    transition: border-color 0.3s;
+}
+
+.select-selected.has-value {
+    color: #fff;
+}
+
+.select-selected:after {
+    position: absolute;
+    content: "";
+    top: 50%;
+    right: 12px;
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-color: #999 transparent transparent transparent;
+    transform: translateY(-50%);
+    transition: transform 0.3s;
+}
+
+.select-selected.select-arrow-active:after {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.select-items {
+    position: absolute;
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.select-items div {
+    color: #fff;
+    padding: 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s;
+}
+
+.select-items div:hover {
+    background-color: #4a4a4a;
+}
+
+.select-items div.same-as-selected {
+    background-color: #1a5490;
+}
+
+.select-hide {
+    display: none;
+}
+
+/* 스크롤바 스타일 */
+.select-items::-webkit-scrollbar {
+    width: 6px;
+}
+
+.select-items::-webkit-scrollbar-track {
+    background: #2a2a2a;
+}
+
+.select-items::-webkit-scrollbar-thumb {
+    background: #5a5a5a;
+    border-radius: 3px;
+}
+
+.select-items::-webkit-scrollbar-thumb:hover {
+    background: #6a6a6a;
 }
 
 .form-group input,
@@ -86,6 +274,11 @@
     background-color: #2a2a2a;
     color: #aaaaaa;
     cursor: not-allowed;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 150px;
 }
 
 /* 에디터 스타일 */
@@ -151,12 +344,17 @@
     color: #ffffff;
     font-size: 14px;
     line-height: 1.6;
+    min-height: 300px;
 }
 
 .ql-editor.ql-blank::before {
-    color: #888;
+    color: #ffffff;
     content: "광고 상세 내용을 입력하세요...";
     font-style: normal;
+}
+
+.ql-editor:focus {
+    outline: none;
 }
 
 .ql-editor img {
@@ -173,24 +371,74 @@
     border: 2px dashed #1a5490;
 }
 
-/* 연락처 섹션 */
-.contact-section {
-    margin-top: 30px;
-    padding-top: 30px;
-    border-top: 1px solid #4a4a4a;
+.file-info {
+    color: #aaaaaa;
+    font-size: 12px;
+    margin-top: 5px;
 }
 
-.contact-section h3 {
-    color: #ffffff;
-    font-size: 18px;
-    margin-bottom: 20px;
+/* 썸네일 업로드 영역 */
+.thumbnail-upload-area {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-/* 버튼 스타일 */
-.form-actions {
+.thumbnail-upload-btn {
+    padding: 12px 20px;
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: fit-content;
+}
+
+.thumbnail-upload-btn:hover {
+    background-color: #4a4a4a;
+    border-color: #5a5a5a;
+}
+
+.thumbnail-preview {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #2a2a2a;
+    border: 1px solid #4a4a4a;
+}
+
+.thumbnail-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumbnail-delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 6px 12px;
+    background-color: rgba(255, 0, 0, 0.8);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.thumbnail-delete-btn:hover {
+    background-color: rgba(255, 0, 0, 1);
+}
+
+/* 버튼 그룹 */
+.button-group {
     display: flex;
     gap: 10px;
-    margin-top: 30px;
 }
 
 .btn-submit,
@@ -206,12 +454,14 @@
 }
 
 .btn-submit {
-    background-color: #1a5490;
-    color: white;
+    background-color: #00DD59;
+    color: #000;
+    font-weight: bold;
 }
 
 .btn-submit:hover {
-    background-color: #144170;
+    background-color: #00c94f;
+    color: #000;
 }
 
 .btn-submit:disabled {
@@ -240,5 +490,20 @@
 }
 
 .error-message.show {
+    display: block;
+}
+
+/* 성공 메시지 */
+.success-message {
+    background-color: #1a4a1a;
+    color: #51cf66;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    display: none;
+}
+
+.success-message.show {
     display: block;
 }

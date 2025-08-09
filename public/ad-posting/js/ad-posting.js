@@ -501,10 +501,10 @@ async function handleSubmit(e) {
         const adData = {
             author: authorInput.value,
             authorId: [currentUser.uid], // 배열 형태로 저장
-            title: document.getElementById('title').value,
             category: categoryInput.value,
             businessType: businessTypeInput.value,
             businessTypeCode: businessTypeCode, // 업종 코드 추가
+            businessName: document.getElementById('business-name').value, // 업소명 추가
             region: regionInput.value,
             city: cityInput.value,
             content: editorContent,

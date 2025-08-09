@@ -29,85 +29,128 @@
             </div>
             
             <div class="ad-edit-header">
-                <h1>광고 수정</h1>
+                <img src="/img/ad-posting/ad-edit.png" alt="광고 수정 아이콘">
+                <span>광고 수정</span>
             </div>
             
             <form id="ad-edit-form" class="ad-edit-form">
-                <!-- 작성자 (자동 입력) -->
-                <div class="form-group">
-                    <label>작성자</label>
-                    <input type="text" id="author" name="author" readonly>
-                </div>
-                
-                <!-- 업종 선택 -->
-                <div class="form-group">
-                    <label for="business-type">업종 *</label>
-                    <select id="business-type" name="business-type" required>
-                        <option value="">업종을 선택하세요</option>
-                    </select>
-                </div>
-                
-                <!-- 지역 선택 -->
-                <div class="form-group">
-                    <label for="region">지역 *</label>
-                    <select id="region" name="region" required>
-                        <option value="">지역을 선택하세요</option>
-                    </select>
-                </div>
-                
-                <!-- 도시 선택 -->
-                <div class="form-group">
-                    <label for="city">도시 *</label>
-                    <select id="city" name="city" required>
-                        <option value="">먼저 지역을 선택하세요</option>
-                    </select>
-                </div>
-                
-                <!-- 제목 -->
-                <div class="form-group">
-                    <label for="title">제목 *</label>
-                    <input type="text" id="title" name="title" placeholder="광고 제목을 입력하세요" maxlength="80" required>
-                </div>
-                
-                <!-- 상세 내용 -->
-                <div class="form-group">
-                    <label for="content">상세 내용 *</label>
-                    <div id="editor-container">
-                        <div id="editor"></div>
+                <!-- 1. 기본정보 섹션 -->
+                <div class="form-section">
+                    <h2 class="section-title">1. 기본정보 입력</h2>
+                    
+                    <!-- 작성자 (수정 가능) -->
+                    <div class="form-group">
+                        <label for="author">작성자</label>
+                        <input type="text" id="author" name="author">
                     </div>
-                    <input type="hidden" id="content" name="content" required>
+                    
+                    <!-- 카테고리 선택 -->
+                    <div class="form-group">
+                        <label>카테고리 *</label>
+                        <div class="category-buttons" id="category-buttons">
+                            <!-- 카테고리 버튼들이 여기에 동적으로 추가됩니다 -->
+                        </div>
+                        <input type="hidden" id="category" name="category" required>
+                    </div>
+                    
+                    <!-- 업종 선택 -->
+                    <div class="form-group">
+                        <label for="business-type">업종 *</label>
+                        <div class="custom-select" id="business-type-wrapper">
+                            <div class="select-selected" data-value="">먼저 카테고리를 선택하세요</div>
+                            <div class="select-items select-hide" id="business-type-options"></div>
+                        </div>
+                        <input type="hidden" id="business-type" name="business-type" required>
+                    </div>
+                    
+                    <!-- 업소명 추가 -->
+                    <div class="form-group">
+                        <label for="business-name">업소명 *</label>
+                        <input type="text" id="business-name" name="business-name" placeholder="업소명을 입력하세요" required>
+                    </div>
+                    
+                    <!-- 지역과 도시 선택 (한 줄에 표시) -->
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="region">지역 *</label>
+                            <div class="custom-select" id="region-wrapper">
+                                <div class="select-selected" data-value="">지역을 선택하세요</div>
+                                <div class="select-items select-hide" id="region-options"></div>
+                            </div>
+                            <input type="hidden" id="region" name="region" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="city">도시 *</label>
+                            <div class="custom-select" id="city-wrapper">
+                                <div class="select-selected" data-value="">먼저 지역을 선택하세요</div>
+                                <div class="select-items select-hide" id="city-options"></div>
+                            </div>
+                            <input type="hidden" id="city" name="city" required>
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- 연락처 정보 -->
-                <div class="contact-section">
-                    <h3>연락처 정보</h3>
+                <!-- 2. 연락처 정보 섹션 -->
+                <div class="form-section">
+                    <h2 class="section-title">2. 연락처 정보 입력</h2>
                     
                     <div class="form-group">
                         <label for="phone">전화번호 *</label>
-                        <input type="tel" id="phone" name="phone" placeholder="010-1234-5678" required>
+                        <input type="tel" id="phone" name="phone" placeholder="010-0000-0000" required>
                     </div>
                     
                     <div class="form-group">
                         <label for="kakao">카카오톡 ID</label>
-                        <input type="text" id="kakao" name="kakao" placeholder="카카오톡 ID를 입력하세요">
+                        <input type="text" id="kakao" name="kakao" placeholder="카카오톡 ID (선택)">
                     </div>
                     
                     <div class="form-group">
                         <label for="telegram">텔레그램 ID</label>
-                        <input type="text" id="telegram" name="telegram" placeholder="텔레그램 ID를 입력하세요">
+                        <input type="text" id="telegram" name="telegram" placeholder="텔레그램 ID (선택)">
                     </div>
                 </div>
                 
-                <div class="form-actions">
+                <!-- 3. 광고정보 섹션 -->
+                <div class="form-section">
+                    <h2 class="section-title">3. 광고정보 입력</h2>
+                    
+                    <!-- 상세 내용 -->
+                    <div class="form-group">
+                        <label for="content">상세 내용 *</label>
+                        <div id="editor-container">
+                            <div id="editor"></div>
+                        </div>
+                        <input type="hidden" id="content" name="content">
+                    </div>
+                    
+                    <!-- 썸네일 업로드 -->
+                    <div class="form-group">
+                        <label for="thumbnail">대표이미지</label>
+                        <div class="thumbnail-upload-area">
+                            <input type="file" id="thumbnail-input" accept="image/*" style="display: none;">
+                            <button type="button" class="thumbnail-upload-btn" id="thumbnail-upload-btn">
+                                대표이미지 선택
+                            </button>
+                            <div class="thumbnail-preview" id="thumbnail-preview" style="display: none;">
+                                <img id="thumbnail-image" src="" alt="대표이미지 미리보기">
+                                <button type="button" class="thumbnail-delete-btn" id="thumbnail-delete-btn">삭제</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 버튼 그룹 -->
+                <div class="button-group">
+                    <button type="button" class="btn-cancel" onclick="location.href='/ad-posting/ad-management.html'">취소</button>
                     <button type="submit" class="btn-submit">수정 완료</button>
-                    <button type="button" class="btn-cancel">취소</button>
                 </div>
             </form>
         </div>
     </main>
     
     <script src="/js/header.js"></script>
-    <script type="module" src="/ad-posting/js/ad-edit.js"></script>
+    <script type="module" src="js/ad-edit.js"></script>
     <script src="/js/footer.js"></script>
 </body>
 </html>
