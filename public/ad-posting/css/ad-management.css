@@ -1,14 +1,13 @@
 /* 다크 모드 스타일 */
 .ad-management-container {
-    min-height: calc(100vh - 60px);
-    background-color: #1a1a1a;
+    background-color: #131217;
     padding: 16px;
 }
 
 /* 탭 네비게이션 */
 .tab-navigation {
     display: flex;
-    background-color: #2a2a2a;
+    background-color: #202020;
     border-radius: 8px;
     padding: 4px;
     margin-bottom: 20px;
@@ -35,8 +34,9 @@
 }
 
 .tab-button.active {
-    background-color: #1a5490;
-    color: #fff;
+    background-color: transparent;
+    color: #00DD59;
+    border: 1px solid #00DD59;
 }
 
 /* 광고 상세 콘텐츠 */
@@ -270,16 +270,17 @@
 }
 
 .btn-add-first {
-    background-color: #1a5490;
-    color: white;
+    background-color: #00DD59;
+    color: #000;
     border: none;
     padding: 12px 24px;
     border-radius: 6px;
     font-size: 14px;
+    font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s;
 }
 
 .btn-add-first:hover {
-    background-color: #144170;
+    background-color: #00c94f;
 }
