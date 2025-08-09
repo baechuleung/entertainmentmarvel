@@ -1,9 +1,24 @@
 <section class="main-header-section">
     <div class="banner">
-        <div class="banner-content">
-            <div class="banner-text">
-                <h1>유흥마블에서<br>원하는 서비스를 즐기세요!</h1>
-            </div>
+        <div class="banner-slider">
+            <img 
+                src="https://ik.imagekit.io/leadproject/entmarvel/img/main/main_top_bg.png?tr=w-412,h-267,f-auto&updatedAt=1754719850410" 
+                class="banner-slide active" 
+                alt="배너1"
+                fetchpriority="high">
+            <img 
+                src="https://ik.imagekit.io/leadproject/entmarvel/img/main/main_top_bg2.png?tr=w-412,h-267,f-auto&updatedAt=1754719850418" 
+                class="banner-slide" 
+                alt="배너2">
+            <img 
+                src="https://ik.imagekit.io/leadproject/entmarvel/img/main/main_top_bg3.png?tr=w-412,h-267,f-auto&updatedAt=1754719850307" 
+                class="banner-slide" 
+                alt="배너3">
+        </div>
+        <div class="banner-dots">
+            <span class="dot active" data-slide="0"></span>
+            <span class="dot" data-slide="1"></span>
+            <span class="dot" data-slide="2"></span>
         </div>
     </div>
     
@@ -16,6 +31,13 @@
             <div class="select-selected" data-value="">도시</div>
             <div class="select-items select-hide" id="city-options"></div>
         </div>
+    </div>
+    
+    <!-- 카테고리 선택 버튼 -->
+    <div class="category-select-section">
+        <button class="category-select-btn active" data-category="all">전체</button>
+        <button class="category-select-btn" data-category="karaoke">유흥주점</button>
+        <button class="category-select-btn" data-category="gunma">건전마사지</button>
     </div>
     
     <!-- 업종 가로 슬라이드 -->

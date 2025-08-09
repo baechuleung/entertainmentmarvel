@@ -34,7 +34,49 @@ async function loadMainHeader() {
         await loadRegionData();
         await loadBusinessTypes();
         setupCustomSelects();
+        setupCategoryButtons();
+        setupBannerSlider();
     }, 100);
+}
+
+// 배너 슬라이더 설정
+function setupBannerSlider() {
+    const slides = document.querySelectorAll('.banner-slide');
+    const dots = document.querySelectorAll('.banner-dots .dot');
+    let currentSlide = 0;
+    
+    if (slides.length === 0) return;
+    
+    // 슬라이드 변경 함수
+    function changeSlide(index) {
+        // 모든 슬라이드와 점 비활성화
+        slides.forEach(slide => slide.classList.remove('active'));
+        dots.forEach(dot => dot.classList.remove('active'));
+        
+        // 선택된 슬라이드와 점 활성화
+        slides[index].classList.add('active');
+        if (dots[index]) {
+            dots[index].classList.add('active');
+        }
+        
+        currentSlide = index;
+    }
+    
+    // 다음 슬라이드로 이동
+    function nextSlide() {
+        const nextIndex = (currentSlide + 1) % slides.length;
+        changeSlide(nextIndex);
+    }
+    
+    // 자동 슬라이드 (5초마다)
+    setInterval(nextSlide, 5000);
+    
+    // 인디케이터 클릭 이벤트
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            changeSlide(index);
+        });
+    });
 }
 
 // 커스텀 셀렉트 초기화
@@ -121,15 +163,45 @@ async function loadRegionData() {
     }
 }
 
-// 업종 데이터 로드 - 가로 슬라이드로 변경
-async function loadBusinessTypes() {
+// 카테고리 버튼 설정
+function setupCategoryButtons() {
+    const categoryButtons = document.querySelectorAll('.category-select-btn');
+    
+    categoryButtons.forEach(btn => {
+        btn.addEventListener('click', async function() {
+            // 모든 버튼에서 active 제거
+            categoryButtons.forEach(b => b.classList.remove('active'));
+            // 클릭한 버튼에 active 추가
+            this.classList.add('active');
+            
+            const category = this.dataset.category;
+            
+            if (category === 'all') {
+                // 전체 선택 시 기본 업종 로드
+                await loadBusinessTypes();
+            } else if (category === 'karaoke') {
+                // 유흥주점 선택 시
+                await loadCategoryBusinessTypes('/data/karaoke.json');
+            } else if (category === 'gunma') {
+                // 건전마사지 선택 시
+                await loadCategoryBusinessTypes('/data/gunma.json');
+            }
+        });
+    });
+}
+
+// 카테고리별 업종 데이터 로드
+async function loadCategoryBusinessTypes(jsonPath) {
     try {
-        const response = await fetch('/data/business-types.json');
+        const response = await fetch(jsonPath);
         const data = await response.json();
         
         // 가로 슬라이드 컨테이너 찾기
         const categoryContainer = document.getElementById('category-slide-container');
         if (categoryContainer) {
+            // 기존 버튼들 제거
+            categoryContainer.innerHTML = '';
+            
             // 전체 버튼 추가
             const allBtn = document.createElement('button');
             allBtn.className = 'category-btn active';
@@ -142,6 +214,60 @@ async function loadBusinessTypes() {
             
             // 각 업종 버튼 추가
             data.businessTypes.forEach(type => {
+                const btn = document.createElement('button');
+                btn.className = 'category-btn';
+                btn.textContent = type.name;
+                btn.setAttribute('data-value', type.name);
+                btn.addEventListener('click', function() {
+                    selectCategory(this);
+                });
+                categoryContainer.appendChild(btn);
+            });
+            
+            // PC 마우스 드래그 기능 재설정
+            setupMouseDrag();
+        }
+    } catch (error) {
+        console.error('카테고리 업종 데이터 로드 실패:', error);
+    }
+}
+
+// 업종 데이터 로드 - 전체 카테고리 시 두 파일 모두 로드
+async function loadBusinessTypes() {
+    try {
+        // karaoke.json과 gunma.json의 데이터를 모두 로드하여 합침
+        const [karaokeResponse, gunmaResponse] = await Promise.all([
+            fetch('/data/karaoke.json'),
+            fetch('/data/gunma.json')
+        ]);
+        
+        const karaokeData = await karaokeResponse.json();
+        const gunmaData = await gunmaResponse.json();
+        
+        // 두 카테고리의 업종을 합침
+        const allBusinessTypes = [
+            ...karaokeData.businessTypes,
+            ...gunmaData.businessTypes
+        ];
+        
+        // 가로 슬라이드 컨테이너 찾기
+        const categoryContainer = document.getElementById('category-slide-container');
+        if (categoryContainer) {
+            // 기존 버튼들 제거
+            categoryContainer.innerHTML = '';
+            
+            // 전체 버튼 추가
+            const allBtn = document.createElement('button');
+            allBtn.className = 'category-btn active';
+            allBtn.textContent = '전체';
+            allBtn.setAttribute('data-value', '');
+            allBtn.addEventListener('click', function() {
+                selectCategory(this);
+            });
+            categoryContainer.appendChild(allBtn);
+            
+            // 각 업종 버튼 추가
+            allBusinessTypes.forEach(type => {
                 const btn = document.createElement('button');
                 btn.className = 'category-btn';
                 btn.textContent = type.name;
@@ -325,11 +451,11 @@ async function loadBusinessItemTemplate() {
         const response = await fetch('components/business-list.html');
         businessItemTemplate = await response.text();
     } catch (error) {
-        console.error('업종 리스트 템플릿 로드 실패:', error);
+        console.error('템플릿 로드 실패:', error);
     }
 }
 
-// 광고 목록 로드 (캐시 적용)
+// 광고 데이터 로드
 async function loadAdvertisements() {
     console.log('광고 목록 로드 시작');
     
@@ -350,26 +476,27 @@ async function loadAdvertisements() {
         }
     }
     
-    // Firebase에서 새 데이터 로드 - get 사용으로 변경
-    const adsRef = ref(rtdb, 'advertisements');
-    
+    // Firebase에서 새 데이터 로드
     try {
+        const adsRef = ref(rtdb, 'advertisements');
         const snapshot = await get(adsRef);
+        
         console.log('Firebase 데이터 수신');
-        const data = snapshot.val();
-        console.log('받은 데이터:', data);
         
-        allAdvertisements = []; // 전역 변수에 저장
-        
-        if (data) {
-            Object.keys(data).forEach(key => {
-                const ad = { id: key, ...data[key] };
-                
-                // active 상태인 광고만 추가
-                if (ad.status === 'active') {
-                    allAdvertisements.push(ad);
-                }
-            });
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            allAdvertisements = Object.entries(data).map(([id, ad]) => ({
+                ...ad,
+                id
+            }));
+            
+            // 활성 상태인 광고만 필터링
+            allAdvertisements = allAdvertisements.filter(ad => ad.status === 'active');
+            
+            // 최신순 정렬
+            allAdvertisements.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        } else {
+            allAdvertisements = [];
         }
         
         // 캐시에 저장
@@ -380,10 +507,9 @@ async function loadAdvertisements() {
         sessionStorage.setItem(cacheKey, JSON.stringify(dataToCache));
         console.log('데이터 캐시 저장 완료');
         
-        // 초기 표시
         displayAdvertisements(allAdvertisements);
     } catch (error) {
-        console.error('데이터 로드 실패:', error);
+        console.error('광고 로드 실패:', error);
         allAdvertisements = [];
         displayAdvertisements(allAdvertisements);
     }
