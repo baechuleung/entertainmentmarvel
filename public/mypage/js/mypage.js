@@ -7,6 +7,10 @@ import { ref, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-dat
 let currentUser = null;
 let userData = null;
 
+// 캐시 키와 만료 시간 (5분)
+const CACHE_KEY = 'mypage_user_data';
+const CACHE_EXPIRY = 5 * 60 * 1000; // 5분
+
 // 초기화
 document.addEventListener('DOMContentLoaded', function() {
     checkAuth();
@@ -26,17 +30,109 @@ function checkAuth() {
     });
 }
 
-// 사용자 데이터 로드
-async function loadUserData() {
+// 캐시 데이터 가져오기
+function getCachedData() {
     try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+            const data = JSON.parse(cached);
+            const now = Date.now();
+            
+            // 캐시가 만료되지 않았고, 같은 사용자인 경우
+            if (data.expiry > now && data.uid === currentUser.uid) {
+                console.log('캐시된 데이터 사용');
+                return data.userData;
+            }
+        }
+    } catch (error) {
+        console.error('캐시 읽기 실패:', error);
+    }
+    return null;
+}
+
+// 캐시에 데이터 저장
+function setCachedData(data) {
+    try {
+        const cacheData = {
+            userData: data,
+            uid: currentUser.uid,
+            expiry: Date.now() + CACHE_EXPIRY
+        };
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+    } catch (error) {
+        console.error('캐시 저장 실패:', error);
+    }
+}
+
+// 캐시 무효화
+function invalidateCache() {
+    try {
+        localStorage.removeItem(CACHE_KEY);
+    } catch (error) {
+        console.error('캐시 삭제 실패:', error);
+    }
+}
+
+// 사용자 데이터 로드 (forceRefresh: 강제 새로고침 옵션)
+async function loadUserData(forceRefresh = false) {
+    try {
+        // 강제 새로고침이 아닌 경우 캐시 확인
+        if (!forceRefresh) {
+            const cachedData = getCachedData();
+            if (cachedData) {
+                userData = cachedData;
+                displayUserInfo();
+                
+                // 백그라운드에서 최신 데이터 확인
+                checkForUpdates();
+                return;
+            }
+        }
+
+        // 캐시가 없거나 강제 새로고침인 경우 Firestore에서 로드
+        console.log('Firestore에서 데이터 로드');
         const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
         
         if (userDoc.exists()) {
             userData = userDoc.data();
             displayUserInfo();
+            
+            // 캐시에 저장
+            setCachedData(userData);
         }
     } catch (error) {
         console.error('사용자 데이터 로드 실패:', error);
+    }
+}
+
+// 백그라운드에서 데이터 업데이트 확인
+async function checkForUpdates() {
+    try {
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        
+        if (userDoc.exists()) {
+            const latestData = userDoc.data();
+            
+            // 데이터가 변경되었는지 확인 (주요 필드만 비교)
+            const hasChanged = 
+                latestData.nickname !== userData.nickname ||
+                latestData.level !== userData.level ||
+                latestData.points !== userData.points ||
+                latestData.reviews_count !== userData.reviews_count ||
+                JSON.stringify(latestData.bookmarks) !== JSON.stringify(userData.bookmarks);
+            
+            if (hasChanged) {
+                console.log('데이터 변경 감지 - 업데이트');
+                userData = latestData;
+                displayUserInfo();
+                setCachedData(latestData);
+                
+                // 통계도 업데이트
+                await loadUserStats();
+            }
+        }
+    } catch (error) {
+        console.error('업데이트 확인 실패:', error);
     }
 }
 
@@ -135,3 +231,28 @@ async function loadUserStats() {
         console.error('통계 로드 실패:', error);
     }
 }
+
+// 페이지 벗어날 때 캐시 관리 (선택적)
+window.addEventListener('beforeunload', () => {
+    // 특정 조건에서 캐시 무효화가 필요한 경우
+    // invalidateCache();
+});
+
+// 페이지가 다시 활성화될 때 데이터 새로고침
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && currentUser) {
+        // 페이지가 다시 보이면 백그라운드에서 업데이트 확인
+        checkForUpdates();
+    }
+});
+
+// 외부에서 캐시 무효화가 필요한 경우를 위한 전역 함수
+window.invalidateMypageCache = invalidateCache;
+
+// 데이터 새로고침 함수 (외부에서 호출 가능)
+window.refreshMypageData = () => {
+    invalidateCache();
+    if (currentUser) {
+        loadUserData(true);
+    }
+};

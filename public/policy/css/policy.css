@@ -1,7 +1,7 @@
 /* 정책 컨테이너 */
 .policy-container {
-    min-height: calc(100vh - 60px);
-    background-color: #1a1a1a;
+    min-height: calc(100vh - 160px);
+    background-color: #131217;
     padding: 16px;
 }
 
@@ -9,23 +9,20 @@
 .policy-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0;
 }
 
 .policy-item {
-    background-color: #2a2a2a;
-    border-radius: 8px;
-    padding: 20px;
     cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
     position: relative;
     display: flex;
     flex-direction: column;
+    padding: 20px 0;
+    border-bottom: 1px solid #686868;
 }
 
-.policy-item:hover {
-    transform: translateY(-2px);
-    background-color: #3a3a3a;
+.policy-item:last-child {
+    border-bottom: none;
 }
 
 .policy-item h3 {

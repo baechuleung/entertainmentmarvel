@@ -1,12 +1,11 @@
 /* 마이페이지 컨테이너 */
 .mypage-container {
     min-height: calc(100vh - 60px);
-    background-color: #1a1a1a;
+    background-color: #131217;
 }
 
 /* 프로필 섹션 */
 .profile-section {
-    background-color: #2a2a2a;
     padding: 20px;
 }
 
@@ -21,8 +20,11 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
+    background: linear-gradient(180deg, #6B73FF 0%, #000DFF 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
-    background-color: #3a3a3a;
 }
 
 .profile-image img {
@@ -60,9 +62,9 @@
 }
 
 .profile-name {
-    color: #ffffff;
+    color: #FFF;
     font-size: 18px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 /* 포인트 그리드 */
@@ -73,7 +75,7 @@
 }
 
 .point-item {
-    background-color: #3a3a3a;
+    background-color: #202020;
     border-radius: 8px;
     padding: 15px 10px;
     text-align: center;
@@ -98,16 +100,8 @@
 
 /* 메뉴 섹션 */
 .menu-section {
-    background-color: #1a1a1a;
+    background-color: #131217;
     padding: 20px 0;
-}
-
-.section-title {
-    color: #ffffff;
-    font-size: 16px;
-    font-weight: 500;
-    padding: 0 20px;
-    margin-bottom: 10px;
 }
 
 .menu-item {
@@ -115,7 +109,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px 20px;
-    background-color: #1a1a1a;
+    background-color: #131217;
     cursor: pointer;
     transition: background-color 0.2s;
 }
