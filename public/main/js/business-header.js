@@ -352,50 +352,43 @@ function setupCategorySlider() {
     const container = document.getElementById('category-slide-container');
     if (!container) return;
     
-    let isDown = false;
-    let startX;
-    let scrollLeft;
+    // PC에서만 드래그 기능 활성화
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
     
-    // 마우스 이벤트
-    container.addEventListener('mousedown', (e) => {
-        isDown = true;
-        container.style.cursor = 'grabbing';
-        startX = e.pageX - container.offsetLeft;
-        scrollLeft = container.scrollLeft;
-    });
-    
-    container.addEventListener('mouseleave', () => {
-        isDown = false;
+    if (!isMobile) {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        
+        // 마우스 이벤트 (PC에서만)
+        container.addEventListener('mousedown', (e) => {
+            isDown = true;
+            container.style.cursor = 'grabbing';
+            startX = e.pageX - container.offsetLeft;
+            scrollLeft = container.scrollLeft;
+        });
+        
+        container.addEventListener('mouseleave', () => {
+            isDown = false;
+            container.style.cursor = 'grab';
+        });
+        
+        container.addEventListener('mouseup', () => {
+            isDown = false;
+            container.style.cursor = 'grab';
+        });
+        
+        container.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - container.offsetLeft;
+            const walk = (x - startX) * 2;
+            container.scrollLeft = scrollLeft - walk;
+        });
+        
+        // 기본 커서 스타일 (PC에서만)
         container.style.cursor = 'grab';
-    });
+    }
     
-    container.addEventListener('mouseup', () => {
-        isDown = false;
-        container.style.cursor = 'grab';
-    });
-    
-    container.addEventListener('mousemove', (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - container.offsetLeft;
-        const walk = (x - startX) * 2;
-        container.scrollLeft = scrollLeft - walk;
-    });
-    
-    // 터치 이벤트 (모바일)
-    let touchStartX = 0;
-    let touchScrollLeft = 0;
-    
-    container.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].pageX;
-        touchScrollLeft = container.scrollLeft;
-    });
-    
-    container.addEventListener('touchmove', (e) => {
-        const touchDelta = touchStartX - e.touches[0].pageX;
-        container.scrollLeft = touchScrollLeft + touchDelta;
-    });
-    
-    // 기본 커서 스타일
-    container.style.cursor = 'grab';
+    // 모바일에서는 기본 터치 스크롤 사용 (별도 처리 불필요)
 }

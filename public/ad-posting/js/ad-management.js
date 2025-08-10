@@ -1,21 +1,22 @@
 import { auth, db, rtdb } from '/js/firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { ref, onValue, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { ref, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
 // 전역 변수
 let currentUser = null;
 let currentUserData = null;
 let currentAd = null;
 let currentAdId = null;
-let currentImageIndex = 0;
 let adImages = [];
+let currentImageIndex = 0;
 
 // DOM 요소
 const adTitle = document.getElementById('ad-title');
 const businessTypeBadge = document.getElementById('business-type-badge');
 const locationBadge = document.getElementById('location-badge');
 const adMainImage = document.getElementById('ad-main-image');
+const imageDots = document.getElementById('image-dots');
 const adDescription = document.getElementById('ad-description');
 const favoriteCount = document.getElementById('favorite-count');
 const viewCount = document.getElementById('view-count');
@@ -23,14 +24,10 @@ const reviewCount = document.getElementById('review-count');
 const approvalStatus = document.getElementById('approval-status');
 const emptyState = document.getElementById('empty-state');
 const adDetailContent = document.querySelector('.ad-detail-content');
-const imageDots = document.getElementById('image-dots');
 
 // 초기화
 document.addEventListener('DOMContentLoaded', function() {
-    // 인증 상태 확인
     checkAuth();
-    
-    // 이벤트 리스너 설정
     setupEventListeners();
 });
 
@@ -39,13 +36,15 @@ function checkAuth() {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
-            // 사용자 유형 확인
+            
+            // Firestore에서 사용자 정보 가져오기
             const userDoc = await getDoc(doc(db, 'users', user.uid));
             if (userDoc.exists()) {
                 currentUserData = userDoc.data();
-                // business 또는 administrator만 접근 가능
+                
+                // 일반 유저가 접근한 경우 리다이렉트
                 if (currentUserData.userType !== 'business' && currentUserData.userType !== 'administrator') {
-                    alert('업체회원 또는 관리자만 접근 가능합니다.');
+                    alert('업체회원만 접근 가능합니다.');
                     window.location.href = '/main/main.html';
                     return;
                 }
@@ -70,7 +69,12 @@ function loadUserAd() {
         if (data) {
             // 사용자의 광고만 필터링
             Object.entries(data).forEach(([key, value]) => {
-                if (currentUserData.userType === 'administrator' || value.authorId === currentUser.uid) {
+                // authorId가 배열인 경우와 문자열인 경우 모두 처리
+                const hasPermission = Array.isArray(value.authorId) 
+                    ? value.authorId.includes(currentUser.uid)
+                    : value.authorId === currentUser.uid;
+                    
+                if (currentUserData.userType === 'administrator' || hasPermission) {
                     userAds.push({ id: key, ...value });
                 }
             });
@@ -97,8 +101,8 @@ function loadUserAd() {
 function displayAdDetail() {
     if (!currentAd) return;
     
-    // 제목
-    adTitle.textContent = currentAd.title || '제목 없음';
+    // 제목 또는 업소명 표시 (title이 없으면 businessName 사용)
+    adTitle.textContent = currentAd.title || currentAd.businessName || '제목 없음';
     
     // 업종 배지
     businessTypeBadge.textContent = currentAd.businessType || '업종';
@@ -215,10 +219,81 @@ function updateDots() {
     });
 }
 
+// ImageKit에서 이미지들 삭제
+async function deleteAllAdImages(ad) {
+    const imageUrls = [];
+    
+    // 썸네일 수집
+    if (ad.thumbnail && ad.thumbnail.includes('ik.imagekit.io')) {
+        imageUrls.push(ad.thumbnail);
+    }
+    
+    // 상세 이미지들 수집
+    if (ad.images && Array.isArray(ad.images)) {
+        ad.images.forEach(imageUrl => {
+            if (imageUrl && imageUrl.includes('ik.imagekit.io')) {
+                imageUrls.push(imageUrl);
+            }
+        });
+    }
+    
+    // 에디터 내용에서 이미지 URL 추출
+    if (ad.content) {
+        const imgRegex = /<img[^>]+src="([^">]+)"/g;
+        let match;
+        while ((match = imgRegex.exec(ad.content)) !== null) {
+            const imageUrl = match[1];
+            if (imageUrl && imageUrl.includes('ik.imagekit.io')) {
+                imageUrls.push(imageUrl);
+            }
+        }
+    }
+    
+    if (imageUrls.length === 0) {
+        console.log('삭제할 ImageKit 이미지가 없습니다.');
+        return;
+    }
+    
+    try {
+        // 배포된 Firebase Function 호출
+        const response = await fetch('https://imagekit-delete-enujtcasca-uc.a.run.app', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                fileUrls: imageUrls,
+                userId: currentUser.uid
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('이미지 삭제 결과:', result);
+            
+            // 삭제 결과 확인
+            if (result.summary) {
+                console.log(`총 ${result.summary.total}개 중 ${result.summary.deleted}개 삭제 성공`);
+            }
+            
+            // 실패한 파일이 있으면 로그
+            if (result.failed && result.failed.length > 0) {
+                console.warn('삭제 실패한 파일들:', result.failed);
+            }
+        } else {
+            const errorText = await response.text();
+            console.error('이미지 삭제 요청 실패:', errorText);
+        }
+    } catch (error) {
+        console.error('ImageKit 이미지 삭제 오류:', error);
+        // 실패해도 광고 삭제는 계속 진행
+    }
+}
+
 // 이벤트 리스너 설정
 function setupEventListeners() {
     // 이전 이미지
-    document.getElementById('prev-image').addEventListener('click', () => {
+    document.getElementById('prev-image')?.addEventListener('click', () => {
         if (adImages.length > 1) {
             currentImageIndex = (currentImageIndex - 1 + adImages.length) % adImages.length;
             updateImage();
@@ -226,7 +301,7 @@ function setupEventListeners() {
     });
     
     // 다음 이미지
-    document.getElementById('next-image').addEventListener('click', () => {
+    document.getElementById('next-image')?.addEventListener('click', () => {
         if (adImages.length > 1) {
             currentImageIndex = (currentImageIndex + 1) % adImages.length;
             updateImage();
@@ -234,22 +309,40 @@ function setupEventListeners() {
     });
     
     // 수정 버튼
-    document.getElementById('btn-edit').addEventListener('click', () => {
+    document.getElementById('btn-edit')?.addEventListener('click', () => {
         if (currentAdId) {
             window.location.href = `/ad-posting/ad-edit.html?id=${currentAdId}`;
         }
     });
     
     // 삭제 버튼
-    document.getElementById('btn-delete').addEventListener('click', async () => {
-        if (currentAdId && confirm(`"${currentAd.title}" 광고를 삭제하시겠습니까?`)) {
+    document.getElementById('btn-delete')?.addEventListener('click', async () => {
+        const adName = currentAd.businessName || '이 광고';
+        if (currentAdId && confirm(`"${adName}"를 삭제하시겠습니까?\n\n삭제된 광고와 이미지는 복구할 수 없습니다.`)) {
             try {
+                // 삭제 중 표시
+                const deleteBtn = document.getElementById('btn-delete');
+                const originalText = deleteBtn.textContent;
+                deleteBtn.disabled = true;
+                deleteBtn.textContent = '삭제 중...';
+                
+                // ImageKit에서 이미지들 삭제 (실패해도 계속 진행)
+                await deleteAllAdImages(currentAd);
+                
+                // Firebase에서 광고 삭제
                 await remove(ref(rtdb, `advertisements/${currentAdId}`));
+                
                 alert('광고가 삭제되었습니다.');
                 window.location.reload();
+                
             } catch (error) {
                 console.error('광고 삭제 실패:', error);
                 alert('광고 삭제에 실패했습니다.');
+                
+                // 버튼 원래대로 복구
+                const deleteBtn = document.getElementById('btn-delete');
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = originalText || '광고삭제';
             }
         }
     });

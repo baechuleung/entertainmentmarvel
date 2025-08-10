@@ -255,3 +255,11 @@
         cursor: grabbing;
     }
 }
+
+/* 모바일에서는 기본 스크롤 */
+@media (max-width: 767px) {
+    .category-slide-container {
+        cursor: auto;
+        -webkit-overflow-scrolling: touch;  /* iOS 부드러운 스크롤 */
+    }
+}
