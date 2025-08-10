@@ -39,136 +39,150 @@
     border: 1px solid #00DD59;
 }
 
-/* 광고 상세 콘텐츠 */
-.ad-detail-content {
+/* 광고 관리 헤더 추가 */
+.ad-management-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     max-width: 450px;
-    margin: 0 auto;
+    margin: 0 auto 20px auto;
 }
 
-/* 광고 헤더 */
-.ad-header {
-    margin-bottom: 20px;
+.ad-management-header img {
+    width: 24px;
+    height: 24px;
 }
 
-.ad-header h1 {
+.ad-management-header span {
     color: #ffffff;
-    font-size: 24px;
-    margin-bottom: 12px;
+    font-size: 20px;
+    font-weight: 600;
 }
 
-.ad-badge-container {
+/* 광고 리스트 (main과 동일) */
+.business-list {
+    padding: 0;
+}
+
+/* 비즈니스 아이템 (main과 동일) */
+.business-item {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.business-item img {
+    width: 150px;
+    height: 100px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border-radius: 10px;
+}
+
+.business-info {
+    flex: 1;
+    padding: 2px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.ad-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FFF;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+}
+
+.ad-meta {
+    font-size: 13px;
+    color: #999;
+    margin-top: 8px;
+}
+
+.ad-type-author {
+    color: #999;
+    font-size: 13px;
+}
+
+/* 버튼 영역 (main과 동일) */
+.business-buttons {
     display: flex;
     gap: 8px;
-    flex-wrap: wrap;
+    margin-top: 10px;
 }
 
-.ad-badge {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 20px;
+.btn-detail, .btn-review {
+    flex: 1;
+    padding: 8px 0;
+    border: 1px solid #333;
+    background-color: #2a2a2a;
+    color: #fff;
+    border-radius: 6px;
     font-size: 13px;
-    font-weight: 500;
-}
-
-.ad-badge.business-type {
-    background-color: #FFE4B5;
-    color: #8B4513;
-}
-
-.ad-badge.location {
-    background-color: #2a2a2a;
-    color: #ffffff;
-    border: 1px solid #3a3a3a;
-}
-
-/* 광고 이미지 */
-.ad-image-container {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16/9;
-    background-color: #2a2a2a;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-.ad-image-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.image-navigation {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 10px;
-    pointer-events: none;
-}
-
-.image-nav-btn {
-    width: 36px;
-    height: 36px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    font-size: 24px;
     cursor: pointer;
-    pointer-events: all;
-    transition: background-color 0.3s;
+    transition: background-color 0.2s;
+    text-align: center;
 }
 
-.image-nav-btn:hover {
-    background-color: rgba(0, 0, 0, 0.7);
+.btn-detail {
+    background-color: #1a5490;
+    border-color: #1a5490;
 }
 
-.image-dots {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 6px;
+.btn-review {
+    background-color: transparent;
 }
 
-.dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    transition: background-color 0.3s;
+.btn-detail:hover {
+    background-color: #144170;
 }
 
-.dot.active {
-    background-color: #ffffff;
+.btn-review:hover {
+    background-color: #3a3a3a;
 }
 
 /* 광고 설명 */
 .ad-description {
+    margin-bottom: 20px;
+}
+
+.ad-description h2 {
+    color: #ffffff;
+    font-size: 18px;
+    margin-bottom: 16px;
+    padding-left: 4px;
+}
+
+.ad-description-content {
     background-color: #2a2a2a;
     border-radius: 8px;
     padding: 16px;
-    margin-bottom: 20px;
     color: #ffffff;
     line-height: 1.6;
 }
 
-.ad-description h2,
-.ad-description h3 {
+.ad-description-content h2,
+.ad-description-content h3 {
     margin: 16px 0 8px 0;
     color: #ffffff;
 }
 
-.ad-description p {
+.ad-description-content p {
     margin: 8px 0;
 }
 
-.ad-description img {
+.ad-description-content img {
     max-width: 100%;
     border-radius: 8px;
     margin: 12px 0;
@@ -177,6 +191,9 @@
 /* 광고 현황 */
 .ad-stats {
     margin-bottom: 24px;
+    border-top: 1px solid #363636;
+    border-bottom: 1px solid #363636;
+    padding: 20px 0;
 }
 
 .ad-stats h2 {
@@ -187,41 +204,46 @@
 }
 
 .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .stat-item {
-    background-color: #2a2a2a;
-    border-radius: 8px;
-    padding: 16px 12px;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+}
+
+.stat-left {
+    display: flex;
     align-items: center;
     gap: 8px;
 }
 
 .stat-icon {
-    font-size: 20px;
+    width: 16px;
+    height: 16px;
+    fill: #ffffff;
 }
 
 .stat-label {
-    color: #888;
-    font-size: 12px;
+    color: #ffffff;
+    font-size: 14px;
 }
 
 .stat-value {
     color: #ffffff;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
 }
 
 .stat-value.status {
-    color: #4CAF50;
+    color: #ffffff;
 }
 
-/* 액션 버튼 */
+/* 액션 버튼 (광고 수정/삭제) */
 .action-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -239,21 +261,21 @@
     transition: all 0.3s;
 }
 
-.btn-edit {
-    background-color: #3a3a3a;
-    color: #ffffff;
+.btn-action.btn-edit {
+    background-color: #00DD59;
+    color: #000000;
 }
 
-.btn-edit:hover {
-    background-color: #4a4a4a;
+.btn-action.btn-edit:hover {
+    background-color: #00c94f;
 }
 
-.btn-delete {
-    background-color: #3a3a3a;
-    color: #ff6b6b;
+.btn-action.btn-delete {
+    background-color: #363636;
+    color: #999999;
 }
 
-.btn-delete:hover {
+.btn-action.btn-delete:hover {
     background-color: #4a4a4a;
 }
 

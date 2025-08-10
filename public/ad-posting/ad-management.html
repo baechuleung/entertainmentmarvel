@@ -23,70 +23,93 @@
                 <button class="tab-button" onclick="location.href='/ad-posting/ad-posting.html'">광고 추가</button>
             </div>
             
-            <!-- 광고 상세 내용 -->
-            <div class="ad-detail-content">
-                <!-- 광고 헤더 -->
-                <div class="ad-header">
-                    <h1 id="ad-title">광고관리</h1>
-                    <div class="ad-badge-container">
-                        <span class="ad-badge business-type" id="business-type-badge">업종</span>
-                        <span class="ad-badge location" id="location-badge">📍 지역</span>
+            <!-- 광고 관리 헤더 -->
+            <div class="ad-management-header">
+                <img src="/img/ad-posting/ad-management.png" alt="광고 관리 아이콘">
+                <span>광고관리</span>
+            </div>
+            
+            <!-- 광고 리스트 (main과 동일한 구조) -->
+            <div class="business-list">
+                <!-- 비즈니스 아이템 -->
+                <div class="business-item" id="ad-item" style="display: none;">
+                    <img id="ad-thumbnail" src="/img/default-thumb.jpg" alt="광고 이미지">
+                    <div class="business-info">
+                        <div>
+                            <div class="ad-title" id="ad-title"></div>
+                            <div class="ad-meta">
+                                <span class="ad-type-author" id="ad-type-author"></span>
+                            </div>
+                        </div>
+                        <div class="business-buttons">
+                            <button class="btn-detail" id="btn-detail">상세보기</button>
+                            <button class="btn-review" id="btn-review">후기</button>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- 광고 이미지 -->
-                <div class="ad-image-container">
-                    <img id="ad-main-image" src="/img/default-ad.jpg" alt="광고 이미지">
-                    <div class="image-navigation">
-                        <button class="image-nav-btn prev" id="prev-image">‹</button>
-                        <button class="image-nav-btn next" id="next-image">›</button>
-                    </div>
-                    <div class="image-dots" id="image-dots"></div>
+            <!-- 광고 현황 -->
+            <div class="ad-stats" id="ad-stats" style="display: none;">
+                <h2>광고현황</h2>
+                <div class="stats-grid">
+                    <span class="stat-item">
+                        <span class="stat-left">
+                            <svg class="stat-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2L14.09 8.26L20.5 9.27L16.09 13.14L17.09 19.5L12 16.77L6.91 19.5L7.91 13.14L3.5 9.27L9.91 8.26L12 2Z" fill="white"/>
+                            </svg>
+                            <span class="stat-label">즐겨찾기</span>
+                        </span>
+                        <span class="stat-value" id="favorite-count">0 회</span>
+                    </span>
+                    <span class="stat-item">
+                        <span class="stat-left">
+                            <svg class="stat-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z" fill="white"/>
+                            </svg>
+                            <span class="stat-label">조회수</span>
+                        </span>
+                        <span class="stat-value" id="view-count">0 회</span>
+                    </span>
+                    <span class="stat-item">
+                        <span class="stat-left">
+                            <svg class="stat-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25ZM20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.37 3.29C17.98 2.9 17.35 2.9 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04Z" fill="white"/>
+                            </svg>
+                            <span class="stat-label">후기</span>
+                        </span>
+                        <span class="stat-value" id="review-count">0 회</span>
+                    </span>
+                    <span class="stat-item">
+                        <span class="stat-left">
+                            <svg class="stat-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                            </svg>
+                            <span class="stat-label">승인상태</span>
+                        </span>
+                        <span class="stat-value status" id="approval-status">광고중</span>
+                    </span>
                 </div>
+            </div>
 
-                <!-- 광고 설명 -->
-                <div class="ad-description" id="ad-description">
+            <!-- 광고 설명 -->
+            <div class="ad-description" id="ad-description" style="display: none;">
+                <h2>광고상세</h2>
+                <div class="ad-description-content" id="ad-description-content">
                     <p>광고 상세 내용이 여기에 표시됩니다.</p>
                 </div>
+            </div>
 
-                <!-- 광고 현황 -->
-                <div class="ad-stats">
-                    <h2>광고현황</h2>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <span class="stat-icon">⭐</span>
-                            <span class="stat-label">즐겨찾기 수</span>
-                            <span class="stat-value" id="favorite-count">0 회</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-icon">👁</span>
-                            <span class="stat-label">조회 수</span>
-                            <span class="stat-value" id="view-count">0 회</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-icon">✍️</span>
-                            <span class="stat-label">후기 수</span>
-                            <span class="stat-value" id="review-count">0 회</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-icon">✅</span>
-                            <span class="stat-label">승인상태</span>
-                            <span class="stat-value status" id="approval-status">광고중</span>
-                        </div>
-                    </div>
-                </div>
+            <!-- 액션 버튼들 (광고 수정/삭제) - 맨 아래 -->
+            <div class="action-buttons" id="action-buttons" style="display: none;">
+                <button class="btn-action btn-delete" id="btn-delete">광고삭제</button>
+                <button class="btn-action btn-edit" id="btn-edit">광고수정</button>
+            </div>
 
-                <!-- 액션 버튼들 -->
-                <div class="action-buttons">
-                    <button class="btn-action btn-edit" id="btn-edit">광고수정</button>
-                    <button class="btn-action btn-delete" id="btn-delete">광고삭제</button>
-                </div>
-
-                <!-- 빈 상태 메시지 -->
-                <div class="empty-state" id="empty-state" style="display: none;">
-                    <p>등록된 광고가 없습니다.</p>
-                    <button class="btn-add-first" onclick="location.href='/ad-posting/ad-posting.html'">첫 광고 등록하기</button>
-                </div>
+            <!-- 빈 상태 메시지 -->
+            <div class="empty-state" id="empty-state" style="display: none;">
+                <p>등록된 광고가 없습니다.</p>
+                <button class="btn-add-first" onclick="location.href='/ad-posting/ad-posting.html'">첫 광고 등록하기</button>
             </div>
         </div>
     </main>

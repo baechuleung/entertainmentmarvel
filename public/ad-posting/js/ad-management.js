@@ -8,22 +8,20 @@ let currentUser = null;
 let currentUserData = null;
 let currentAd = null;
 let currentAdId = null;
-let adImages = [];
-let currentImageIndex = 0;
 
 // DOM 요소
+const adItem = document.getElementById('ad-item');
+const adThumbnail = document.getElementById('ad-thumbnail');
 const adTitle = document.getElementById('ad-title');
-const businessTypeBadge = document.getElementById('business-type-badge');
-const locationBadge = document.getElementById('location-badge');
-const adMainImage = document.getElementById('ad-main-image');
-const imageDots = document.getElementById('image-dots');
+const adTypeAuthor = document.getElementById('ad-type-author');
 const adDescription = document.getElementById('ad-description');
+const adStats = document.getElementById('ad-stats');
 const favoriteCount = document.getElementById('favorite-count');
 const viewCount = document.getElementById('view-count');
 const reviewCount = document.getElementById('review-count');
 const approvalStatus = document.getElementById('approval-status');
+const actionButtons = document.getElementById('action-buttons');
 const emptyState = document.getElementById('empty-state');
-const adDetailContent = document.querySelector('.ad-detail-content');
 
 // 초기화
 document.addEventListener('DOMContentLoaded', function() {
@@ -91,7 +89,7 @@ function loadUserAd() {
             emptyState.style.display = 'none';
         } else {
             // 광고가 없을 때
-            adDetailContent.style.display = 'none';
+            hideAdSections();
             emptyState.style.display = 'block';
         }
     });
@@ -101,26 +99,27 @@ function loadUserAd() {
 function displayAdDetail() {
     if (!currentAd) return;
     
-    // 제목 또는 업소명 표시 (title이 없으면 businessName 사용)
-    adTitle.textContent = currentAd.title || currentAd.businessName || '제목 없음';
+    // 각 섹션 표시
+    showAdSections();
     
-    // 업종 배지
-    businessTypeBadge.textContent = currentAd.businessType || '업종';
+    // 썸네일 표시
+    adThumbnail.src = currentAd.thumbnail || '/img/default-thumb.jpg';
     
-    // 지역 배지
+    // 제목 표시 (businessName - author 형식)
+    adTitle.textContent = `${currentAd.businessName || '업소명 없음'} - ${currentAd.author || '작성자 없음'}`;
+    
+    // 메타 정보 표시 (businessType - region city)
     const location = currentAd.city ? 
-        `📍 ${currentAd.region} ${currentAd.city}` : 
-        `📍 ${currentAd.region || '지역'}`;
-    locationBadge.textContent = location;
-    
-    // 이미지 설정
-    setupImages();
+        `${currentAd.region} ${currentAd.city}` : 
+        `${currentAd.region || ''}`;
+    adTypeAuthor.textContent = `${currentAd.businessType || '업종'} - ${location}`.trim();
     
     // 광고 설명 (HTML 콘텐츠)
+    const adDescriptionContent = document.getElementById('ad-description-content');
     if (currentAd.content) {
-        adDescription.innerHTML = currentAd.content;
+        adDescriptionContent.innerHTML = currentAd.content;
     } else {
-        adDescription.innerHTML = '<p>광고 상세 내용이 없습니다.</p>';
+        adDescriptionContent.innerHTML = '<p>광고 상세 내용이 없습니다.</p>';
     }
     
     // 통계 정보
@@ -147,76 +146,20 @@ function displayAdDetail() {
                                  currentAd.status === 'pending' ? '#FFA500' : '#888';
 }
 
-// 이미지 설정
-function setupImages() {
-    adImages = [];
-    
-    // 썸네일 추가
-    if (currentAd.thumbnail) {
-        adImages.push(currentAd.thumbnail);
-    }
-    
-    // 추가 이미지들
-    if (currentAd.images && Array.isArray(currentAd.images)) {
-        adImages = adImages.concat(currentAd.images);
-    }
-    
-    // 기본 이미지가 없으면
-    if (adImages.length === 0) {
-        adImages.push('/img/default-ad.jpg');
-    }
-    
-    // 첫 번째 이미지 표시
-    currentImageIndex = 0;
-    updateImage();
-    
-    // 이미지 도트 생성
-    createImageDots();
-    
-    // 이미지가 1개면 네비게이션 숨기기
-    const navButtons = document.querySelectorAll('.image-nav-btn');
-    if (adImages.length <= 1) {
-        navButtons.forEach(btn => btn.style.display = 'none');
-        imageDots.style.display = 'none';
-    } else {
-        navButtons.forEach(btn => btn.style.display = 'block');
-        imageDots.style.display = 'flex';
-    }
+// 광고 섹션 표시
+function showAdSections() {
+    adItem.style.display = 'flex';
+    adDescription.style.display = 'block';
+    adStats.style.display = 'block';
+    actionButtons.style.display = 'grid';
 }
 
-// 이미지 업데이트
-function updateImage() {
-    adMainImage.src = adImages[currentImageIndex];
-    updateDots();
-}
-
-// 이미지 도트 생성
-function createImageDots() {
-    imageDots.innerHTML = '';
-    adImages.forEach((_, index) => {
-        const dot = document.createElement('span');
-        dot.className = 'dot';
-        if (index === currentImageIndex) {
-            dot.classList.add('active');
-        }
-        dot.addEventListener('click', () => {
-            currentImageIndex = index;
-            updateImage();
-        });
-        imageDots.appendChild(dot);
-    });
-}
-
-// 도트 업데이트
-function updateDots() {
-    const dots = document.querySelectorAll('.dot');
-    dots.forEach((dot, index) => {
-        if (index === currentImageIndex) {
-            dot.classList.add('active');
-        } else {
-            dot.classList.remove('active');
-        }
-    });
+// 광고 섹션 숨기기
+function hideAdSections() {
+    adItem.style.display = 'none';
+    adDescription.style.display = 'none';
+    adStats.style.display = 'none';
+    actionButtons.style.display = 'none';
 }
 
 // ImageKit에서 이미지들 삭제
@@ -292,19 +235,17 @@ async function deleteAllAdImages(ad) {
 
 // 이벤트 리스너 설정
 function setupEventListeners() {
-    // 이전 이미지
-    document.getElementById('prev-image')?.addEventListener('click', () => {
-        if (adImages.length > 1) {
-            currentImageIndex = (currentImageIndex - 1 + adImages.length) % adImages.length;
-            updateImage();
+    // 상세보기 버튼
+    document.getElementById('btn-detail')?.addEventListener('click', function() {
+        if (currentAdId) {
+            window.location.href = `/business-detail/business-detail.html?id=${currentAdId}`;
         }
     });
     
-    // 다음 이미지
-    document.getElementById('next-image')?.addEventListener('click', () => {
-        if (adImages.length > 1) {
-            currentImageIndex = (currentImageIndex + 1) % adImages.length;
-            updateImage();
+    // 후기 버튼
+    document.getElementById('btn-review')?.addEventListener('click', function() {
+        if (currentAdId) {
+            window.location.href = `/business-detail/business-detail.html?id=${currentAdId}&tab=reviews`;
         }
     });
     
