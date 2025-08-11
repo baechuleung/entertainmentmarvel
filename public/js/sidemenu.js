@@ -284,7 +284,7 @@ const SideMenu = {
         
         // 페이지 이동 매핑
         const pageMap = {
-            '홈으로 가기': '/main/main.html',
+            '홈으로 가기': '/',
             '광고 관리': '/ad-posting/ad-management.html',
             '1:1 고객센터': 'https://open.kakao.com/o/skhPJeLh',
             'FAQ': '/faq/faq.html',
@@ -312,7 +312,7 @@ const SideMenu = {
                 console.log('로그아웃 완료');
                 
                 // 메인 페이지로 이동
-                window.location.href = '/main/main.html';
+                window.location.href = '/';
             } catch (error) {
                 console.error('로그아웃 실패:', error);
                 alert('로그아웃에 실패했습니다.');

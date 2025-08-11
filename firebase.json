@@ -12,8 +12,12 @@
         "destination": "/__/auth/handler"
       },
       {
+        "source": "/",
+        "destination": "/main/main.html"
+      },
+      {
         "source": "**",
-        "destination": "/index.html"
+        "destination": "/main/main.html"
       }
     ]
   },

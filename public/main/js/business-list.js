@@ -1,15 +1,24 @@
 import { rtdb } from '/js/firebase-config.js';
 import { ref, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-import { currentCategory, currentFilters } from './business-header.js';
+import { currentCategory, currentFilters } from '/main/js/business-header.js';
 
 // 전역 변수
 let businessItemTemplate = null;
 let allAdvertisements = [];
+let displayedAds = [];
+let preloadedAds = [];
+let currentDisplayIndex = 0;
+let isLoading = false;
+let hasMoreData = true;
+
+const INITIAL_LOAD = 100;  // 처음 로드할 개수
+const DISPLAY_BATCH = 50;  // 한번에 보여줄 개수
+const PRELOAD_BATCH = 50;  // 미리 로드할 개수
 
 // 업종 리스트 템플릿 로드
 export async function loadBusinessItemTemplate() {
     try {
-        const response = await fetch('components/business-list.html');
+        const response = await fetch('/main/components/business-list.html');
         const html = await response.text();
         businessItemTemplate = html;
     } catch (error) {
@@ -27,26 +36,22 @@ function replaceTemplate(template, data) {
     return html;
 }
 
-// Firebase에서 광고 데이터 로드 (캐싱 포함)
+// 배열 셔플 함수 (Fisher-Yates 알고리즘)
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+// Firebase에서 광고 데이터 로드 (초기 100개)
 export async function loadAdvertisements() {
     console.log('광고 목록 로드 시작');
     
-    // 캐시 확인
-    const cacheKey = 'mainPageAds';
-    const cacheTime = 2 * 60 * 60 * 1000; // 2시간
-    const cached = sessionStorage.getItem(cacheKey);
-    
-    if (cached) {
-        const { data, timestamp } = JSON.parse(cached);
-        const isExpired = Date.now() - timestamp > cacheTime;
-        
-        if (!isExpired) {
-            console.log('캐시된 데이터 사용');
-            allAdvertisements = data;
-            displayAdvertisements(allAdvertisements);
-            return;
-        }
-    }
+    // 캐시 확인 (랜덤이므로 캐시 사용 안함)
+    const cacheKey = 'mainPageAds_random_' + Date.now();
     
     // Firebase에서 새 데이터 로드
     try {
@@ -57,42 +62,186 @@ export async function loadAdvertisements() {
         
         if (snapshot.exists()) {
             const data = snapshot.val();
-            allAdvertisements = Object.entries(data).map(([id, ad]) => ({
+            const allAds = Object.entries(data).map(([id, ad]) => ({
                 ...ad,
                 id
             }));
             
             // 활성 상태인 광고만 필터링
-            allAdvertisements = allAdvertisements.filter(ad => ad.status === 'active');
+            let activeAds = allAds.filter(ad => ad.status === 'active');
             
-            // 최신순 정렬
-            allAdvertisements.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            // 랜덤으로 셔플
+            activeAds = shuffleArray(activeAds);
             
-            console.log(`총 ${allAdvertisements.length}개의 광고 로드됨`);
+            // 처음 100개만 가져오기
+            allAdvertisements = activeAds.slice(0, INITIAL_LOAD);
+            
+            console.log(`총 ${allAdvertisements.length}개의 광고 랜덤 로드됨`);
         } else {
             allAdvertisements = [];
             console.log('광고 데이터가 없습니다');
         }
         
-        // 캐시에 저장
-        const dataToCache = {
-            data: allAdvertisements,
-            timestamp: Date.now()
-        };
-        sessionStorage.setItem(cacheKey, JSON.stringify(dataToCache));
-        console.log('데이터 캐시 저장 완료');
-        
-        displayAdvertisements(allAdvertisements);
+        initializeDisplay();
     } catch (error) {
         console.error('광고 로드 실패:', error);
         allAdvertisements = [];
-        displayAdvertisements(allAdvertisements);
+        initializeDisplay();
     }
+}
+
+// 초기 디스플레이 설정
+function initializeDisplay() {
+    // 처음 50개만 표시
+    displayedAds = allAdvertisements.slice(0, DISPLAY_BATCH);
+    currentDisplayIndex = DISPLAY_BATCH;
+    
+    // 51-100번째 광고를 preloadedAds에 저장
+    if (allAdvertisements.length > DISPLAY_BATCH) {
+        preloadedAds = allAdvertisements.slice(DISPLAY_BATCH, INITIAL_LOAD);
+    }
+    
+    displayAdvertisements(displayedAds);
+    
+    // 스크롤 이벤트 설정
+    setupScrollListener();
+    
+    // 백그라운드에서 추가 50개 로드 (101-150)
+    if (allAdvertisements.length === INITIAL_LOAD) {
+        preloadNextBatch();
+    }
+}
+
+// 백그라운드에서 추가 데이터 로드
+async function preloadNextBatch() {
+    if (isLoading || !hasMoreData) return;
+    
+    isLoading = true;
+    
+    try {
+        const adsRef = ref(rtdb, 'advertisements');
+        const snapshot = await get(adsRef);
+        
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            const allAds = Object.entries(data).map(([id, ad]) => ({
+                ...ad,
+                id
+            }));
+            
+            // 활성 상태인 광고만 필터링
+            let activeAds = allAds.filter(ad => ad.status === 'active');
+            
+            // 이미 로드된 광고 ID 목록
+            const loadedIds = new Set(allAdvertisements.map(ad => ad.id));
+            
+            // 아직 로드되지 않은 광고들만 필터링
+            let newAds = activeAds.filter(ad => !loadedIds.has(ad.id));
+            
+            // 랜덤으로 셔플
+            newAds = shuffleArray(newAds);
+            
+            // 50개만 선택
+            const nextBatch = newAds.slice(0, PRELOAD_BATCH);
+            
+            if (nextBatch.length > 0) {
+                preloadedAds = [...preloadedAds, ...nextBatch];
+                allAdvertisements = [...allAdvertisements, ...nextBatch];
+                console.log(`백그라운드에서 ${nextBatch.length}개 추가 랜덤 로드됨`);
+            } else {
+                hasMoreData = false;
+                console.log('더 이상 로드할 광고가 없습니다');
+            }
+        }
+    } catch (error) {
+        console.error('추가 광고 로드 실패:', error);
+    } finally {
+        isLoading = false;
+    }
+}
+
+// 스크롤 이벤트 리스너 설정
+function setupScrollListener() {
+    let ticking = false;
+    
+    function handleScroll() {
+        if (!ticking) {
+            window.requestAnimationFrame(function() {
+                checkScrollPosition();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }
+    
+    window.addEventListener('scroll', handleScroll);
+}
+
+// 스크롤 위치 체크
+function checkScrollPosition() {
+    const scrollHeight = document.documentElement.scrollHeight;
+    const scrollTop = window.scrollY;
+    const clientHeight = window.innerHeight;
+    
+    // 페이지 하단 200px 전에 도달하면 다음 배치 표시
+    if (scrollHeight - scrollTop - clientHeight < 200) {
+        showNextBatch();
+    }
+}
+
+// 다음 배치 표시
+function showNextBatch() {
+    if (isLoading) return;
+    
+    // preloadedAds에서 다음 50개 가져오기
+    if (preloadedAds.length > 0) {
+        const nextBatch = preloadedAds.slice(0, DISPLAY_BATCH);
+        preloadedAds = preloadedAds.slice(DISPLAY_BATCH);
+        
+        displayedAds = [...displayedAds, ...nextBatch];
+        appendAdvertisements(nextBatch);
+        
+        console.log(`${nextBatch.length}개 추가 표시됨`);
+        
+        // preloadedAds가 부족하면 백그라운드에서 추가 로드
+        if (preloadedAds.length < DISPLAY_BATCH && hasMoreData) {
+            preloadNextBatch();
+        }
+    }
+}
+
+// 광고 추가 표시 (기존 목록에 추가)
+function appendAdvertisements(ads) {
+    const businessList = document.querySelector('.business-list');
+    if (!businessList || ads.length === 0) return;
+    
+    // 추가할 광고들의 HTML 생성
+    const html = ads.map(ad => {
+        const data = {
+            id: ad.id,
+            thumbnail: ad.thumbnail || '/img/default-thumb.jpg',
+            businessName: ad.businessName || '업소명 없음',
+            businessType: ad.businessType || '미분류',
+            author: ad.author || '작성자 없음',
+            region: ad.region || '',
+            city: ad.city || '',
+            location: [ad.region, ad.city].filter(Boolean).join(' ') || '위치 정보 없음',
+            views: ad.views || 0
+        };
+        
+        return replaceTemplate(businessItemTemplate, data);
+    }).join('');
+    
+    // 기존 목록에 추가
+    businessList.insertAdjacentHTML('beforeend', html);
+    
+    // 새로 추가된 아이템들에 이벤트 리스너 추가
+    attachEventListeners();
 }
 
 // 필터 적용
 export function applyFilters() {
-    let filteredAds = allAdvertisements;
+    let filteredAds = displayedAds;
     
     // 카테고리 필터 우선 적용 (name 값으로 비교)
     if (currentCategory === 'karaoke') {
@@ -143,7 +292,7 @@ export async function displayAdvertisements(ads) {
         const data = {
             id: ad.id,
             thumbnail: ad.thumbnail || '/img/default-thumb.jpg',
-            businessName: ad.businessName || '업소명 없음',  // businessName 필드 사용
+            businessName: ad.businessName || '업소명 없음',
             businessType: ad.businessType || '미분류',
             author: ad.author || '작성자 없음',
             region: ad.region || '',
@@ -157,34 +306,47 @@ export async function displayAdvertisements(ads) {
     
     businessList.innerHTML = html;
     
+    // 이벤트 리스너 추가
+    attachEventListeners();
+}
+
+// 이벤트 리스너 추가 함수
+function attachEventListeners() {
     // 상세보기 버튼 이벤트
     document.querySelectorAll('.btn-detail').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const adId = this.dataset.id;
-            window.location.href = `/business-detail/business-detail.html?id=${adId}`;
-        });
+        if (!btn.hasAttribute('data-listener')) {
+            btn.setAttribute('data-listener', 'true');
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const adId = this.dataset.id;
+                window.location.href = `/business-detail/business-detail.html?id=${adId}`;
+            });
+        }
     });
     
     // 후기 버튼 이벤트
     document.querySelectorAll('.btn-review').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const adId = this.dataset.id;
-            // 후기 탭으로 바로 이동
-            window.location.href = `/business-detail/business-detail.html?id=${adId}&tab=reviews`;
-        });
+        if (!btn.hasAttribute('data-listener')) {
+            btn.setAttribute('data-listener', 'true');
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const adId = this.dataset.id;
+                window.location.href = `/business-detail/business-detail.html?id=${adId}&tab=reviews`;
+            });
+        }
     });
     
-    // 전체 아이템 클릭 이벤트 (이미지나 제목 클릭 시)
+    // 전체 아이템 클릭 이벤트
     document.querySelectorAll('.business-item').forEach(item => {
-        item.addEventListener('click', function(e) {
-            // 버튼 클릭이 아닌 경우에만 동작
-            if (!e.target.classList.contains('btn-detail') && !e.target.classList.contains('btn-review')) {
-                const adId = this.dataset.id;
-                window.location.href = `/business-detail/business-detail.html?id=${adId}`;
-            }
-        });
+        if (!item.hasAttribute('data-listener')) {
+            item.setAttribute('data-listener', 'true');
+            item.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('btn-detail') && !e.target.classList.contains('btn-review')) {
+                    const adId = this.dataset.id;
+                    window.location.href = `/business-detail/business-detail.html?id=${adId}`;
+                }
+            });
+        }
     });
 }
 
@@ -193,12 +355,12 @@ window.addEventListener('categoryChanged', (e) => {
     const { category } = e.detail;
     
     if (category === 'all') {
-        displayAdvertisements(allAdvertisements);
+        displayAdvertisements(displayedAds);
     } else if (category === 'karaoke') {
-        const filtered = allAdvertisements.filter(ad => ad.category === '유흥주점');
+        const filtered = displayedAds.filter(ad => ad.category === '유흥주점');
         displayAdvertisements(filtered);
     } else if (category === 'gunma') {
-        const filtered = allAdvertisements.filter(ad => ad.category === '건전마사지');
+        const filtered = displayedAds.filter(ad => ad.category === '건전마사지');
         displayAdvertisements(filtered);
     }
 });

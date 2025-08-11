@@ -35,7 +35,7 @@ function checkBackButton() {
     const logo = document.querySelector('#common-header .logo');
     const pageTitle = document.querySelector('.page-title');
     
-    if (currentPath !== '/main/main.html' && currentPath !== '/main/main' && currentPath !== '/') {
+    if (currentPath !== '/' && currentPath !== '/' && currentPath !== '/') {
         // 메인 페이지가 아닌 경우 뒤로가기 버튼 표시
         if (backButton) {
             backButton.style.display = 'flex';
@@ -59,7 +59,7 @@ function initHeaderEvents() {
     const logo = document.querySelector('#common-header .logo');
     if (logo) {
         logo.addEventListener('click', function() {
-            window.location.href = '/main/main.html';
+            window.location.href = '/';
         });
     }
     
