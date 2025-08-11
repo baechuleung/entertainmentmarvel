@@ -1,5 +1,5 @@
 import { rtdb, auth, db } from '/js/firebase-config.js';
-import { ref, push, set, onValue, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { ref, push, set, onValue, remove, update, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { doc, getDoc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { uploadSingleImage } from '/js/imagekit-upload.js';
@@ -193,17 +193,44 @@ function displayReviews(reviews) {
         return;
     }
     
-    reviewsList.innerHTML = reviews.map(review => {
+    reviewsList.innerHTML = reviews.map((review, index) => {
         const createdDate = review.createdAt ? 
             new Date(review.createdAt).toLocaleDateString('ko-KR') : '-';
         
+        // 이미지 개수 계산
+        let imageCount = 0;
+        if (review.content) {
+            const imgMatches = review.content.match(/<img/g);
+            imageCount = imgMatches ? imgMatches.length : 0;
+        }
+        
         return `
             <div class="review-item" data-review-id="${review.id}" data-review='${JSON.stringify(review).replace(/'/g, "&apos;")}'>
-                <div class="review-header">
-                    <span class="review-author">${review.authorNickname || '익명'}</span>
-                    <span class="review-date">${createdDate}</span>
+                <div class="review-content-wrapper">
+                    <div class="review-main">
+                        <div class="review-line">
+                            <span class="review-number">${index + 1}</span>
+                            <span class="review-title">${review.title || '제목 없음'}</span>
+                        </div>
+                        <div class="review-line">
+                            <span class="review-spacer"></span>
+                            <div class="review-info">
+                                <span class="review-author">${review.authorNickname || '익명'}</span>
+                                <span class="review-date">${createdDate}</span>
+                            </div>
+                        </div>
+                    </div>
+                    ${imageCount > 0 ? `
+                        <div class="review-image-info">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                            <span>+${imageCount}</span>
+                        </div>
+                    ` : ''}
                 </div>
-                <div class="review-title">${review.title || '제목 없음'}</div>
             </div>
         `;
     }).join('');
@@ -219,27 +246,46 @@ function handleReviewClick(e) {
     const reviewItem = e.currentTarget;
     const reviewData = JSON.parse(reviewItem.getAttribute('data-review'));
     
-    // 상세 모달에 내용 표시
-    document.getElementById('detail-modal-title').textContent = reviewData.title || '제목 없음';
-    document.getElementById('review-detail-content').innerHTML = reviewData.content || '';
+    console.log('후기 클릭됨:', reviewData);
     
-    // 수정/삭제 버튼에 데이터 저장
-    document.getElementById('btn-edit-review').setAttribute('data-review-id', reviewData.id);
-    document.getElementById('btn-delete-review').setAttribute('data-review-id', reviewData.id);
+    // 상세 모달에 내용 표시
+    const modalTitle = document.getElementById('detail-modal-title');
+    const modalContent = document.getElementById('review-detail-content');
+    
+    if (modalTitle) modalTitle.textContent = reviewData.title || '제목 없음';
+    if (modalContent) modalContent.innerHTML = reviewData.content || '';
+    
+    // 수정/삭제 버튼 표시 여부
+    const editBtn = document.getElementById('btn-edit-review');
+    const deleteBtn = document.getElementById('btn-delete-review');
+    
+    if (currentUser && currentUser.uid === reviewData.userId) {
+        if (editBtn) {
+            editBtn.style.display = 'block';
+            editBtn.setAttribute('data-review-id', reviewData.id);
+        }
+        if (deleteBtn) {
+            deleteBtn.style.display = 'block';
+            deleteBtn.setAttribute('data-review-id', reviewData.id);
+        }
+    } else {
+        if (editBtn) editBtn.style.display = 'none';
+        if (deleteBtn) deleteBtn.style.display = 'none';
+    }
     
     // 수정을 위해 전역 변수에 저장
     editingReviewData = reviewData;
     
-    // 본인 작성 후기인지 확인
-    if (currentUser && currentUser.uid === reviewData.userId) {
-        document.getElementById('btn-edit-review').style.display = 'block';
-        document.getElementById('btn-delete-review').style.display = 'block';
+    // 모달 열기
+    const modal = document.getElementById('review-detail-modal');
+    if (modal) {
+        modal.style.cssText = 'display: flex !important; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 99999; align-items: center; justify-content: center;';
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        console.log('상세 모달 열림');
     } else {
-        document.getElementById('btn-edit-review').style.display = 'none';
-        document.getElementById('btn-delete-review').style.display = 'none';
+        console.error('review-detail-modal을 찾을 수 없음');
     }
-    
-    openModal('review-detail-modal');
 }
 
 // 후기 제출
@@ -417,9 +463,57 @@ async function handleReviewEditSubmit(e) {
 async function handleDeleteReview() {
     const reviewId = this.getAttribute('data-review-id');
     
-    if (confirm('정말 이 후기를 삭제하시겠습니까?')) {
+    if (confirm('정말 이 후기를 삭제하시겠습니까?\n삭제된 후기와 이미지는 복구할 수 없습니다.')) {
         try {
-            await remove(ref(rtdb, `advertisements/${currentAdId}/reviews/${reviewId}`));
+            // 삭제할 후기 데이터 가져오기
+            const reviewRef = ref(rtdb, `advertisements/${currentAdId}/reviews/${reviewId}`);
+            const snapshot = await get(reviewRef);
+            const reviewData = snapshot.val();
+            
+            // 후기 내용에서 이미지 URL 추출
+            const imageUrls = [];
+            if (reviewData && reviewData.content) {
+                const imgRegex = /<img[^>]+src="([^">]+)"/g;
+                let match;
+                while ((match = imgRegex.exec(reviewData.content)) !== null) {
+                    const imageUrl = match[1];
+                    if (imageUrl && imageUrl.includes('ik.imagekit.io')) {
+                        imageUrls.push(imageUrl);
+                    }
+                }
+            }
+            
+            // ImageKit에서 이미지 삭제 (있는 경우)
+            if (imageUrls.length > 0) {
+                try {
+                    console.log('삭제할 이미지:', imageUrls);
+                    
+                    // Firebase Function 호출하여 이미지 삭제
+                    const response = await fetch('https://imagekit-delete-enujtcasca-uc.a.run.app', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            fileUrls: imageUrls,
+                            userId: currentUser.uid
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log('이미지 삭제 결과:', result);
+                    } else {
+                        console.error('이미지 삭제 실패:', await response.text());
+                    }
+                } catch (imageError) {
+                    console.error('ImageKit 이미지 삭제 오류:', imageError);
+                    // 이미지 삭제 실패해도 후기 삭제는 계속 진행
+                }
+            }
+            
+            // Firebase에서 후기 삭제
+            await remove(reviewRef);
             
             // Firestore에서 사용자 정보 업데이트 (포인트 차감 및 이력 추가)
             const userRef = doc(db, 'users', currentUser.uid);

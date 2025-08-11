@@ -96,6 +96,7 @@
 .business-buttons {
     display: flex;
     gap: 8px;
+    padding: 10px 15px;
 }
 
 .btn-detail, .btn-review {
@@ -256,34 +257,83 @@
 }
 
 .review-item {
-    background-color: #2a2a2a;
-    padding: 15px;
-    border-radius: 8px;
+    padding: 15px 0;
+    border-bottom: 1px solid #333;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-.review-header {
+.review-item:last-child {
+    border-bottom: none;
+}
+
+.review-content-wrapper {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
+    align-items: center;
+    gap: 15px;
 }
 
-.review-author {
-    color: #1a5490;
-    font-size: 14px;
-    font-weight: 500;
+.review-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.review-date {
-    color: #888;
-    font-size: 12px;
+.review-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.review-number {
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    min-width: 20px;
+}
+
+.review-spacer {
+    min-width: 20px;
 }
 
 .review-title {
     color: #fff;
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 8px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.review-info {
+    display: flex;
+    gap: 10px;
+}
+
+.review-author {
+    color: #888;
+    font-size: 13px;
+}
+
+.review-date {
+    color: #666;
+    font-size: 12px;
+}
+
+.review-image-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 15px 12px;
+    background: #363636;
+    border-radius: 10px;
+    color: #aaa;
+    font-size: 12px;
+    align-self: center;
+}
+
+.review-image-info svg {
+    width: 16px;
+    height: 16px;
 }
 
 .review-content {
