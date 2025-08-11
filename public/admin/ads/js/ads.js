@@ -14,7 +14,6 @@ let allAds = [];
         await loadAdminHeader(user);
         
         // 3. 데이터 로드
-        loadBusinessTypes();
         loadAds();
         
         // 4. 이벤트 리스너 설정
@@ -26,22 +25,22 @@ let allAds = [];
     }
 })();
 
-// 업종 데이터 로드
-async function loadBusinessTypes() {
-    try {
-        const response = await fetch('/data/business-types.json');
-        const data = await response.json();
-        
-        const filterType = document.getElementById('filter-type');
-        data.businessTypes.forEach(type => {
-            const option = document.createElement('option');
-            option.value = type.name;
-            option.textContent = type.name;
-            filterType.appendChild(option);
-        });
-    } catch (error) {
-        console.error('업종 데이터 로드 실패:', error);
-    }
+// 업종 필터 옵션 설정
+function setupFilterOptions() {
+    // 광고 데이터에서 고유한 업종 추출
+    const uniqueBusinessTypes = [...new Set(allAds.map(ad => ad.businessType).filter(Boolean))];
+    const filterType = document.getElementById('filter-type');
+    
+    // 기존 옵션 제거 (전체 업종 제외)
+    filterType.innerHTML = '<option value="">전체 업종</option>';
+    
+    // 업종 옵션 추가
+    uniqueBusinessTypes.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type;
+        option.textContent = type;
+        filterType.appendChild(option);
+    });
 }
 
 // 광고 목록 로드
@@ -60,6 +59,9 @@ function loadAds() {
             // 최신순 정렬
             allAds.sort((a, b) => b.createdAt - a.createdAt);
         }
+        
+        // 필터 옵션 설정
+        setupFilterOptions();
         
         displayAds();
     });
@@ -107,9 +109,9 @@ function displayAds() {
         return `
             <tr>
                 <td>${ad.id.substring(0, 8)}...</td>
-                <td>${ad.title}</td>
+                <td>${ad.category || '-'}</td>
+                <td>${ad.businessType || '-'}</td>
                 <td>${ad.author}</td>
-                <td>${ad.businessType}</td>
                 <td>${ad.region} ${ad.city}</td>
                 <td>
                     <span class="status-badge ${ad.status}">${ad.status === 'active' ? '활성' : '비활성'}</span>
@@ -200,3 +202,122 @@ function setupEventListeners() {
         }
     });
 }
+
+// ImageKit에서 이미지들 삭제
+async function deleteAllAdImages(ad) {
+    const imageUrls = [];
+    
+    // 썸네일 수집
+    if (ad.thumbnail && ad.thumbnail.includes('ik.imagekit.io')) {
+        imageUrls.push(ad.thumbnail);
+    }
+    
+    // 상세 이미지들 수집
+    if (ad.images && Array.isArray(ad.images)) {
+        ad.images.forEach(imageUrl => {
+            if (imageUrl && imageUrl.includes('ik.imagekit.io')) {
+                imageUrls.push(imageUrl);
+            }
+        });
+    }
+    
+    // 에디터 내용에서 이미지 URL 추출
+    if (ad.content) {
+        const imgRegex = /<img[^>]+src="([^">]+)"/g;
+        let match;
+        while ((match = imgRegex.exec(ad.content)) !== null) {
+            const imageUrl = match[1];
+            if (imageUrl && imageUrl.includes('ik.imagekit.io')) {
+                imageUrls.push(imageUrl);
+            }
+        }
+    }
+    
+    if (imageUrls.length === 0) {
+        console.log('삭제할 ImageKit 이미지가 없습니다.');
+        return;
+    }
+    
+    try {
+        // 배포된 Firebase Function 호출
+        const response = await fetch('https://imagekit-delete-enujtcasca-uc.a.run.app', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                fileUrls: imageUrls,
+                userId: ad.authorId || 'admin'
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('이미지 삭제 결과:', result);
+            
+            // 삭제 결과 확인
+            if (result.summary) {
+                console.log(`총 ${result.summary.total}개 중 ${result.summary.deleted}개 삭제 성공`);
+            }
+            
+            // 실패한 파일이 있으면 로그
+            if (result.failed && result.failed.length > 0) {
+                console.warn('삭제 실패한 파일들:', result.failed);
+            }
+        } else {
+            const errorText = await response.text();
+            console.error('이미지 삭제 요청 실패:', errorText);
+        }
+    } catch (error) {
+        console.error('ImageKit 이미지 삭제 오류:', error);
+        // 실패해도 광고 삭제는 계속 진행
+    }
+}
+
+// 광고 삭제
+window.deleteAd = async (adId) => {
+    const ad = allAds.find(a => a.id === adId);
+    const adName = ad?.businessName || ad?.title || '이 광고';
+    
+    if (!confirm(`"${adName}"를 삭제하시겠습니까?\n\n삭제된 광고와 이미지는 복구할 수 없습니다.`)) {
+        return;
+    }
+    
+    try {
+        // ImageKit에서 이미지들 삭제 (실패해도 계속 진행)
+        if (ad) {
+            await deleteAllAdImages(ad);
+        }
+        
+        // Firebase에서 광고 삭제
+        await remove(ref(rtdb, `advertisements/${adId}`));
+        
+        alert('광고가 삭제되었습니다.');
+        loadAds(); // 목록 새로고침
+    } catch (error) {
+        console.error('광고 삭제 실패:', error);
+        alert('광고 삭제에 실패했습니다.');
+    }
+};
+
+// 광고 상태 토글
+window.toggleStatus = async (adId, currentStatus) => {
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    const statusText = newStatus === 'active' ? '활성화' : '비활성화';
+    
+    if (!confirm(`이 광고를 ${statusText}하시겠습니까?`)) {
+        return;
+    }
+    
+    try {
+        await update(ref(rtdb, `advertisements/${adId}`), {
+            status: newStatus,
+            updatedAt: Date.now()
+        });
+        alert(`광고가 ${statusText}되었습니다.`);
+        loadAds(); // 목록 새로고침
+    } catch (error) {
+        console.error('상태 변경 실패:', error);
+        alert('상태 변경에 실패했습니다.');
+    }
+};
