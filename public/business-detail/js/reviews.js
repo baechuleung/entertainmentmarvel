@@ -15,6 +15,18 @@ let previewImagesWrite = new Map();
 let previewImagesEdit = new Map();
 let editingReviewData = null;
 
+// 모달 닫기 함수 추가
+function closeReviewModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+}
+
 // 후기 설정
 export function setupReviews(adId) {
     currentAdId = adId;
@@ -28,16 +40,47 @@ export function setupReviews(adId) {
     quillWrite = initQuillEditor('editor', previewImagesWrite);
     quillEdit = initQuillEditor('editor-edit', previewImagesEdit);
     
+    // 초기 로드
+    loadReviews(currentAdId);
+    
     // 후기 로드 이벤트
     window.addEventListener('loadReviews', () => {
         loadReviews(currentAdId);
     });
     
-    // 후기 작성 버튼
-    document.addEventListener('click', (e) => {
-        if (e.target.id === 'btn-write-review-tab') {
-            handleWriteReview();
+    // 후기 작성 버튼 - 직접 이벤트 리스너 추가
+    setTimeout(() => {
+        const writeReviewBtn = document.getElementById('btn-write-review-tab');
+        if (writeReviewBtn) {
+            console.log('후기 작성 버튼 찾음');
+            writeReviewBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('후기 작성 버튼 클릭됨');
+                handleWriteReview();
+            });
+        } else {
+            console.error('후기 작성 버튼을 찾을 수 없음');
         }
+    }, 1000);
+    
+    // 모달 닫기 버튼들
+    document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const modalId = e.target.getAttribute('data-modal');
+            if (modalId) {
+                closeReviewModal(modalId);
+            }
+        });
+    });
+    
+    // 취소 버튼들
+    document.querySelectorAll('.btn-cancel').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const modalId = e.target.getAttribute('data-modal');
+            if (modalId) {
+                closeReviewModal(modalId);
+            }
+        });
     });
     
     // 폼 이벤트
@@ -51,6 +94,9 @@ export function setupReviews(adId) {
 
 // 후기 작성 처리
 function handleWriteReview() {
+    console.log('handleWriteReview 함수 호출됨');
+    console.log('currentUser:', currentUser);
+    
     if (!currentUser) {
         if (confirm('후기 작성은 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
             const currentUrl = window.location.href;
@@ -59,7 +105,18 @@ function handleWriteReview() {
         return;
     }
     
-    openModal('review-modal');
+    console.log('모달 열기 시도');
+    const modal = document.getElementById('review-modal');
+    if (modal) {
+        console.log('모달 요소 찾음');
+        // show 클래스 대신 직접 스타일 적용
+        modal.style.cssText = 'display: flex !important; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 99999; align-items: center; justify-content: center;';
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        console.log('모달 스타일 적용 완료');
+    } else {
+        console.error('review-modal 요소를 찾을 수 없음');
+    }
 }
 
 // 후기 목록 로드
@@ -99,6 +156,18 @@ async function loadReviews(adId) {
                 
                 // 최신순 정렬
                 reviews.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            }
+            
+            // 후기 개수 업데이트 추가
+            const reviewTotalCount = document.getElementById('review-total-count');
+            if (reviewTotalCount) {
+                reviewTotalCount.textContent = `(${reviews.length})`;
+            }
+            
+            // 헤더의 review-count도 업데이트
+            const headerReviewCount = document.getElementById('review-count');
+            if (headerReviewCount) {
+                headerReviewCount.textContent = reviews.length;
             }
             
             displayReviews(reviews);
@@ -248,7 +317,9 @@ async function handleReviewSubmit(e) {
         });
         
         alert('후기가 등록되었습니다.');
-        closeModal('review-modal');
+        
+        // 모달 닫기
+        closeReviewModal('review-modal');
         
         // 초기화
         document.getElementById('review-title').value = '';
@@ -325,7 +396,9 @@ async function handleReviewEditSubmit(e) {
         });
         
         alert('후기가 수정되었습니다.');
-        closeModal('review-edit-modal');
+        
+        // 모달 닫기
+        closeReviewModal('review-edit-modal');
         
         // 초기화
         previewImagesEdit.clear();
@@ -371,7 +444,9 @@ async function handleDeleteReview() {
             });
             
             alert('후기가 삭제되었습니다.');
-            closeModal('review-detail-modal');
+            
+            // 모달 닫기
+            closeReviewModal('review-detail-modal');
         } catch (error) {
             console.error('후기 삭제 실패:', error);
             alert('후기 삭제에 실패했습니다.');

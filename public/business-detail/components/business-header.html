@@ -1,15 +1,52 @@
 <div class="business-header-section">
-    <div class="business-item-detail">
+    <div class="business-item" data-id="{{id}}">
         <img id="business-thumbnail" style="display: none;" alt="업체 이미지">
         <div class="business-info">
-            <div class="ad-title" id="business-title"></div>
-            <div class="ad-meta">
-                <span class="ad-type-author" id="business-type-author"></span>
-                <span class="ad-location" id="business-location"></span>
+            <div>
+                <div class="ad-title" id="business-name"></div>
+                <div class="ad-meta">
+                    <div class="ad-type" id="business-type"></div>
+                    <div class="ad-location" id="business-location"></div>
+                </div>
             </div>
-            <div class="ad-views">
-                <span id="business-views"></span>
+            <div class="business-stats">
+                <div class="stat-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span id="view-count">0</span>
+                </div>
+                <div class="stat-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span id="review-count">0</span>
+                </div>
+                <div class="stat-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    <span id="bookmark-count">0</span>
+                </div>
             </div>
         </div>
+    </div>
+    <div class="business-buttons">
+        <button class="btn-detail" id="btn-call">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+            문의하기
+        </button>
+        <button class="btn-review" id="btn-bookmark">
+            <svg class="star-outline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            <span class="bookmark-text">즐겨찾기</span>
+        </button>
     </div>
 </div>

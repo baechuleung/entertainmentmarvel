@@ -116,6 +116,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-clamp: 1;
 }
 
 /* 게시글 메타 정보 */
