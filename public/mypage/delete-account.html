@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>회원탈퇴 - 유흥마블</title>
+    <meta name="description" content="유흥마블 회원탈퇴">
+    
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/sidemenu.css">
+    <link rel="stylesheet" href="css/delete-account.css">
+    
+    <script src="/js/seo.js"></script>
+</head>
+<body>
+    <main>
+        <div class="delete-account-container">
+            <!-- 경고 메시지 -->
+            <div class="warning-section">
+                <div class="warning-icon">⚠️</div>
+                <h2 class="warning-title">정말 탈퇴하시겠습니까?</h2>
+                <p class="warning-text">회원 탈퇴 시 아래 정보가 모두 삭제되며, 복구할 수 없습니다.</p>
+            </div>
+            
+            <!-- 삭제될 정보 목록 -->
+            <div class="delete-info-section">
+                <h3 class="section-title">삭제되는 정보</h3>
+                <ul class="delete-list">
+                    <li>
+                        <span class="list-icon">•</span>
+                        <span>회원 정보 (닉네임, 이메일 등)</span>
+                    </li>
+                    <li>
+                        <span class="list-icon">•</span>
+                        <span>보유 포인트 <span id="user-points" class="highlight">0 P</span></span>
+                    </li>
+                    <li>
+                        <span class="list-icon">•</span>
+                        <span>작성한 리뷰 <span id="review-count" class="highlight">0개</span></span>
+                    </li>
+                    <li>
+                        <span class="list-icon">•</span>
+                        <span>찜한 업체 <span id="bookmark-count" class="highlight">0개</span></span>
+                    </li>
+                    <li class="business-only" style="display: none;">
+                        <span class="list-icon">•</span>
+                        <span>등록한 업체 정보</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- 탈퇴 사유 -->
+            <div class="reason-section">
+                <h3 class="section-title">탈퇴 사유 (선택)</h3>
+                <div class="reason-options">
+                    <label class="reason-item">
+                        <input type="radio" name="reason" value="no-use">
+                        <span>서비스를 이용하지 않음</span>
+                    </label>
+                    <label class="reason-item">
+                        <input type="radio" name="reason" value="dissatisfied">
+                        <span>서비스가 마음에 들지 않음</span>
+                    </label>
+                    <label class="reason-item">
+                        <input type="radio" name="reason" value="privacy">
+                        <span>개인정보 보호 우려</span>
+                    </label>
+                    <label class="reason-item">
+                        <input type="radio" name="reason" value="other">
+                        <span>기타</span>
+                    </label>
+                </div>
+                <textarea id="reason-text" class="reason-text" placeholder="탈퇴 사유를 입력해주세요 (선택사항)"></textarea>
+            </div>
+            
+            <!-- 비밀번호 확인 -->
+            <div class="password-section">
+                <h3 class="section-title">비밀번호 확인</h3>
+                <input type="password" id="password" class="password-input" placeholder="비밀번호를 입력하세요" required>
+                <span class="error-message" id="password-error"></span>
+            </div>
+            
+            <!-- 동의 체크박스 -->
+            <div class="agreement-section">
+                <label class="agreement-label">
+                    <input type="checkbox" id="agreement" class="agreement-checkbox">
+                    <span>위 내용을 모두 확인했으며, 회원 탈퇴에 동의합니다.</span>
+                </label>
+            </div>
+            
+            <!-- 버튼 그룹 -->
+            <div class="button-group">
+                <button type="button" class="cancel-btn" onclick="history.back()">취소</button>
+                <button type="button" class="delete-btn" id="delete-btn" disabled>탈퇴하기</button>
+            </div>
+        </div>
+    </main>
+    
+    <script src="/js/header.js"></script>
+    <script type="module" src="js/delete-account.js"></script>
+    <script src="/js/footer.js"></script>
+</body>
+</html>

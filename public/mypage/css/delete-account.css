@@ -1,0 +1,203 @@
+/* 회원탈퇴 컨테이너 */
+.delete-account-container {
+    min-height: calc(100vh - 160px);
+    background-color: #131217;
+    padding-bottom: 20px;
+}
+
+/* 경고 섹션 */
+.warning-section {
+    text-align: center;
+    padding: 30px 20px;
+    background-color: #1a1a1a;
+    margin: 20px;
+    border-radius: 10px;
+}
+
+.warning-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.warning-title {
+    color: #FFF;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+}
+
+.warning-text {
+    color: #888;
+    font-size: 14px;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* 삭제 정보 섹션 */
+.delete-info-section {
+    padding: 0 20px;
+    margin-bottom: 30px;
+}
+
+.section-title {
+    color: #FFF;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+}
+
+.delete-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.delete-list li {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    color: #888;
+    font-size: 14px;
+}
+
+.list-icon {
+    color: #e74c3c;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.highlight {
+    color: #3F3FF5;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+/* 탈퇴 사유 섹션 */
+.reason-section {
+    padding: 0 20px;
+    margin-bottom: 30px;
+}
+
+.reason-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.reason-item {
+    display: flex;
+    align-items: center;
+    color: #888;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.reason-item input[type="radio"] {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+}
+
+.reason-text {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+    background-color: #202020;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    color: #FFF;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.reason-text::placeholder {
+    color: #666;
+}
+
+/* 비밀번호 섹션 */
+.password-section {
+    padding: 0 20px;
+    margin-bottom: 20px;
+}
+
+.password-input {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #202020;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    color: #FFF;
+    font-size: 16px;
+}
+
+.password-input:focus {
+    outline: none;
+    border-color: #3F3FF5;
+}
+
+.error-message {
+    display: none;
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.error-message.show {
+    display: block;
+}
+
+/* 동의 섹션 */
+.agreement-section {
+    padding: 0 20px;
+    margin-bottom: 30px;
+}
+
+.agreement-label {
+    display: flex;
+    align-items: flex-start;
+    color: #888;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.agreement-checkbox {
+    margin-right: 10px;
+    margin-top: 2px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* 버튼 그룹 */
+.button-group {
+    display: flex;
+    gap: 10px;
+    padding: 0 20px;
+}
+
+.cancel-btn,
+.delete-btn {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background-color: #2a2a2a;
+    color: #888;
+}
+
+.delete-btn {
+    background-color: #e74c3c;
+    color: #FFF;
+}
+
+.delete-btn:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+}

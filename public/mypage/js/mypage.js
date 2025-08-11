@@ -148,11 +148,17 @@ function displayUserInfo() {
     const memberTypeEl = document.getElementById('member-type');
     if (memberTypeEl) {
         if (userData.userType === 'business') {
-            memberTypeEl.textContent = '업체';
+            memberTypeEl.textContent = '업체회원';
+            memberTypeEl.classList.remove('general');
+            memberTypeEl.classList.add('business');
         } else if (userData.userType === 'administrator') {
             memberTypeEl.textContent = '관리자';
+            memberTypeEl.classList.remove('general');
+            memberTypeEl.classList.add('business');  // administrator도 business 클래스 사용
         } else {
-            memberTypeEl.textContent = '일반';
+            memberTypeEl.textContent = '일반회원';
+            memberTypeEl.classList.remove('business');
+            memberTypeEl.classList.add('general');
         }
     }
     
@@ -174,7 +180,10 @@ function displayUserInfo() {
         if (userData.userType === 'member' && userData.level) {
             profileImg.src = `/img/level/lv${userData.level}.png`;
         } else if (userData.userType === 'business') {
-            profileImg.src = '/img/business.png';
+            profileImg.src = '/img/level/business.png';
+        } else if (userData.userType === 'administrator') {
+            // 관리자인 경우 admin.png 사용
+            profileImg.src = '/img/level/admin.png';
         } else {
             profileImg.src = '/img/user-icon.png';
         }
@@ -187,13 +196,11 @@ function displayUserInfo() {
             pointGrid.style.display = 'grid';
             
             // 포인트 표시
-            const pointValueEl = document.querySelector('.point-item:first-child .point-value');
+            const pointValueEl = document.querySelector('.point-value');
             if (pointValueEl) {
-                const points = userData.points || 0;
-                pointValueEl.textContent = `${points.toLocaleString()} P`;
+                pointValueEl.textContent = `${userData.points || 0} P`;
             }
         } else {
-            // 업체회원이나 관리자는 포인트 그리드 숨김
             pointGrid.style.display = 'none';
         }
     }
@@ -207,52 +214,52 @@ function displayUserInfo() {
 
 // 사용자 통계 로드
 async function loadUserStats() {
-    // 일반회원이 아닌 경우 통계 로드 건너뛰기
-    if (userData.userType !== 'member') {
-        return;
-    }
-    
     try {
-        // 후기 개수 표시 (Firestore에서 직접 가져오기)
+        // 후기 개수 표시
         const reviewCountEl = document.getElementById('review-count');
         if (reviewCountEl) {
-            const reviewCount = userData.reviews_count || 0;
-            reviewCountEl.textContent = `${reviewCount}개`;
+            reviewCountEl.textContent = `${userData.reviews_count || 0}개`;
         }
         
-        // 즐겨찾기 개수 표시
+        // 찜 개수 표시  
         const bookmarkCountEl = document.getElementById('bookmark-count');
         if (bookmarkCountEl) {
             const bookmarks = userData.bookmarks || [];
             bookmarkCountEl.textContent = `${bookmarks.length}개`;
         }
-        
     } catch (error) {
         console.error('통계 로드 실패:', error);
     }
 }
 
-// 페이지 벗어날 때 캐시 관리 (선택적)
-window.addEventListener('beforeunload', () => {
-    // 특정 조건에서 캐시 무효화가 필요한 경우
-    // invalidateCache();
-});
-
-// 페이지가 다시 활성화될 때 데이터 새로고침
-document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && currentUser) {
-        // 페이지가 다시 보이면 백그라운드에서 업데이트 확인
-        checkForUpdates();
+// 이벤트 리스너 설정
+function setupEventListeners() {
+    // 업체 정보 수정 (업체회원만)
+    const editBusinessBtn = document.getElementById('edit-business-info');
+    if (editBusinessBtn) {
+        editBusinessBtn.addEventListener('click', () => {
+            if (userData.userType === 'business') {
+                window.location.href = '/business/edit.html';
+            } else {
+                alert('업체회원만 이용 가능합니다.');
+            }
+        });
     }
-});
-
-// 외부에서 캐시 무효화가 필요한 경우를 위한 전역 함수
-window.invalidateMypageCache = invalidateCache;
-
-// 데이터 새로고침 함수 (외부에서 호출 가능)
-window.refreshMypageData = () => {
-    invalidateCache();
-    if (currentUser) {
-        loadUserData(true);
+    
+    // 로그아웃
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                try {
+                    await auth.signOut();
+                    invalidateCache(); // 캐시 삭제
+                    window.location.href = '/';
+                } catch (error) {
+                    console.error('로그아웃 실패:', error);
+                    alert('로그아웃에 실패했습니다.');
+                }
+            }
+        });
     }
-};
+}

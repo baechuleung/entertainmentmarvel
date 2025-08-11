@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>회원정보수정 - 유흥마블</title>
+    <meta name="description" content="유흥마블 회원정보수정">
+    
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/sidemenu.css">
+    <link rel="stylesheet" href="css/edit-profile.css">
+    
+    <script src="/js/seo.js"></script>
+</head>
+<body>
+    <main>
+        <div class="edit-profile-container">
+            <!-- 정보 수정 폼 -->
+            <form id="edit-form" class="edit-form">
+                <!-- 닉네임 -->
+                <div class="form-group">
+                    <label for="nickname">닉네임</label>
+                    <input type="text" id="nickname" name="nickname" required>
+                    <span class="error-message" id="nickname-error"></span>
+                </div>
+                
+                <!-- 이메일 (읽기 전용) -->
+                <div class="form-group">
+                    <label for="email">이메일</label>
+                    <input type="email" id="email" name="email" readonly>
+                    <span class="info-message">이메일은 변경할 수 없습니다</span>
+                </div>
+                
+                <!-- 비밀번호 변경 -->
+                <div class="form-group">
+                    <label for="current-password">현재 비밀번호</label>
+                    <input type="password" id="current-password" name="current-password">
+                </div>
+                
+                <div class="form-group">
+                    <label for="new-password">새 비밀번호</label>
+                    <input type="password" id="new-password" name="new-password">
+                    <span class="info-message">비밀번호를 변경하지 않으려면 비워두세요</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm-password">새 비밀번호 확인</label>
+                    <input type="password" id="confirm-password" name="confirm-password">
+                    <span class="error-message" id="password-error"></span>
+                </div>
+                
+                <!-- 저장 버튼 -->
+                <div class="button-group">
+                    <button type="submit" class="save-btn">저장하기</button>
+                </div>
+            </form>
+        </div>
+    </main>
+    
+    <script src="/js/header.js"></script>
+    <script type="module" src="js/edit-profile.js"></script>
+    <script src="/js/footer.js"></script>
+</body>
+</html>

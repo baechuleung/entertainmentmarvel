@@ -1,14 +1,14 @@
 /* 게시판 컨테이너 */
 .board-container {
     min-height: calc(100vh - 60px);
-    background-color: #1a1a1a;
+    background-color: #131217;
     padding: 16px;
 }
 
 /* 탭 네비게이션 */
 .tab-navigation {
     display: flex;
-    background-color: #1a1a1a;
+    background-color: #131217;
     border-bottom: 1px solid #3a3a3a;
     margin-bottom: 20px;
 }
@@ -32,7 +32,7 @@
 
 .tab-button.active {
     color: #ffffff;
-    border-bottom-color: #1a5490;
+    border-bottom-color: #ffffff;
 }
 
 /* 탭 컨텐츠 */
@@ -54,9 +54,12 @@
 .board-item {
     background-color: #2a2a2a;
     border-radius: 8px;
-    padding: 20px;
+    padding: 20px 10px;
     cursor: pointer;
     transition: transform 0.2s, background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .board-item:hover {
@@ -66,22 +69,41 @@
 
 /* 배지 */
 .board-badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: bold;
-    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    flex-shrink: 0;
 }
 
 .board-badge.notice {
-    background-color: #e74c3c;
-    color: white;
+    background-color: #3F3FF5;
+}
+
+.board-badge.notice svg {
+    width: 20px;
+    height: 20px;
+    fill: #FFFFFF;
 }
 
 .board-badge.event {
-    background-color: #f39c12;
-    color: white;
+    background-color: #3F3FF5;
+}
+
+.board-badge.event svg {
+    width: 20px;
+    height: 20px;
+    fill: #FFFFFF;
+}
+
+/* 게시글 내용 */
+.board-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 /* 게시글 제목 */
@@ -89,9 +111,8 @@
     color: #ffffff;
     font-size: 16px;
     font-weight: 500;
-    margin-bottom: 8px;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -100,10 +121,18 @@
 /* 게시글 메타 정보 */
 .board-meta {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 8px;
     color: #888;
     font-size: 13px;
+}
+
+.board-nickname {
+    color: #888;
+}
+
+.board-divider {
+    color: #555;
 }
 
 .board-date {

@@ -1,0 +1,84 @@
+/* 회원정보수정 컨테이너 */
+.edit-profile-container {
+    min-height: calc(100vh - 160px);
+    background-color: #131217;
+    padding-bottom: 20px;
+}
+
+/* 폼 스타일 */
+.edit-form {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: #888;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #202020;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    color: #FFF;
+    font-size: 16px;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #3F3FF5;
+}
+
+.form-group input[readonly] {
+    background-color: #1a1a1a;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.info-message {
+    display: block;
+    color: #666;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.error-message {
+    display: none;
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.error-message.show {
+    display: block;
+}
+
+/* 버튼 그룹 */
+.button-group {
+    margin-top: 30px;
+    padding: 0 0 20px 0;
+}
+
+.save-btn {
+    width: 100%;
+    padding: 15px;
+    background-color: #3F3FF5;
+    color: #FFF;
+    border: none;
+    border-radius: 10px;
+    font-size: 16;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.save-btn:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+}

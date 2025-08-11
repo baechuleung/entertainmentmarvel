@@ -1,85 +1,67 @@
 import { db } from '/js/firebase-config.js';
-import { collection, getDocs, doc, updateDoc, query, where, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { 
+    collection, 
+    getDocs, 
+    doc,
+    updateDoc,
+    query,
+    where,
+    orderBy
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // 전역 변수
 let allNotices = [];
 let allEvents = [];
 let currentTab = 'notice';
 
-// 초기화
-document.addEventListener('DOMContentLoaded', function() {
-    // URL 파라미터에서 tab 값 확인
-    const urlParams = new URLSearchParams(window.location.search);
-    const tabParam = urlParams.get('tab');
-    
-    // 탭 파라미터가 있으면 해당 탭으로 설정
-    if (tabParam === 'event') {
-        currentTab = 'event';
-        // 탭 버튼 활성화 변경
-        document.querySelectorAll('.tab-button').forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.getAttribute('data-tab') === 'event') {
-                btn.classList.add('active');
-            }
-        });
-        // 탭 콘텐츠 활성화 변경
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-        });
-        document.getElementById('event-tab').classList.add('active');
-    }
-    
-    // 페이지 타이틀 업데이트
-    updatePageTitle();
-    
-    loadBoardData();
+// DOM이 로드되면 실행
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadBoards();
     setupTabs();
     setupEventListeners();
+    displayCurrentTab();
+    updatePageTitle();
 });
 
 // 게시판 데이터 로드
-async function loadBoardData() {
+async function loadBoards() {
     try {
         // 공지사항 로드
-        const noticesQuery = query(
+        const noticeQuery = query(
             collection(db, 'boards'),
             where('category', '==', 'notice'),
             orderBy('createdAt', 'desc')
         );
-        
-        const noticesSnapshot = await getDocs(noticesQuery);
-        allNotices = [];
-        noticesSnapshot.forEach((doc) => {
-            allNotices.push({ id: doc.id, ...doc.data() });
-        });
+        const noticeSnapshot = await getDocs(noticeQuery);
+        allNotices = noticeSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
         
         // 이벤트 로드
-        const eventsQuery = query(
+        const eventQuery = query(
             collection(db, 'boards'),
             where('category', '==', 'event'),
             orderBy('createdAt', 'desc')
         );
-        
-        const eventsSnapshot = await getDocs(eventsQuery);
-        allEvents = [];
-        eventsSnapshot.forEach((doc) => {
-            allEvents.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // 현재 탭 표시
-        displayCurrentTab();
+        const eventSnapshot = await getDocs(eventQuery);
+        allEvents = eventSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
         
     } catch (error) {
-        console.error('게시판 데이터 로드 실패:', error);
+        console.error('게시판 로드 실패:', error);
         showError();
     }
 }
 
 // 페이지 타이틀 업데이트
 function updatePageTitle() {
-    const pageTitle = document.querySelector('.page-title');
+    const pageTitle = document.querySelector('title');
     if (pageTitle) {
-        pageTitle.textContent = currentTab === 'notice' ? '공지사항' : '이벤트';
+        pageTitle.textContent = currentTab === 'notice' ? 
+            '공지사항 - 유흥마블' : '이벤트 - 유흥마블';
     }
     
     // HTML title 태그도 업데이트
@@ -142,11 +124,18 @@ function displayNotices() {
         
         return `
             <div class="board-item" data-id="${notice.id}" data-category="notice">
-                <span class="board-badge notice">공지</span>
-                <h3 class="board-title">${notice.title}</h3>
-                <div class="board-meta">
-                    <span class="board-date">${createdDate}</span>
-                    <span class="board-views">조회 ${notice.views || 0}</span>
+                <div class="board-badge notice">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                    </svg>
+                </div>
+                <div class="board-content">
+                    <h3 class="board-title">${notice.title}</h3>
+                    <div class="board-meta">
+                        <span class="board-author">${notice.author || '관리자'}</span>
+                        <span class="board-divider">|</span>
+                        <span class="board-date">${createdDate}</span>
+                    </div>
                 </div>
             </div>
         `;
@@ -173,16 +162,23 @@ function displayEvents() {
     emptyState.style.display = 'none';
     
     eventList.innerHTML = allEvents.map(event => {
-        const createdDate = event.createdAt ? 
+        const createdDate = event.createdAt ?
             new Date(event.createdAt.toMillis()).toLocaleDateString('ko-KR') : '-';
         
         return `
             <div class="board-item" data-id="${event.id}" data-category="event">
-                <span class="board-badge event">이벤트</span>
-                <h3 class="board-title">${event.title}</h3>
-                <div class="board-meta">
-                    <span class="board-date">${createdDate}</span>
-                    <span class="board-views">조회 ${event.views || 0}</span>
+                <div class="board-badge event">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                </div>
+                <div class="board-content">
+                    <h3 class="board-title">${event.title}</h3>
+                    <div class="board-meta">
+                        <span class="board-author">${event.author || '관리자'}</span>
+                        <span class="board-divider">|</span>
+                        <span class="board-date">${createdDate}</span>
+                    </div>
                 </div>
             </div>
         `;
@@ -241,7 +237,7 @@ function showBoardModal(boardData) {
     const modalContent = document.getElementById('modal-content');
     
     // 날짜 포맷
-    const createdDate = boardData.createdAt ? 
+    const createdDate = boardData.createdAt ?
         new Date(boardData.createdAt.toMillis()).toLocaleDateString('ko-KR', {
             year: 'numeric',
             month: 'long',

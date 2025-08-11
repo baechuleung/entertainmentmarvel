@@ -224,6 +224,7 @@ async function savePost(e) {
             title,
             content,
             author: currentUser.email.split('@')[0],
+            nickname: currentUser.displayName || currentUser.email.split('@')[0],
             updatedAt: serverTimestamp()
         };
         

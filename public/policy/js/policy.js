@@ -328,8 +328,7 @@ const policies = {
             <h3>8. 제휴 문의</h3>
             <p>비즈니스 제휴를 원하시는 경우 아래로 문의해주세요.</p>
             <ul>
-                <li>이메일: partnership@entmarvel.com</li>
-                <li>전화: 1588-0000</li>
+                <li>1:1고객센터로 문의</li>
             </ul>
             
             <h3>9. 책임의 제한</h3>
