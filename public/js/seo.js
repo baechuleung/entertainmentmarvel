@@ -77,12 +77,6 @@
                 document.head.appendChild(link);
             });
 
-            // Web App Manifest 추가
-            const manifestLink = document.createElement('link');
-            manifestLink.rel = 'manifest';
-            manifestLink.href = '/img/favicon/site.webmanifest';
-            document.head.appendChild(manifestLink);
-
             // MS Application 타일 색상
             const msApplicationTileColor = document.createElement('meta');
             msApplicationTileColor.name = 'msapplication-TileColor';
