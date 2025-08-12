@@ -102,47 +102,69 @@
                     
                     <div class="form-group">
                         <label for="kakao">카카오톡 ID</label>
-                        <input type="text" id="kakao" name="kakao" placeholder="카카오톡 ID (선택)">
+                        <input type="text" id="kakao" name="kakao" placeholder="선택사항">
                     </div>
                     
                     <div class="form-group">
                         <label for="telegram">텔레그램 ID</label>
-                        <input type="text" id="telegram" name="telegram" placeholder="텔레그램 ID (선택)">
+                        <input type="text" id="telegram" name="telegram" placeholder="선택사항">
                     </div>
                 </div>
                 
-                <!-- 3. 광고정보 섹션 -->
+                <!-- 3. 광고 정보 입력 섹션 -->
                 <div class="form-section">
-                    <h2 class="section-title">3. 광고정보 입력</h2>
+                    <h2 class="section-title">3. 광고 정보 입력</h2>
                     
-                    <!-- 상세 내용 -->
+                    <!-- 유흥주점 카테고리 전용 필드 (기본 숨김) -->
+                    <div id="karaoke-fields" class="category-specific-fields" style="display: none;">
+                        <!-- 영업시간 -->
+                        <div class="form-group">
+                            <label for="business-hours">영업시간</label>
+                            <input type="text" id="business-hours" name="business-hours" placeholder="예: 오후 7시 ~ 새벽 5시">
+                        </div>
+                        
+                        <!-- 주대설정 -->
+                        <div class="form-group">
+                            <label for="table-price">주대설정</label>
+                            <textarea id="table-price" name="table-price" rows="3" placeholder="예: 일반룸 30만원, VIP룸 50만원"></textarea>
+                        </div>
+                        
+                        <!-- 이벤트 -->
+                        <div class="form-group">
+                            <label for="event-info">이벤트</label>
+                            <textarea id="event-info" name="event-info" rows="3" placeholder="진행중인 이벤트를 입력하세요"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- 썸네일 업로드 -->
+                    <div class="form-group">
+                        <label>썸네일 이미지</label>
+                        <div class="thumbnail-upload-area">
+                            <button type="button" class="thumbnail-upload-btn" id="thumbnail-upload-btn">
+                                <span class="upload-icon">📷</span>
+                                <span class="upload-text">썸네일 업로드</span>
+                            </button>
+                            <div class="thumbnail-preview" id="thumbnail-preview" style="display: none;">
+                                <img id="thumbnail-image" src="" alt="썸네일 미리보기">
+                                <button type="button" class="delete-thumbnail" id="delete-thumbnail">×</button>
+                            </div>
+                            <input type="file" id="thumbnail-input" accept="image/*" style="display: none;">
+                        </div>
+                        <p class="help-text">* 썸네일을 업로드하지 않으면 업종별 기본 이미지가 사용됩니다</p>
+                    </div>
+                    
+                    <!-- 상세 내용 에디터 -->
                     <div class="form-group">
                         <label for="content">상세 내용 *</label>
                         <div id="editor-container">
                             <div id="editor"></div>
                         </div>
-                        <input type="hidden" id="content" name="content">
-                    </div>
-                    
-                    <!-- 썸네일 업로드 -->
-                    <div class="form-group">
-                        <label for="thumbnail">대표이미지</label>
-                        <div class="thumbnail-upload-area">
-                            <input type="file" id="thumbnail-input" accept="image/*" style="display: none;">
-                            <button type="button" class="thumbnail-upload-btn" id="thumbnail-upload-btn">
-                                대표이미지 선택
-                            </button>
-                            <div class="thumbnail-preview" id="thumbnail-preview" style="display: none;">
-                                <img id="thumbnail-image" src="" alt="대표이미지 미리보기">
-                                <button type="button" class="thumbnail-delete-btn" id="thumbnail-delete-btn">삭제</button>
-                            </div>
-                        </div>
+                        <input type="hidden" id="content" name="content" required>
                     </div>
                 </div>
                 
-                <!-- 버튼 그룹 -->
-                <div class="button-group">
-                    <button type="button" class="btn-cancel" onclick="location.href='/ad-posting/ad-management.html'">취소</button>
+                <!-- 제출 버튼 -->
+                <div class="form-actions">
                     <button type="submit" class="btn-submit">광고 등록</button>
                 </div>
             </form>
@@ -150,7 +172,7 @@
     </main>
     
     <script src="/js/header.js"></script>
-    <script type="module" src="js/ad-posting.js"></script>
+    <script type="module" src="/ad-posting/js/ad-posting.js"></script>
     <script src="/js/footer.js"></script>
 </body>
 </html>
