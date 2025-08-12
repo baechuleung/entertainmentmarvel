@@ -19,7 +19,11 @@ import {
     setSelectValue,
     setEditorContent,
     processEditorImages,
-    showThumbnailFromUrl
+    showThumbnailFromUrl,
+    initializeEventEditor,
+    setupTablePriceEvents,
+    toggleCategorySpecificFields,
+    collectCategoryData
 } from './modules/index.js';
 
 // 전역 변수
@@ -28,6 +32,7 @@ let currentUserData = null;
 let adId = null;
 let currentAd = null;
 let quill = null;
+let eventQuill = null;
 let previewImages = new Map();
 let thumbnailFile = null;
 let existingThumbnail = null;
@@ -57,9 +62,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Quill 에디터 초기화
     quill = initializeQuillEditor();
     
+    // 이벤트 에디터 초기화
+    eventQuill = initializeEventEditor(previewImages);
+    
     // 이미지 핸들러 설정
     const toolbar = quill.getModule('toolbar');
     toolbar.addHandler('image', createImageHandler(quill, previewImages));
+    
+    const eventToolbar = eventQuill.getModule('toolbar');
+    eventToolbar.addHandler('image', createImageHandler(eventQuill, previewImages));
+    
+    // 주대/코스 추가/삭제 이벤트 설정
+    setupTablePriceEvents();
     
     // 인증 상태 확인
     checkAuth();
@@ -67,11 +81,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     // 데이터 로드
     await loadCategoryData();
     createCategoryButtons(categoryButtons, categoryInput, async (categoryName) => {
+        toggleCategorySpecificFields(categoryName, eventQuill);
         const types = await loadBusinessTypes(categoryName);
         if (types) {
             createBusinessTypeOptions(types);
         }
     });
+    
     const { regionData } = await loadRegionData();
     createRegionOptions(regionData);
     
@@ -162,13 +178,19 @@ async function fillFormData() {
                 btn.classList.add('active');
             }
         });
+        
+        // 카테고리별 필드 표시
+        toggleCategorySpecificFields(currentAd.category, eventQuill);
+        
         // 해당 카테고리의 업종 로드
-        await loadBusinessTypes(currentAd.category);
+        const types = await loadBusinessTypes(currentAd.category);
+        if (types) {
+            createBusinessTypeOptions(types);
+        }
     }
     
     // 업종 선택
     if (currentAd.businessType) {
-        await loadBusinessTypes(currentAd.category);
         setSelectValue('business-type-wrapper', currentAd.businessType, currentAd.businessType);
         businessTypeInput.value = currentAd.businessType;
     }
@@ -198,9 +220,21 @@ async function fillFormData() {
     document.getElementById('kakao').value = currentAd.kakao || '';
     document.getElementById('telegram').value = currentAd.telegram || '';
     
+    // 카테고리별 추가 필드 채우기
+    if (currentAd.category === '유흥주점') {
+        fillKaraokeFields();
+    } else if (currentAd.category === '건전마사지') {
+        fillMassageFields();
+    }
+    
     // Quill 에디터에 내용 설정
     if (currentAd.content) {
         setEditorContent(quill, currentAd.content);
+    }
+    
+    // 이벤트 에디터에 내용 설정
+    if (currentAd.eventInfo && eventQuill) {
+        setEditorContent(eventQuill, currentAd.eventInfo);
     }
     
     // 기존 썸네일 표시
@@ -212,6 +246,125 @@ async function fillFormData() {
             document.getElementById('thumbnail-preview'),
             document.getElementById('thumbnail-upload-btn')
         );
+    }
+}
+
+// 유흥주점 필드 채우기
+function fillKaraokeFields() {
+    // 영업시간
+    if (currentAd.businessHours) {
+        document.getElementById('business-hours').value = currentAd.businessHours;
+    }
+    
+    // 주대설정
+    if (currentAd.tablePrice && typeof currentAd.tablePrice === 'object') {
+        const priceList = document.getElementById('table-price-list');
+        priceList.innerHTML = ''; // 기존 내용 초기화
+        
+        Object.entries(currentAd.tablePrice).forEach(([name, price], index) => {
+            const item = document.createElement('div');
+            item.className = 'table-price-item';
+            
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.className = 'table-price-name';
+            nameInput.value = name;
+            nameInput.placeholder = '예: 일반룸';
+            
+            const priceWrapper = document.createElement('div');
+            priceWrapper.className = 'price-input-wrapper';
+            
+            const valueInput = document.createElement('input');
+            valueInput.type = 'text';
+            valueInput.className = 'table-price-value';
+            valueInput.value = price;
+            valueInput.placeholder = '예: 30만';
+            
+            const priceUnit = document.createElement('span');
+            priceUnit.className = 'price-unit';
+            priceUnit.textContent = '원';
+            
+            priceWrapper.appendChild(valueInput);
+            priceWrapper.appendChild(priceUnit);
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn-remove-price';
+            removeBtn.textContent = '×';
+            removeBtn.style.display = Object.keys(currentAd.tablePrice).length > 1 ? 'flex' : 'none';
+            
+            item.appendChild(nameInput);
+            item.appendChild(priceWrapper);
+            item.appendChild(removeBtn);
+            priceList.appendChild(item);
+        });
+    }
+}
+
+// 건전마사지 필드 채우기
+function fillMassageFields() {
+    // 영업시간
+    if (currentAd.businessHours) {
+        document.getElementById('massage-business-hours').value = currentAd.businessHours;
+    }
+    
+    // 휴무일
+    if (currentAd.closedDays) {
+        document.getElementById('closed-days').value = currentAd.closedDays;
+    }
+    
+    // 주차안내
+    if (currentAd.parkingInfo) {
+        document.getElementById('parking-info').value = currentAd.parkingInfo;
+    }
+    
+    // 오시는 길
+    if (currentAd.directions) {
+        document.getElementById('directions').value = currentAd.directions;
+    }
+    
+    // 코스설정
+    if (currentAd.courses && typeof currentAd.courses === 'object') {
+        const courseList = document.getElementById('course-list');
+        courseList.innerHTML = ''; // 기존 내용 초기화
+        
+        Object.entries(currentAd.courses).forEach(([name, price], index) => {
+            const item = document.createElement('div');
+            item.className = 'course-item';
+            
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.className = 'course-name';
+            nameInput.value = name;
+            nameInput.placeholder = '예: 전신관리';
+            
+            const priceWrapper = document.createElement('div');
+            priceWrapper.className = 'price-input-wrapper';
+            
+            const priceInput = document.createElement('input');
+            priceInput.type = 'text';
+            priceInput.className = 'course-price';
+            priceInput.value = price;
+            priceInput.placeholder = '예: 10만';
+            
+            const priceUnit = document.createElement('span');
+            priceUnit.className = 'price-unit';
+            priceUnit.textContent = '원';
+            
+            priceWrapper.appendChild(priceInput);
+            priceWrapper.appendChild(priceUnit);
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn-remove-course';
+            removeBtn.textContent = '×';
+            removeBtn.style.display = Object.keys(currentAd.courses).length > 1 ? 'flex' : 'none';
+            
+            item.appendChild(nameInput);
+            item.appendChild(priceWrapper);
+            item.appendChild(removeBtn);
+            courseList.appendChild(item);
+        });
     }
 }
 
@@ -258,6 +411,12 @@ async function handleSubmit(e) {
             images: uploadedImages,
             updatedAt: Date.now()
         };
+        
+        // 카테고리별 추가 필드 저장
+        if (categoryInput.value === '유흥주점' || categoryInput.value === '건전마사지') {
+            const categoryData = collectCategoryData(categoryInput.value, eventQuill);
+            Object.assign(adData, categoryData);
+        }
         
         // 리얼타임 데이터베이스 업데이트
         await update(ref(rtdb, `advertisements/${adId}`), adData);
