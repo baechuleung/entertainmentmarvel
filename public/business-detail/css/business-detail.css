@@ -210,6 +210,113 @@
     margin: 15px 0;
 }
 
+/* ===== 연락처 정보 섹션 ===== */
+.contact-section {
+    margin-top: 30px;
+}
+
+.contact-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+}
+
+.contact-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.contact-icon.kakao {
+    background-color: #FEE500;
+}
+
+.contact-icon.telegram {
+    background: linear-gradient(135deg, #2AABEE 0%, #229ED9 100%);
+}
+
+.contact-info {
+    flex: 1;
+}
+
+.contact-label {
+    color: #888;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.contact-value {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.contact-value.kakao {
+    color: #FEE500;
+}
+
+.contact-value.telegram {
+    color: #2AABEE;
+}
+
+.contact-value a {
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.contact-value a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+.btn-copy {
+    padding: 8px 16px;
+    background-color: #1a5490;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-copy:hover {
+    background-color: #2a6ab0;
+}
+
+/* 복사 알림 */
+.copy-notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #4caf50;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 6px;
+    z-index: 10000;
+    font-size: 14px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.copy-notification.fade-out {
+    opacity: 0;
+}
+
 /* ===== 후기 탭 ===== */
 .reviews-tab-content {
     padding: 20px;

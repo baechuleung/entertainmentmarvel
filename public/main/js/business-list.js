@@ -294,7 +294,7 @@ export async function displayAdvertisements(ads) {
             thumbnail: ad.thumbnail || '/img/default-thumb.jpg',
             businessName: ad.businessName || '업소명 없음',
             businessType: ad.businessType || '미분류',
-            author: ad.author || '작성자 없음',
+            author: ad.category === '건전마사지' ? '' : (ad.author || '작성자 없음'),
             region: ad.region || '',
             city: ad.city || '',
             location: [ad.region, ad.city].filter(Boolean).join(' ') || '위치 정보 없음',

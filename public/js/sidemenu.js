@@ -65,6 +65,7 @@ const SideMenu = {
         const logoutSection = document.querySelector('.logout-section');
         const businessOnlyMenu = document.querySelector('.business-only');
         const businessOnlyDivider = document.querySelector('.business-only-divider');
+        const adminModeMenu = document.getElementById('admin-mode-menu');
         
         if (isLoggedIn && userData) {
             // 회원인 경우
@@ -105,6 +106,11 @@ const SideMenu = {
                 if (userData.userType === 'business' || userData.userType === 'administrator') {
                     if (businessOnlyMenu) businessOnlyMenu.style.display = 'block';
                     if (businessOnlyDivider) businessOnlyDivider.style.display = 'block';
+                    
+                    // 관리자인 경우 관리자 모드 메뉴도 표시
+                    if (userData.userType === 'administrator' && adminModeMenu) {
+                        adminModeMenu.style.display = 'flex';
+                    }
                 }
                 
                 if (levelTextEl) {
@@ -155,6 +161,7 @@ const SideMenu = {
             if (logoutSection) logoutSection.style.display = 'none';
             if (businessOnlyMenu) businessOnlyMenu.style.display = 'none';
             if (businessOnlyDivider) businessOnlyDivider.style.display = 'none';
+            if (adminModeMenu) adminModeMenu.style.display = 'none';
         }
     },
 
@@ -286,6 +293,7 @@ const SideMenu = {
         const pageMap = {
             '홈으로 가기': '/',
             '광고 관리': '/ad-posting/ad-management.html',
+            '관리자 모드': '/admin/index.html',  // 관리자 모드 추가
             '1:1 고객센터': 'https://open.kakao.com/o/skhPJeLh',
             'FAQ': '/faq/faq.html',
             '공지사항': '/board/board.html',
@@ -299,7 +307,12 @@ const SideMenu = {
         } else {
             const targetPage = pageMap[menuText];
             if (targetPage) {
-                window.location.href = targetPage;
+                // 외부 링크인 경우 새 탭에서 열기
+                if (targetPage.startsWith('http')) {
+                    window.open(targetPage, '_blank');
+                } else {
+                    window.location.href = targetPage;
+                }
             }
         }
     },

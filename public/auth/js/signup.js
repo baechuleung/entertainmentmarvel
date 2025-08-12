@@ -28,7 +28,7 @@ let isSigningUp = false;
 onAuthStateChanged(auth, (user) => {
     if (user && !isSigningUp) {
         // 이미 로그인된 경우 메인 페이지로 이동
-        window.location.href = '/main/main.html';
+        window.location.href = '/';
     }
 });
 
@@ -293,7 +293,7 @@ signupForm.addEventListener('submit', async (e) => {
         
         // 2초 후 메인 페이지로 이동
         setTimeout(() => {
-            window.location.href = '/main/main.html';
+            window.location.href = '/';
         }, 2000);
         
     } catch (error) {

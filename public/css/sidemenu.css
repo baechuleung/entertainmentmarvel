@@ -299,3 +299,25 @@
     color: #fff;
     font-weight: 600;
 }
+
+/* 관리자 모드 메뉴 스타일 */
+#admin-mode-menu {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 5px 20px;
+    border-radius: 8px;
+}
+
+#admin-mode-menu:hover {
+    opacity: 0.9;
+    transform: translateX(2px);
+    transition: all 0.2s ease;
+}
+
+#admin-mode-menu span:first-child {
+    color: #fff !important;
+    font-weight: 600;
+}
+
+#admin-mode-menu .arrow {
+    color: #fff !important;
+}

@@ -10,6 +10,39 @@
             <div class="detail-content" id="detail-content">
                 <!-- 상세 내용이 여기에 로드됩니다 -->
             </div>
+            
+            <!-- 연락처 정보 섹션 -->
+            <div class="contact-section" id="contact-section" style="display: none;">
+                <div class="contact-items">
+                    <!-- 카카오톡 -->
+                    <div class="contact-item" id="kakao-item" style="display: none;">
+                        <div class="contact-icon kakao">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#000000">
+                                <path d="M12 3C6.48 3 2 6.58 2 10.86c0 2.78 1.88 5.21 4.71 6.56-.2.79-.48 1.9-.56 2.19-.1.4.15.55.34.42.15-.1 2.47-1.66 2.86-1.93.55.08 1.11.12 1.65.12 5.52 0 10-3.58 10-7.86S17.52 3 12 3z"/>
+                            </svg>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">카카오톡 ID</div>
+                            <div class="contact-value kakao" id="kakao-id"></div>
+                        </div>
+                        <button class="btn-copy" id="btn-kakao-action">복사</button>
+                    </div>
+                    
+                    <!-- 텔레그램 -->
+                    <div class="contact-item" id="telegram-item" style="display: none;">
+                        <div class="contact-icon telegram">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffffff">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.56c-.21 2.27-1.13 7.75-1.6 10.29-.2 1.08-.58 1.44-.95 1.48-.81.08-1.43-.54-2.22-1.06-1.23-.82-1.93-1.33-3.12-2.13-1.38-.93-.49-1.44.3-2.27.21-.22 3.82-3.5 3.89-3.8.01-.04.01-.19-.07-.27-.08-.08-.2-.05-.28-.03-.12.03-2.04 1.29-5.76 3.78-.54.37-1.03.55-1.47.54-.48-.01-1.41-.27-2.1-.5-.85-.28-1.52-.43-1.46-.91.03-.25.37-.51 1.01-.78 3.94-1.72 6.58-2.86 7.91-3.42 3.77-1.6 4.55-1.88 5.06-1.89.11 0 .36.03.52.18.14.12.18.28.2.46-.01.06.01.24 0 .38z"/>
+                            </svg>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">텔레그램 ID</div>
+                            <div class="contact-value telegram" id="telegram-id"></div>
+                        </div>
+                        <button class="btn-copy" id="btn-telegram-action">복사</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     

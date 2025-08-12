@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>룰렛 게임 – 단일 파일 MVP</title>
+  <style>
+    :root{
+      --bg:#0b0f14; 
+      --panel:#111825; 
+      --muted:#8ba3b8; 
+      --accent:#4fc3f7; 
+      --good:#22c55e; 
+      --bad:#ef4444; 
+      --wheel-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 2px 0 rgba(255,255,255,.05);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:radial-gradient(1200px 800px at 70% 0%, #0f172a 0%, #0b0f14 60%); color:#e5eff9; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans KR, Apple SD Gothic Neo, "Malgun Gothic", sans-serif;
+      display:flex; align-items:center; justify-content:center; padding:24px;
+    }
+    .app{ width: min(960px, 100%); display:grid; gap:18px; grid-template-columns: 1.1fr .9fr; align-items:center;}
+    @media (max-width:900px){.app{grid-template-columns:1fr}}
+
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:18px; box-shadow: 0 20px 40px rgba(0,0,0,.35)}
+
+    /* Wheel */
+    .wheel-wrap{position:relative; display:flex; align-items:center; justify-content:center;}
+    .wheel{width: 460px; height: 460px; border-radius:50%; position:relative; overflow:hidden; box-shadow: var(--wheel-shadow); background:#0a0f15}
+    @media (max-width:520px){.wheel{width: 320px; height: 320px}}
+
+    .slice{position:absolute; inset:0;}
+    .center{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:120px; height:120px; border-radius:50%; background: radial-gradient(circle at 30% 30%, #263348, #121927); display:flex; align-items:center; justify-content:center; color:#eaf6ff; font-weight:700; letter-spacing:.5px; text-transform:uppercase; border:1px solid rgba(255,255,255,.12); box-shadow: 0 8px 18px rgba(0,0,0,.5), inset 0 2px 0 rgba(255,255,255,.06) }
+
+    .pointer{ position:absolute; top:-6px; left:50%; transform: translateX(-50%); width:0; height:0; border-left:14px solid transparent; border-right:14px solid transparent; border-bottom:28px solid var(--accent); filter: drop-shadow(0 6px 10px rgba(0,0,0,.5));}
+
+    .controls{display:grid; gap:12px}
+    .title{font-size:20px; font-weight:700; letter-spacing:.2px}
+    .muted{color:var(--muted); font-size:14px}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .btn{appearance:none; border:none; padding:14px 16px; border-radius:12px; font-weight:700; cursor:pointer; color:#071018; background:linear-gradient(180deg, #a0e7ff, #4fc3f7); box-shadow: 0 12px 24px rgba(79,195,247,.35); transition: transform .06s ease, box-shadow .2s ease}
+    .btn:active{ transform: translateY(2px); box-shadow: 0 8px 16px rgba(79,195,247,.25)}
+    .btn[disabled]{opacity:.6; cursor:not-allowed}
+
+    .stat{padding:10px 12px; border-radius:12px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); font-size:14px}
+
+    .legend{display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:10px}
+    .legend .item{display:flex; gap:10px; align-items:center; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); padding:8px 10px; border-radius:10px; font-size:14px}
+    .square{width:14px; height:14px; border-radius:3px}
+
+    .toast{ position:fixed; left:50%; bottom:20px; transform: translateX(-50%); background:rgba(15,23,42,.9); border:1px solid rgba(255,255,255,.12); padding:12px 14px; border-radius:12px; display:none }
+
+    .modal{ position:fixed; inset:0; display:none; place-items:center; background:rgba(3,6,12,.55);}
+    .modal .panel{ width:min(440px, 92%); background:var(--panel); border:1px solid rgba(255,255,255,.1); border-radius:16px; padding:18px; box-shadow: 0 24px 60px rgba(0,0,0,.6)}
+    .panel h3{margin:0 0 6px; font-size:20px}
+    .panel p{margin:0 0 12px; color:var(--muted)}
+    .panel .row{justify-content:flex-end}
+    .ghost{ background:transparent; border:1px solid rgba(255,255,255,.18); color:#eaf2ff }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Wheel Side -->
+    <div class="card">
+      <div class="title">룰렛 이벤트</div>
+      <div class="muted">방문 당 1회 참여 · 당첨 시 매장 내 혜택 제공 (현금/상품권 아님)</div>
+      <div class="wheel-wrap" style="margin-top:14px">
+        <div class="pointer" aria-hidden="true"></div>
+        <div id="wheel" class="wheel" aria-live="polite"></div>
+        <div class="center"><span id="centerText">SPIN</span></div>
+      </div>
+    </div>
+
+    <!-- Controls Side -->
+    <div class="card">
+      <div class="title">참여</div>
+      <div class="muted" id="limitInfo">남은 횟수 계산중…</div>
+      <div class="row" style="margin-top:10px">
+        <button id="spinBtn" class="btn">돌리기</button>
+        <div class="stat" id="cooldownInfo" hidden>재시도 대기중…</div>
+      </div>
+
+      <div style="margin-top:14px" class="muted">구성</div>
+      <div id="legend" class="legend"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <div id="resultModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="resTitle">
+    <div class="panel">
+      <h3 id="resTitle">결과</h3>
+      <p id="resDesc">당첨 결과가 여기에 표시됩니다.</p>
+      <div class="row">
+        <button class="btn ghost" id="closeModal">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // =========================
+  // CONFIG (업주가 수정)
+  // =========================
+  const CONFIG = {
+    dailyLimit: 1,             // 방문(하루)당 참여 가능 횟수
+    cooldownSec: 0,            // 쿨다운(초) – 매장 정책에 맞게 0으로 두면 1회만
+    // 당첨 확률은 weight로 가중 랜덤. label은 손님에게 보이는 이름, rewardText는 혜택 설명
+    prizes: [
+      { label: '시간 +10분', color: '#22c55e', weight: 10, rewardText: '룸 사용 시간 10분 연장' },
+      { label: '음료 1잔',  color: '#60a5fa', weight: 8,  rewardText: '기본 음료 1잔(원가 저가권장)' },
+      { label: '안주 1개',  color: '#f59e0b', weight: 3,  rewardText: '소형 안주 1개 제공' },
+      { label: '꽝',       color: '#ef4444', weight: 15, rewardText: '아쉽지만 다음에 또 도전!' },
+      { label: '시간 +5분', color: '#10b981', weight: 12, rewardText: '룸 사용 시간 5분 연장' },
+      { label: '다음판 +5%', color: '#a78bfa', weight: 7, rewardText: '다음 방문 당첨 확률 +5% (로컬 전용 예시)' },
+    ],
+    minRotations: 6,           // 최소 회전수 (미학)
+    spinDurationMs: 3800       // 회전 애니메이션 시간
+  }
+
+  // =========================
+  // State & Helpers
+  // =========================
+  const wheelEl = document.getElementById('wheel');
+  const spinBtn = document.getElementById('spinBtn');
+  const centerText = document.getElementById('centerText');
+  const legendEl = document.getElementById('legend');
+  const limitInfo = document.getElementById('limitInfo');
+  const cooldownInfo = document.getElementById('cooldownInfo');
+  const toast = document.getElementById('toast');
+  const resultModal = document.getElementById('resultModal');
+  const resTitle = document.getElementById('resTitle');
+  const resDesc = document.getElementById('resDesc');
+  const closeModal = document.getElementById('closeModal');
+
+  let spinning = false;
+  let currentRotation = 0;
+
+  // LocalStorage 키 (매장 별도로 고유 ID를 바꿔 쓰길 권장)
+  const STORE_KEY = 'roulette-demo-store-v1';
+
+  function getPlayState(){
+    const raw = localStorage.getItem(STORE_KEY);
+    const today = new Date().toISOString().slice(0,10);
+    if(!raw) return { date: today, played: 0, last: 0, bonus: 0 };
+    const data = JSON.parse(raw);
+    if(data.date !== today){
+      return { date: today, played: 0, last: 0, bonus: data.bonus || 0 };
+    }
+    return data;
+  }
+  function setPlayState(state){
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    updateLimitInfo();
+  }
+
+  function updateLimitInfo(){
+    const s = getPlayState();
+    const left = Math.max(CONFIG.dailyLimit - s.played, 0);
+    limitInfo.textContent = `오늘 남은 참여: ${left}회`;
+  }
+
+  function showToast(msg){
+    toast.textContent = msg; toast.style.display='block';
+    setTimeout(()=> toast.style.display='none', 1600);
+  }
+
+  // Weighted random pick (보너스 확률 가산 옵션 포함)
+  function pickPrize(){
+    const s = getPlayState();
+    const bonus = s.bonus || 0; // 예: 다음판 +5% 같은 메타 보상
+    const weights = CONFIG.prizes.map(p=>p.weight);
+
+    // 보너스는 당첨 항목(꽝 제외)에 균등 가산
+    const nonMissIdx = CONFIG.prizes.map((p,i)=> p.label!== '꽝' ? i : null).filter(v=>v!==null);
+    const add = bonus > 0 ? (bonus / nonMissIdx.length) : 0;
+
+    let total = 0; const adjusted = [];
+    for(let i=0;i<CONFIG.prizes.length;i++){
+      const base = weights[i];
+      const plus = nonMissIdx.includes(i) ? add : 0;
+      const w = Math.max(0, base + plus);
+      adjusted.push(w); total += w;
+    }
+    let r = Math.random() * total;
+    for(let i=0;i<adjusted.length;i++){
+      if(r < adjusted[i]) return i;
+      r -= adjusted[i];
+    }
+    return adjusted.length-1;
+  }
+
+  // Build wheel slices as SVG for crispness
+  function buildWheel(){
+    const size = 1000; // virtual size for SVG
+    const radius = size/2;
+    const n = CONFIG.prizes.length;
+    const angle = (2*Math.PI)/n;
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '100%');
+    svg.setAttribute('aria-hidden','true');
+
+    for(let i=0;i<n;i++){
+      const start = -Math.PI/2 + i*angle; // start at top
+      const end = start + angle;
+      const x1 = radius + radius*Math.cos(start);
+      const y1 = radius + radius*Math.sin(start);
+      const x2 = radius + radius*Math.cos(end);
+      const y2 = radius + radius*Math.sin(end);
+
+      const path = document.createElementNS(svgNS, 'path');
+      const d = [
+        `M ${radius} ${radius}`,
+        `L ${x1} ${y1}`,
+        `A ${radius} ${radius} 0 0 1 ${x2} ${y2}`,
+        'Z'
+      ].join(' ');
+      path.setAttribute('d', d);
+      path.setAttribute('fill', CONFIG.prizes[i].color);
+      svg.appendChild(path);
+
+      // label
+      const labelAngle = start + angle/2;
+      const tx = radius + (radius*0.62)*Math.cos(labelAngle);
+      const ty = radius + (radius*0.62)*Math.sin(labelAngle);
+      const g = document.createElementNS(svgNS,'g');
+      g.setAttribute('transform', `translate(${tx},${ty}) rotate(${(labelAngle*180/Math.PI)+90})`);
+
+      const text = document.createElementNS(svgNS, 'text');
+      text.setAttribute('fill', '#0b0f14');
+      text.setAttribute('font-size', String(size*0.038));
+      text.setAttribute('font-weight', '800');
+      text.setAttribute('text-anchor', 'middle');
+      text.textContent = CONFIG.prizes[i].label;
+      g.appendChild(text);
+      svg.appendChild(g);
+    }
+    wheelEl.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'slice';
+    wrap.appendChild(svg);
+    wheelEl.appendChild(wrap);
+
+    // legend
+    legendEl.innerHTML = '';
+    CONFIG.prizes.forEach(p=>{
+      const item = document.createElement('div'); item.className='item';
+      const sq = document.createElement('div'); sq.className='square'; sq.style.background = p.color;
+      const label = document.createElement('div'); label.textContent = `${p.label}`;
+      item.appendChild(sq); item.appendChild(label);
+      legendEl.appendChild(item);
+    });
+  }
+
+  function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+
+  async function spin(){
+    if(spinning) return;
+    const s = getPlayState();
+    if(s.played >= CONFIG.dailyLimit){ showToast('오늘 참여 기회를 모두 사용했습니다.'); return; }
+
+    spinning = true; spinBtn.disabled = true; centerText.textContent = '...';
+
+    // Pick prize and compute target angle
+    const n = CONFIG.prizes.length;
+    const sliceDeg = 360 / n;
+    const pick = pickPrize();
+
+    // 목표를 포인터(12시)가 가리키게 하려면 해당 슬라이스의 중앙이 0도에 오도록 회전
+    const targetSliceCenter = (pick * sliceDeg) + (sliceDeg/2);
+    // 약간의 랜덤 오프셋(근접 실패/자연스러움). 선택 슬라이스 내부에서만 ±15% 범위.
+    const jitter = (Math.random()*0.3 - 0.15) * sliceDeg;
+    const targetDeg = CONFIG.minRotations*360 + (360 - (targetSliceCenter + jitter));
+
+    const start = performance.now();
+    const dur = CONFIG.spinDurationMs;
+    const from = currentRotation % 360; // 현재 각도 기준 부드럽게
+
+    function frame(now){
+      const t = Math.min(1, (now - start)/dur);
+      const eased = easeOutCubic(t);
+      const value = from + eased * (targetDeg);
+      wheelEl.style.transform = `rotate(${value}deg)`;
+      if(t < 1){ requestAnimationFrame(frame); }
+      else {
+        currentRotation = value;
+        onSpinEnd(pick);
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function onSpinEnd(index){
+    spinning = false; spinBtn.disabled = false; centerText.textContent = 'SPIN';
+
+    const prize = CONFIG.prizes[index];
+    // 플레이 기록 업데이트
+    const s = getPlayState(); s.played += 1; s.last = Date.now();
+    if(prize.label === '다음판 +5%'){
+      s.bonus = Math.min(20, (s.bonus||0) + 5); // 보너스 상한 20%
+    }
+    setPlayState(s);
+
+    // 결과 노출
+    resTitle.textContent = prize.label === '꽝' ? '아쉽습니다!' : '축하합니다!';
+    resDesc.textContent = prize.rewardText + (prize.label === '꽝' ? '' : ' (직원 확인 후 제공)');
+    resultModal.style.display='grid';
+
+    // 서버 검증/정산 훅 (필요시 교체)
+    // fetch('/api/roulette/result', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ prize: prize.label, ts: Date.now() }) })
+    //   .catch(()=>{/* 네트워크 실패 무시(데모) */});
+
+    // 쿨다운 표시(선택)
+    if(CONFIG.cooldownSec>0 && s.played < CONFIG.dailyLimit){
+      cooldownInfo.hidden = false; let left = CONFIG.cooldownSec;
+      cooldownInfo.textContent = `재시도 ${left}s`;
+      spinBtn.disabled = true;
+      const timer = setInterval(()=>{
+        left--; cooldownInfo.textContent = `재시도 ${left}s`;
+        if(left<=0){ clearInterval(timer); cooldownInfo.hidden=true; spinBtn.disabled=false; }
+      }, 1000);
+    }
+  }
+
+  // Init
+  buildWheel();
+  updateLimitInfo();
+
+  spinBtn.addEventListener('click', spin);
+  closeModal.addEventListener('click', ()=> resultModal.style.display='none');
+  resultModal.addEventListener('click', (e)=> { if(e.target === resultModal) resultModal.style.display='none'; });
+  </script>
+</body>
+</html>

@@ -105,7 +105,7 @@ document.addEventListener('click', (e) => {
                 window.location.replace(returnUrl);
             } else {
                 // returnUrl이 없으면 메인으로
-                window.location.replace('/main/main.html');
+                window.location.replace('/');
             }
         } else {
             // 로그인되지 않은 경우 페이지 표시
@@ -198,7 +198,7 @@ if (loginForm) {
                 window.location.replace(returnUrl);
             } else {
                 console.log('메인 페이지로 리다이렉트');
-                window.location.replace('/main/main.html');
+                window.location.replace('/');
             }
             
         } catch (error) {

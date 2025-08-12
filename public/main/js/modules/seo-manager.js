@@ -2,7 +2,7 @@ import { currentCategory, currentFilters } from '/main/js/business-header.js';
 
 // 기본 SEO 태그 설정 함수
 export function setDefaultSEOTags() {
-    document.title = '유흥마블 - 원하는 서비스를 즐기세요!';
+    document.title = '유흥마블 - 유흥주점 건전마시지 모든 정보를 한눈에 즐기세요!';
     
     // description 메타 태그
     let metaDescription = document.querySelector('meta[name="description"]');
@@ -71,7 +71,7 @@ export function updateSEOTags() {
         title = parts.join(' ') + ' - 유흥마블';
         description = descParts.join(' ') + ' 정보를 확인하세요.';
     } else {
-        title = '유흥마블 - 원하는 서비스를 즐기세요!';
+        title = '유흥마블 - 유흥주점 건전마시지 모든 정보를 한눈에 즐기세요!';
     }
     
     // 메타 태그 업데이트

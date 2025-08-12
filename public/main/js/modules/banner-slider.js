@@ -30,5 +30,5 @@ export function initBannerSlider() {
     });
     
     // 자동 슬라이드
-    setInterval(nextSlide, 5000);
+    setInterval(nextSlide, 3000);
 }
