@@ -4,7 +4,7 @@
 }
 
 .content-wrapper {
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 .content-text {
@@ -18,7 +18,9 @@
     height: auto;
     border-radius: 8px;
     margin: 15px 0;
-}/* ===== 카테고리별 추가 섹션 스타일 ===== */
+}
+
+/* ===== 카테고리별 추가 섹션 스타일 ===== */
 
 /* 섹션 공통 스타일 */
 .section-title {
@@ -30,16 +32,17 @@
     border-bottom: 1px solid #3a3a3a;
 }
 
-/* 공통 섹션 스타일 */
-.business-hours-section,
-.table-price-section,
-.event-info-section,
-.courses-section,
-.closed-days-section,
-.parking-info-section,
-.directions-section,
-.massage-event-section {
-    margin-bottom: 10px;
+/* ===== 카테고리별 섹션 공통 스타일 (30px margin-bottom) ===== */
+.business-hours-section, 
+.table-price-section, 
+.event-info-section, 
+.courses-section, 
+.closed-days-section, 
+.parking-info-section, 
+.directions-section, 
+.massage-event-section,
+.content-section {
+    margin-bottom: 20px;
 }
 
 /* 섹션 헤더 (영업시간 등) */
@@ -71,17 +74,36 @@
     line-height: 1.6;
 }
 
+/* 주대안내 스타일 */
 .table-price-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 .price-item {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    padding: 12px 15px;
+    background-color: #2a2a2a;
+    border-radius: 6px;
+    border: 1px solid #3a3a3a;
+}
+
+/* 코스 안내 스타일 (한 줄 표시) */
+.courses-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.course-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 12px 15px;
     background-color: #2a2a2a;
     border-radius: 6px;
@@ -113,7 +135,7 @@
     background-color: #2a2a2a;
     border-radius: 6px;
     border: 1px solid #3a3a3a;
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 .event-info-content {
@@ -130,53 +152,14 @@
 }
 
 /* ===== 건전마사지 섹션 ===== */
-.courses-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
 
-.course-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 15px;
-    background-color: #2a2a2a;
-    border-radius: 6px;
-    border: 1px solid #3a3a3a;
-}
-
-.course-name {
-    color: #ffffff;
-    font-size: 15px;
-    font-weight: 500;
-}
-
-.course-price {
-    color: #00DD59;
-    font-size: 15px;
-    font-weight: 600;
-}
-
-.closed-days-content {
-    color: #ff6b6b;
-    font-size: 15px;
-    font-weight: 500;
-}
-
-.parking-info-content,
-.directions-content {
-    color: #e0e0e0;
-    font-size: 15px;
-    line-height: 1.6;
-}
-
+/* 건전마사지 이벤트 */
 .massage-event-wrapper {
     padding: 12px 15px;
     background-color: #2a2a2a;
     border-radius: 6px;
     border: 1px solid #3a3a3a;
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 .massage-event-content {
