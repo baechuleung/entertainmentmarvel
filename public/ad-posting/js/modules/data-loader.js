@@ -35,6 +35,10 @@ export async function loadRegionData() {
             regionData[region.name] = region.code;
         });
         
+        // window 객체에 저장 (전역 접근용)
+        window.regionData = regionData;
+        window.cityData = cityData;
+        
         return { regionData, cityData };
     } catch (error) {
         console.error('지역 데이터 로드 실패:', error);
@@ -78,7 +82,10 @@ export async function loadBusinessTypes(categoryName) {
 export function getCitiesByRegion(regionName) {
     const regionCode = regionData[regionName];
     if (regionCode && cityData[regionCode]) {
-        return cityData[regionCode];
+        // 도시 데이터가 문자열 배열인지 객체 배열인지 확인
+        return cityData[regionCode].map(city => 
+            typeof city === 'string' ? { name: city } : city
+        );
     }
     return [];
 }

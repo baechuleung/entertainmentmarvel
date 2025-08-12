@@ -89,17 +89,22 @@ export function updateCityOptions(regionName) {
     citySelected.classList.remove('has-value');
     if (cityInput) cityInput.value = '';
     
-    // 선택된 지역의 도시 목록 가져오기
-    const cities = getCitiesByRegion(regionName);
-    cities.forEach(city => {
-        const option = document.createElement('div');
-        option.setAttribute('data-value', city.name);
-        option.textContent = city.name;
-        option.addEventListener('click', function() {
-            selectOption(this, 'city');
+    // regionData와 cityData를 window에서 가져오기
+    const regionCode = window.regionData ? window.regionData[regionName] : null;
+    
+    if (regionCode && window.cityData && window.cityData[regionCode]) {
+        window.cityData[regionCode].forEach(city => {
+            const option = document.createElement('div');
+            // city가 객체인지 문자열인지 확인
+            const cityName = typeof city === 'string' ? city : city.name;
+            option.setAttribute('data-value', cityName);
+            option.textContent = cityName;
+            option.addEventListener('click', function() {
+                selectOption(this, 'city');
+            });
+            cityOptions.appendChild(option);
         });
-        cityOptions.appendChild(option);
-    });
+    }
 }
 
 // 커스텀 셀렉트 옵션 선택
@@ -131,13 +136,13 @@ export function closeAllSelect(elmnt) {
     const selectSelected = document.getElementsByClassName('select-selected');
     
     for (let i = 0; i < selectSelected.length; i++) {
-        if (elmnt !== selectSelected[i]) {
+        if (elmnt && elmnt !== selectSelected[i]) {
             selectSelected[i].classList.remove('select-arrow-active');
         }
     }
     
     for (let i = 0; i < selectItems.length; i++) {
-        if (elmnt !== selectSelected[i] && !selectItems[i].contains(elmnt)) {
+        if (!elmnt || (elmnt !== selectSelected[i] && !selectItems[i].contains(elmnt.target || elmnt))) {
             selectItems[i].classList.add('select-hide');
         }
     }

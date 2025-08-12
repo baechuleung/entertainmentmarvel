@@ -116,41 +116,83 @@
                     <h2 class="section-title">3. 광고 정보 입력</h2>
                     
                     <!-- 유흥주점 카테고리 전용 필드 (기본 숨김) -->
-                    <div id="karaoke-fields" class="category-specific-fields" style="display: none;">
-                        <!-- 영업시간 -->
-                        <div class="form-group">
-                            <label for="business-hours">영업시간</label>
-                            <input type="text" id="business-hours" name="business-hours" placeholder="예: 오후 7시 ~ 새벽 5시">
-                        </div>
-                        
-                        <!-- 주대설정 -->
-                        <div class="form-group">
-                            <label for="table-price">주대설정</label>
-                            <textarea id="table-price" name="table-price" rows="3" placeholder="예: 일반룸 30만원, VIP룸 50만원"></textarea>
-                        </div>
-                        
-                        <!-- 이벤트 -->
-                        <div class="form-group">
-                            <label for="event-info">이벤트</label>
-                            <textarea id="event-info" name="event-info" rows="3" placeholder="진행중인 이벤트를 입력하세요"></textarea>
-                        </div>
+                    <!-- 영업시간 -->
+                    <div class="form-group karaoke-field" style="display: none;">
+                        <label for="business-hours">영업시간</label>
+                        <input type="text" id="business-hours" name="business-hours" placeholder="예: 오후 7시 ~ 새벽 5시">
                     </div>
                     
-                    <!-- 썸네일 업로드 -->
+                    <!-- 주대설정 -->
+                    <div class="form-group karaoke-field" style="display: none;">
+                        <label>주대설정</label>
+                        <div id="table-price-list">
+                            <div class="table-price-item">
+                                <input type="text" class="table-price-name" placeholder="예: 일반룸">
+                                <div class="price-input-wrapper">
+                                    <input type="text" class="table-price-value" placeholder="예: 30만">
+                                    <span class="price-unit">원</span>
+                                </div>
+                                <button type="button" class="btn-remove-price" style="display: none;">×</button>
+                            </div>
+                        </div>
+                        <button type="button" id="btn-add-price" class="btn-add-price">+ 주대 추가</button>
+                    </div>
+                    
+                    <!-- 건전마사지 카테고리 전용 필드 (기본 숨김) -->
+                    <!-- 영업시간 -->
+                    <div class="form-group massage-field" style="display: none;">
+                        <label for="massage-business-hours">영업시간</label>
+                        <input type="text" id="massage-business-hours" name="massage-business-hours" placeholder="예: 오전 10시 ~ 오후 10시">
+                    </div>
+                    
+                    <!-- 휴무일 -->
+                    <div class="form-group massage-field" style="display: none;">
+                        <label for="closed-days">휴무일</label>
+                        <input type="text" id="closed-days" name="closed-days" placeholder="예: 매주 일요일">
+                    </div>
+                    
+                    <!-- 주차안내 -->
+                    <div class="form-group massage-field" style="display: none;">
+                        <label for="parking-info">주차안내</label>
+                        <input type="text" id="parking-info" name="parking-info" placeholder="예: 건물 지하 1~2층 무료주차 가능">
+                    </div>
+                    
+                    <!-- 오시는 길 -->
+                    <div class="form-group massage-field" style="display: none;">
+                        <label for="directions">오시는 길</label>
+                        <input type="text" id="directions" name="directions" placeholder="예: 강남역 3번 출구에서 도보 5분">
+                    </div>
+                    
+                    <!-- 코스설정 -->
+                    <div class="form-group massage-field" style="display: none;">
+                        <label>코스설정</label>
+                        <div id="course-list">
+                            <div class="course-item">
+                                <input type="text" class="course-name" placeholder="예: 전신관리">
+                                <div class="price-input-wrapper">
+                                    <input type="text" class="course-price" placeholder="예: 100,000">
+                                    <span class="price-unit">원</span>
+                                </div>
+                                <button type="button" class="btn-remove-course" style="display: none;">×</button>
+                            </div>
+                        </div>
+                        <button type="button" id="btn-add-course" class="btn-add-course">+ 코스 추가</button>
+                    </div>
+                    
+                    <!-- 대표이미지 업로드 -->
                     <div class="form-group">
-                        <label>썸네일 이미지</label>
+                        <label>대표이미지</label>
                         <div class="thumbnail-upload-area">
                             <button type="button" class="thumbnail-upload-btn" id="thumbnail-upload-btn">
                                 <span class="upload-icon">📷</span>
-                                <span class="upload-text">썸네일 업로드</span>
+                                <span class="upload-text">대표이미지 업로드</span>
                             </button>
                             <div class="thumbnail-preview" id="thumbnail-preview" style="display: none;">
-                                <img id="thumbnail-image" src="" alt="썸네일 미리보기">
+                                <img id="thumbnail-image" src="" alt="대표이미지 미리보기">
                                 <button type="button" class="delete-thumbnail" id="delete-thumbnail">×</button>
                             </div>
                             <input type="file" id="thumbnail-input" accept="image/*" style="display: none;">
                         </div>
-                        <p class="help-text">* 썸네일을 업로드하지 않으면 업종별 기본 이미지가 사용됩니다</p>
                     </div>
                     
                     <!-- 상세 내용 에디터 -->
@@ -160,6 +202,15 @@
                             <div id="editor"></div>
                         </div>
                         <input type="hidden" id="content" name="content" required>
+                    </div>
+                    
+                    <!-- 이벤트 (유흥주점/건전마사지 전용, 상세 내용 아래) -->
+                    <div class="form-group karaoke-field massage-field" style="display: none;">
+                        <label for="event-info">이벤트</label>
+                        <div id="event-editor-container">
+                            <div id="event-editor"></div>
+                        </div>
+                        <input type="hidden" id="event-info" name="event-info">
                     </div>
                 </div>
                 

@@ -157,13 +157,163 @@
     color: #000;
 }
 
-/* 카테고리별 전용 필드 스타일 */
-.category-specific-fields {
-    padding: 15px;
-    background: #1a1a1a;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #2a2a2a;
+/* 주대설정 스타일 */
+#table-price-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.table-price-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.table-price-name {
+    flex: 1;
+    padding: 10px;
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.price-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.table-price-value,
+.course-price {
+    width: 100%;
+    padding: 10px 35px 10px 10px;
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.price-unit {
+    position: absolute;
+    right: 10px;
+    color: #888;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.btn-remove-price {
+    width: 30px;
+    height: 30px;
+    background-color: #ff4444;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-remove-price:hover {
+    background-color: #ff2222;
+}
+
+.btn-add-price {
+    padding: 8px 16px;
+    background-color: #00DD59;
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-add-price:hover {
+    background-color: #00c94f;
+}
+
+/* 코스설정 스타일 (건전마사지용) */
+#course-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.course-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.course-name {
+    flex: 1;
+    padding: 10px;
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.btn-remove-course {
+    width: 30px;
+    height: 30px;
+    background-color: #ff4444;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-remove-course:hover {
+    background-color: #ff2222;
+}
+
+.btn-add-course {
+    padding: 8px 16px;
+    background-color: #00DD59;
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-add-course:hover {
+    background-color: #00c94f;
+}
+
+/* 이벤트 에디터 스타일 */
+#event-editor-container {
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    border-radius: 5px;
+}
+
+#event-editor {
+    min-height: 200px;
+    color: #ffffff;
+}
+
+/* 카테고리별 전용 필드 애니메이션 */
+.karaoke-field,
+.massage-field {
     animation: slideDown 0.3s ease;
 }
 
@@ -176,14 +326,6 @@
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-.category-specific-fields .form-group {
-    margin-bottom: 15px;
-}
-
-.category-specific-fields .form-group:last-child {
-    margin-bottom: 0;
 }
 
 /* 커스텀 셀렉트 박스 */
@@ -416,7 +558,7 @@
 }
 
 .thumbnail-upload-btn {
-    padding: 12px 20px;
+    padding: 8px 16px;
     background-color: #3a3a3a;
     border: 1px solid #4a4a4a;
     border-radius: 5px;
@@ -479,12 +621,6 @@
 
 .delete-thumbnail:hover {
     background-color: rgba(255, 0, 0, 1);
-}
-
-.help-text {
-    color: #888;
-    font-size: 12px;
-    margin-top: 8px;
 }
 
 /* 연락처 섹션 */

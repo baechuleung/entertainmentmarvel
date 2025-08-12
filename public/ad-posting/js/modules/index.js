@@ -47,3 +47,12 @@ export {
     clearThumbnail,
     uploadThumbnail
 } from './thumbnail.js';
+
+// 카테고리별 필드 모듈
+export {
+    initializeEventEditor,
+    setupTablePriceEvents,
+    toggleCategorySpecificFields,
+    collectTablePrices,
+    collectCategoryData
+} from './category-fields.js';

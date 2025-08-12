@@ -15,13 +15,18 @@ import {
     initializeQuillEditor,
     createImageHandler,
     setupThumbnailUpload,
-    processEditorImages
+    processEditorImages,
+    initializeEventEditor,
+    setupTablePriceEvents,
+    toggleCategorySpecificFields,
+    collectCategoryData
 } from './modules/index.js';
 
 // 전역 변수
 let currentUser = null;
 let currentUserData = null;
 let quill = null;
+let eventQuill = null; // 이벤트 에디터 추가
 let previewImages = new Map();
 let thumbnailFile = null;
 
@@ -40,9 +45,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Quill 에디터 초기화
     quill = initializeQuillEditor();
     
+    // 이벤트 에디터 초기화 (유흥주점용)
+    eventQuill = initializeEventEditor(previewImages);
+    
     // 이미지 핸들러 설정
     const toolbar = quill.getModule('toolbar');
     toolbar.addHandler('image', createImageHandler(quill, previewImages));
+    
+    const eventToolbar = eventQuill.getModule('toolbar');
+    eventToolbar.addHandler('image', createImageHandler(eventQuill, previewImages));
+    
+    // 주대 추가/삭제 이벤트 설정
+    setupTablePriceEvents();
     
     // 인증 상태 확인
     checkAuth();
@@ -51,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadCategoryData();
     createCategoryButtons(categoryButtons, categoryInput, async (categoryName) => {
         // 카테고리별 필드 표시/숨김
-        toggleCategorySpecificFields(categoryName);
+        toggleCategorySpecificFields(categoryName, eventQuill);
         
         // 업종 데이터 로드
         const types = await loadBusinessTypes(categoryName);
@@ -75,21 +89,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     form.addEventListener('submit', handleSubmit);
 });
 
-// 카테고리별 필드 표시/숨김
-function toggleCategorySpecificFields(categoryName) {
-    const karaokeFields = document.getElementById('karaoke-fields');
-    
-    // 유흥주점 카테고리인 경우 추가 필드 표시
-    if (categoryName === '유흥주점') {
-        karaokeFields.style.display = 'block';
-    } else {
-        karaokeFields.style.display = 'none';
-        // 필드 값 초기화
-        document.getElementById('business-hours').value = '';
-        document.getElementById('table-price').value = '';
-        document.getElementById('event-info').value = '';
-    }
-}
 
 // 인증 상태 확인
 function checkAuth() {
@@ -201,11 +200,10 @@ async function handleSubmit(e) {
             status: currentUserData.userType === 'administrator' ? 'active' : 'pending'
         };
         
-        // 유흥주점 카테고리인 경우 추가 필드 저장
-        if (categoryInput.value === '유흥주점') {
-            adData.businessHours = document.getElementById('business-hours').value || '';
-            adData.tablePrice = document.getElementById('table-price').value || '';
-            adData.eventInfo = document.getElementById('event-info').value || '';
+        // 카테고리별 추가 필드 저장
+        if (categoryInput.value === '유흥주점' || categoryInput.value === '건전마사지') {
+            const categoryData = collectCategoryData(categoryInput.value, eventQuill);
+            Object.assign(adData, categoryData);
         }
         
         // 리얼타임 데이터베이스에 저장
