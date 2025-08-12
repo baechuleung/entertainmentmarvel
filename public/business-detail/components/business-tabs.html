@@ -7,13 +7,53 @@
     <!-- 상세내용 탭 -->
     <div class="tab-content active" id="detail-tab">
         <div class="detail-content-section">
+            <!-- 메인 상세 내용 (HTML 콘텐츠) -->
             <div class="detail-content" id="detail-content">
                 <!-- 상세 내용이 여기에 로드됩니다 -->
             </div>
             
+            <!-- 유흥주점 이벤트 섹션 -->
+            <div class="event-section" id="event-section" style="display: none;">
+                <h3 class="section-title">이벤트 정보</h3>
+                <div class="event-content" id="event-content">
+                    <!-- 이벤트 HTML 내용이 여기에 로드됩니다 -->
+                </div>
+            </div>
+            
+            <!-- 건전마사지 코스 섹션 -->
+            <div class="courses-section" id="courses-section" style="display: none;">
+                <h3 class="section-title">코스 안내</h3>
+                <div class="courses-list" id="courses-list">
+                    <!-- 코스 목록이 여기에 동적으로 생성됩니다 -->
+                </div>
+            </div>
+            
+            <!-- 건전마사지 이벤트 섹션 -->
+            <div class="massage-event-section" id="massage-event-section" style="display: none;">
+                <h3 class="section-title">이벤트 정보</h3>
+                <div class="massage-event-content" id="massage-event-content">
+                    <!-- 이벤트 HTML 내용이 여기에 로드됩니다 -->
+                </div>
+            </div>
+            
             <!-- 연락처 정보 섹션 -->
             <div class="contact-section" id="contact-section" style="display: none;">
+                <h3 class="section-title">연락처</h3>
                 <div class="contact-items">
+                    <!-- 전화번호 -->
+                    <div class="contact-item" id="phone-item" style="display: none;">
+                        <div class="contact-icon phone">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">전화번호</div>
+                            <div class="contact-value phone" id="phone-number"></div>
+                        </div>
+                        <button class="btn-copy" id="btn-phone-action">복사</button>
+                    </div>
+                    
                     <!-- 카카오톡 -->
                     <div class="contact-item" id="kakao-item" style="display: none;">
                         <div class="contact-icon kakao">
