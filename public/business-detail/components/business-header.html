@@ -2,13 +2,21 @@
     <div class="business-item" data-id="{{id}}">
         <img id="business-thumbnail" style="display: none;" alt="업체 이미지">
         <div class="business-info">
-            <div>
-                <div class="ad-title" id="business-name"></div>
-                <div class="ad-meta">
-                    <div class="ad-type" id="business-type"></div>
-                    <div class="ad-location" id="business-location"></div>
-                </div>
+            <!-- 업체명 -->
+            <div class="ad-title" id="business-name"></div>
+            
+            <!-- 업종 -->
+            <div class="ad-type" id="business-type"></div>
+            
+            <!-- 위치 -->
+            <div class="ad-location" style="display: none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#ff4757"/>
+                </svg>
+                <span id="business-location"></span>
             </div>
+            
+            <!-- 통계 정보 -->
             <div class="business-stats">
                 <div class="stat-item">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

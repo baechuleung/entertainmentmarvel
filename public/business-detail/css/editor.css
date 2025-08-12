@@ -1,0 +1,101 @@
+/* ===== Quill 에디터 ===== */
+#editor-container,
+#editor-edit-container {
+    background-color: #333;
+    border: 1px solid #444;
+    border-radius: 5px;
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#editor,
+#editor-edit {
+    min-height: 150px;
+    color: #fff;
+    width: 100%;
+}
+
+.ql-toolbar.ql-snow {
+    background-color: #2a2a2a;
+    border: none;
+    border-bottom: 1px solid #444;
+}
+
+.ql-toolbar.ql-snow .ql-stroke {
+    stroke: #aaa;
+}
+
+.ql-toolbar.ql-snow .ql-fill {
+    fill: #aaa;
+}
+
+.ql-toolbar.ql-snow .ql-picker {
+    color: #aaa;
+}
+
+.ql-toolbar.ql-snow .ql-picker-options {
+    background-color: #2a2a2a;
+}
+
+.ql-toolbar.ql-snow .ql-picker-label:hover,
+.ql-toolbar.ql-snow .ql-picker-label.ql-active,
+.ql-toolbar.ql-snow .ql-picker-item:hover,
+.ql-toolbar.ql-snow .ql-picker-item.ql-selected,
+.ql-toolbar.ql-snow button:hover,
+.ql-toolbar.ql-snow button.ql-active {
+    color: #1a5490;
+}
+
+.ql-toolbar.ql-snow button:hover .ql-fill,
+.ql-toolbar.ql-snow button.ql-active .ql-fill {
+    fill: #1a5490;
+}
+
+.ql-toolbar.ql-snow button:hover .ql-stroke,
+.ql-toolbar.ql-snow button.ql-active .ql-stroke {
+    stroke: #1a5490;
+}
+
+.ql-container.ql-snow {
+    border: none;
+}
+
+.ql-editor {
+    background-color: #333;
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 150px;
+    padding: 12px;
+}
+
+.ql-editor.ql-blank::before {
+    color: #666;
+    content: "후기 내용을 입력하세요...";
+    font-style: normal;
+}
+
+.ql-editor:focus {
+    outline: none;
+}
+
+.ql-editor img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+/* 이미지 미리보기 표시 스타일 */
+.ql-editor img[data-preview="true"] {
+    opacity: 0.8;
+    border: 2px dashed #1a5490;
+}
+
+.file-info {
+    color: #aaaaaa;
+    font-size: 12px;
+    margin-top: 5px;
+}

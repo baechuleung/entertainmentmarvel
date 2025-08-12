@@ -1,0 +1,12 @@
+/* ===== 기본 컨테이너 ===== */
+.business-detail-container {
+    min-height: calc(100vh - 160px);
+    background-color: #131217;
+    padding-bottom: 80px;
+}
+
+.error {
+    text-align: center;
+    padding: 60px 20px;
+    color: #ff6b6b;
+}

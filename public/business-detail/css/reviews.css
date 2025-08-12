@@ -1,0 +1,171 @@
+/* ===== 후기 탭 ===== */
+.reviews-tab-content {
+    padding: 20px;
+}
+
+.reviews-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.reviews-title {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.reviews-title svg {
+    color: #f39c12;
+}
+
+#review-total-count {
+    color: #888;
+    font-weight: normal;
+    margin-left: 5px;
+}
+
+.btn-write-review {
+    padding: 8px 16px;
+    background-color: #1a5490;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.review-item {
+    padding: 15px 0;
+    border-bottom: 1px solid #333;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.review-item:last-child {
+    border-bottom: none;
+}
+
+.review-content-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.review-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.review-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.review-number {
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    min-width: 20px;
+}
+
+.review-spacer {
+    min-width: 20px;
+}
+
+.review-title {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.review-info {
+    display: flex;
+    gap: 10px;
+}
+
+.review-author {
+    color: #888;
+    font-size: 13px;
+}
+
+.review-date {
+    color: #666;
+    font-size: 12px;
+}
+
+.review-image-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 15px 12px;
+    background: #363636;
+    border-radius: 10px;
+    color: #aaa;
+    font-size: 12px;
+    align-self: center;
+}
+
+.review-image-info svg {
+    width: 16px;
+    height: 16px;
+}
+
+.review-content {
+    color: #e0e0e0;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.review-images {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.review-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.no-reviews {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+}
+
+/* 후기 상세 내용 */
+.review-detail-content {
+    color: #ffffff;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.review-detail-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+/* 하단 액션 버튼 (탭 컨텐츠 내에서 제거) */
+.bottom-actions {
+    display: none;
+}

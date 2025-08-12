@@ -29,6 +29,12 @@ export function setBusinessHeader(data) {
             `${data.region} ${data.city}` : 
             `${data.region || '위치 정보 없음'}`;
         businessLocation.textContent = location;
+        
+        // 부모 요소 표시
+        const locationContainer = businessLocation.parentElement;
+        if (locationContainer) {
+            locationContainer.style.display = 'flex';
+        }
     }
     
     // 조회수
@@ -54,38 +60,103 @@ export function setBusinessHeader(data) {
 
 // 상세내용 설정
 export function setDetailContent(data) {
+    // 기존 detail-content는 숨김 (나중에 제거 예정)
     const detailContent = document.getElementById('detail-content');
-    
-    // 상세 내용 표시 (HTML 콘텐츠는 에디터에서 생성된 것이므로 innerHTML 사용)
-    if (detailContent && data.content) {
-        detailContent.innerHTML = data.content;
+    if (detailContent) {
+        detailContent.style.display = 'none';
     }
     
-    // 카테고리별 추가 정보 표시
+    // 카테고리별 추가 정보 표시 (이벤트 정보까지)
+    console.log('setDetailContent 호출됨, 카테고리:', data.category);
     displayCategorySpecificInfo(data);
     
-    // 연락처 정보 설정
+    // 상세내용 (content 필드) 표시 - 이벤트 정보 다음에
+    if (data.content) {
+        const contentSection = document.getElementById('content-section');
+        const contentText = document.getElementById('content-text');
+        
+        console.log('상세내용 표시 시도:', contentSection, contentText);
+        
+        if (contentSection && contentText) {
+            contentSection.style.display = 'block';
+            contentText.innerHTML = data.content;
+            console.log('상세내용 표시 완료');
+        }
+    }
+    
+    // 연락처 정보 설정 (기존 코드 유지)
     setContactInfo(data);
 }
 
 // 카테고리별 추가 정보 표시
 function displayCategorySpecificInfo(data) {
-    // 유흥주점 카테고리 정보
-    if (data.category === '유흥주점' && data.eventDescription) {
-        const eventSection = document.getElementById('event-section');
-        const eventContent = document.getElementById('event-content');
+    // 영업시간 (유흥주점, 건전마사지 공통)
+    if (data.businessHours) {
+        const businessHoursSection = document.getElementById('business-hours-section');
+        const businessHoursContent = document.getElementById('business-hours-content');
         
-        if (eventSection && eventContent) {
-            eventSection.style.display = 'block';
-            // 이벤트 설명은 에디터에서 생성된 HTML이므로 innerHTML 사용
-            eventContent.innerHTML = data.eventDescription;
+        if (businessHoursSection && businessHoursContent) {
+            businessHoursSection.style.display = 'block';
+            businessHoursContent.textContent = data.businessHours;
+        }
+    }
+    
+    // 유흥주점 카테고리 정보
+    if (data.category === '유흥주점') {
+        
+        // 주대 안내 (객체 형태로 저장된 경우)
+        if (data.tablePrice) {
+            const tablePriceSection = document.getElementById('table-price-section');
+            const tablePriceList = document.getElementById('table-price-list');
+            
+            if (tablePriceSection && tablePriceList) {
+                tablePriceSection.style.display = 'block';
+                
+                // 기존 내용 초기화
+                tablePriceList.innerHTML = '';
+                
+                // tablePrice가 객체인 경우 처리
+                if (typeof data.tablePrice === 'object') {
+                    // 객체를 배열로 변환 (예: {"1인기준": "330,000", "2인기준": "550,000"})
+                    Object.entries(data.tablePrice).forEach(([person, price]) => {
+                        const priceItem = document.createElement('div');
+                        priceItem.className = 'price-item';
+                        
+                        const priceName = document.createElement('div');
+                        priceName.className = 'price-name';
+                        priceName.textContent = person;
+                        
+                        const priceValue = document.createElement('div');
+                        priceValue.className = 'price-value';
+                        // 가격이 문자열로 저장된 경우 처리
+                        const priceText = typeof price === 'string' ? price : price.toString();
+                        priceValue.textContent = priceText.includes('원') ? priceText : `${priceText}원`;
+                        
+                        priceItem.appendChild(priceName);
+                        priceItem.appendChild(priceValue);
+                        tablePriceList.appendChild(priceItem);
+                    });
+                }
+            }
+        }
+        
+        // 이벤트 정보
+        if (data.eventInfo) {
+            const eventInfoSection = document.getElementById('event-info-section');
+            const eventInfoContent = document.getElementById('event-info-content');
+            
+            if (eventInfoSection && eventInfoContent) {
+                eventInfoSection.style.display = 'block';
+                // 이벤트 정보는 에디터에서 생성된 HTML이므로 innerHTML 사용
+                eventInfoContent.innerHTML = data.eventInfo;
+            }
         }
     }
     
     // 건전마사지 카테고리 정보
     if (data.category === '건전마사지') {
-        // 코스 정보
-        if (data.courses && data.courses.length > 0) {
+        // 코스 정보 (객체 형태로 저장된 경우)
+        if (data.courses && typeof data.courses === 'object') {
             const coursesSection = document.getElementById('courses-section');
             const coursesList = document.getElementById('courses-list');
             
@@ -95,140 +166,145 @@ function displayCategorySpecificInfo(data) {
                 // 기존 내용 초기화
                 coursesList.innerHTML = '';
                 
-                // 코스 아이템 동적 생성
-                data.courses.forEach(course => {
-                    const courseItem = document.createElement('div');
-                    courseItem.className = 'course-item';
-                    
-                    const courseName = document.createElement('span');
-                    courseName.className = 'course-name';
-                    courseName.textContent = course.name;
-                    
-                    const coursePrice = document.createElement('span');
-                    coursePrice.className = 'course-price';
-                    coursePrice.textContent = course.price ? 
-                        `${course.price.toLocaleString()}원` : '가격 문의';
-                    
-                    courseItem.appendChild(courseName);
-                    courseItem.appendChild(coursePrice);
-                    coursesList.appendChild(courseItem);
-                });
+                // courses가 배열이 아닌 객체인 경우 처리
+                if (!Array.isArray(data.courses)) {
+                    // 객체를 배열로 변환 (예: {"60분": "13,000,000", "90분": "16,000,000"})
+                    Object.entries(data.courses).forEach(([duration, price]) => {
+                        const courseItem = document.createElement('div');
+                        courseItem.className = 'course-item';
+                        
+                        const courseName = document.createElement('span');
+                        courseName.className = 'course-name';
+                        courseName.textContent = duration;
+                        
+                        const coursePrice = document.createElement('span');
+                        coursePrice.className = 'course-price';
+                        // 가격이 문자열로 저장된 경우 처리
+                        const priceText = typeof price === 'string' ? price : price.toString();
+                        coursePrice.textContent = priceText.includes('원') ? priceText : `${priceText}원`;
+                        
+                        courseItem.appendChild(courseName);
+                        courseItem.appendChild(coursePrice);
+                        coursesList.appendChild(courseItem);
+                    });
+                } else {
+                    // 배열 형태로 저장된 경우 (기존 코드)
+                    data.courses.forEach(course => {
+                        const courseItem = document.createElement('div');
+                        courseItem.className = 'course-item';
+                        
+                        const courseName = document.createElement('span');
+                        courseName.className = 'course-name';
+                        courseName.textContent = course.name;
+                        
+                        const coursePrice = document.createElement('span');
+                        coursePrice.className = 'course-price';
+                        coursePrice.textContent = course.price ? 
+                            `${course.price.toLocaleString()}원` : '가격 문의';
+                        
+                        courseItem.appendChild(courseName);
+                        courseItem.appendChild(coursePrice);
+                        coursesList.appendChild(courseItem);
+                    });
+                }
+            }
+        }
+        
+        // 휴무일
+        if (data.closedDays) {
+            const closedDaysSection = document.getElementById('closed-days-section');
+            const closedDaysContent = document.getElementById('closed-days-content');
+            
+            if (closedDaysSection && closedDaysContent) {
+                closedDaysSection.style.display = 'block';
+                closedDaysContent.textContent = data.closedDays;
+            }
+        }
+        
+        // 주차 정보
+        if (data.parkingInfo) {
+            const parkingInfoSection = document.getElementById('parking-info-section');
+            const parkingInfoContent = document.getElementById('parking-info-content');
+            
+            if (parkingInfoSection && parkingInfoContent) {
+                parkingInfoSection.style.display = 'block';
+                parkingInfoContent.textContent = data.parkingInfo;
+            }
+        }
+        
+        // 오시는 길
+        if (data.directions) {
+            const directionsSection = document.getElementById('directions-section');
+            const directionsContent = document.getElementById('directions-content');
+            
+            if (directionsSection && directionsContent) {
+                directionsSection.style.display = 'block';
+                directionsContent.textContent = data.directions;
             }
         }
         
         // 이벤트 정보
-        if (data.eventDescription) {
+        if (data.eventInfo) {
             const massageEventSection = document.getElementById('massage-event-section');
             const massageEventContent = document.getElementById('massage-event-content');
             
             if (massageEventSection && massageEventContent) {
                 massageEventSection.style.display = 'block';
-                // 이벤트 설명은 에디터에서 생성된 HTML이므로 innerHTML 사용
-                massageEventContent.innerHTML = data.eventDescription;
+                // 이벤트 정보는 에디터에서 생성된 HTML이므로 innerHTML 사용
+                massageEventContent.innerHTML = data.eventInfo;
             }
         }
     }
 }
 
-// 연락처 정보 설정
+// 연락처 정보 설정 (기존 코드 그대로 유지)
 function setContactInfo(data) {
     const contactSection = document.getElementById('contact-section');
+    const kakaoItem = document.getElementById('kakao-item');
+    const telegramItem = document.getElementById('telegram-item');
+    const kakaoId = document.getElementById('kakao-id');
+    const telegramId = document.getElementById('telegram-id');
     
-    // 연락처 중 하나라도 있으면 섹션 표시
-    if (data.phone || data.kakao || data.telegram) {
-        if (contactSection) contactSection.style.display = 'block';
-        
-        // 전화번호 설정
-        if (data.phone) {
-            const phoneItem = document.getElementById('phone-item');
-            const phoneNumber = document.getElementById('phone-number');
-            const btnPhoneAction = document.getElementById('btn-phone-action');
-            
-            if (phoneItem && phoneNumber) {
-                phoneItem.style.display = 'flex';
-                phoneNumber.textContent = data.phone;
-                
-                if (btnPhoneAction) {
-                    btnPhoneAction.onclick = () => copyToClipboard(data.phone);
-                }
-            }
-        }
+    // 카카오톡이나 텔레그램 중 하나라도 있으면 섹션 표시
+    if (data.kakao || data.telegram) {
+        contactSection.style.display = 'block';
         
         // 카카오톡 설정
         if (data.kakao) {
-            const kakaoItem = document.getElementById('kakao-item');
-            const kakaoId = document.getElementById('kakao-id');
+            kakaoItem.style.display = 'flex';
             const btnKakaoAction = document.getElementById('btn-kakao-action');
             
-            if (kakaoItem && kakaoId) {
-                kakaoItem.style.display = 'flex';
-                
-                // URL인지 ID인지 확인
-                if (data.kakao.startsWith('https://') || data.kakao.startsWith('http://')) {
-                    // URL인 경우 - 링크 생성
-                    const link = document.createElement('a');
-                    link.href = data.kakao;
-                    link.target = '_blank';
-                    link.style.color = '#FEE500';
-                    link.style.textDecoration = 'none';
-                    link.textContent = '링크 열기';
-                    
-                    kakaoId.innerHTML = '';
-                    kakaoId.appendChild(link);
-                    
-                    if (btnKakaoAction) {
-                        btnKakaoAction.textContent = '이동';
-                        btnKakaoAction.onclick = () => window.open(data.kakao, '_blank');
-                    }
-                } else {
-                    // ID인 경우
-                    kakaoId.textContent = data.kakao;
-                    
-                    if (btnKakaoAction) {
-                        btnKakaoAction.textContent = '복사';
-                        btnKakaoAction.onclick = () => copyToClipboard(data.kakao);
-                    }
-                }
+            // URL인지 ID인지 확인
+            if (data.kakao.startsWith('https://') || data.kakao.startsWith('http://')) {
+                // URL인 경우 - 링크로 표시
+                kakaoId.innerHTML = `<a href="${data.kakao}" target="_blank" style="color: #FEE500; text-decoration: none;">링크 열기</a>`;
+                btnKakaoAction.textContent = '이동';
+                btnKakaoAction.onclick = () => window.open(data.kakao, '_blank');
+            } else {
+                // ID인 경우 - 복사 기능
+                kakaoId.textContent = data.kakao;
+                btnKakaoAction.textContent = '복사';
+                btnKakaoAction.onclick = () => copyToClipboard(data.kakao);
             }
         }
         
         // 텔레그램 설정
         if (data.telegram) {
-            const telegramItem = document.getElementById('telegram-item');
-            const telegramId = document.getElementById('telegram-id');
+            telegramItem.style.display = 'flex';
             const btnTelegramAction = document.getElementById('btn-telegram-action');
             
-            if (telegramItem && telegramId) {
-                telegramItem.style.display = 'flex';
-                
-                // URL인지 ID인지 확인
-                if (data.telegram.startsWith('https://') || data.telegram.startsWith('http://')) {
-                    // URL인 경우 - 링크 생성
-                    const link = document.createElement('a');
-                    link.href = data.telegram;
-                    link.target = '_blank';
-                    link.style.color = '#2AABEE';
-                    link.style.textDecoration = 'none';
-                    link.textContent = '링크 열기';
-                    
-                    telegramId.innerHTML = '';
-                    telegramId.appendChild(link);
-                    
-                    if (btnTelegramAction) {
-                        btnTelegramAction.textContent = '이동';
-                        btnTelegramAction.onclick = () => window.open(data.telegram, '_blank');
-                    }
-                } else {
-                    // ID인 경우 - @ 붙여서 표시
-                    const telegramValue = data.telegram.startsWith('@') ? 
-                        data.telegram : `@${data.telegram}`;
-                    telegramId.textContent = telegramValue;
-                    
-                    if (btnTelegramAction) {
-                        btnTelegramAction.textContent = '복사';
-                        btnTelegramAction.onclick = () => copyToClipboard(telegramValue);
-                    }
-                }
+            // URL인지 ID인지 확인
+            if (data.telegram.startsWith('https://') || data.telegram.startsWith('http://')) {
+                // URL인 경우 - 링크로 표시
+                telegramId.innerHTML = `<a href="${data.telegram}" target="_blank" style="color: #2AABEE; text-decoration: none;">링크 열기</a>`;
+                btnTelegramAction.textContent = '이동';
+                btnTelegramAction.onclick = () => window.open(data.telegram, '_blank');
+            } else {
+                // ID인 경우 - @ 붙여서 표시하고 복사 기능
+                const telegramValue = data.telegram.startsWith('@') ? data.telegram : `@${data.telegram}`;
+                telegramId.textContent = telegramValue;
+                btnTelegramAction.textContent = '복사';
+                btnTelegramAction.onclick = () => copyToClipboard(telegramValue);
             }
         }
     }

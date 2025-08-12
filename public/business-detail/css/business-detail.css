@@ -765,3 +765,162 @@
 .btn-cancel:hover {
     background-color: #555;
 }
+
+/* ===== 카테고리별 추가 섹션 스타일 ===== */
+/* 섹션 공통 스타일 */
+.section-title {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 30px 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+/* 유흥주점 영업시간 섹션 */
+.business-hours-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+}
+
+.business-hours-content {
+    color: #e0e0e0;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* 유흥주점 테이블 가격 섹션 */
+.table-price-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+}
+
+.table-price-content {
+    color: #00DD59;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* 유흥주점 이벤트 정보 섹션 */
+.event-info-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+}
+
+.event-info-content {
+    color: #e0e0e0;
+    line-height: 1.8;
+    font-size: 15px;
+}
+
+.event-info-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+/* 건전마사지 코스 섹션 */
+.courses-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+}
+
+.courses-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.course-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: #2a2a2a;
+    border-radius: 6px;
+    border: 1px solid #3a3a3a;
+}
+
+.course-name {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.course-price {
+    color: #00DD59;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* 건전마사지 휴무일 섹션 */
+.closed-days-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+}
+
+.closed-days-content {
+    color: #ff6b6b;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+/* 건전마사지 주차 정보 섹션 */
+.parking-info-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+}
+
+.parking-info-content {
+    color: #e0e0e0;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* 건전마사지 오시는 길 섹션 */
+.directions-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+}
+
+.directions-content {
+    color: #e0e0e0;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* 건전마사지 이벤트 섹션 */
+.massage-event-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+}
+
+.massage-event-content {
+    color: #e0e0e0;
+    line-height: 1.8;
+    font-size: 15px;
+}
+
+.massage-event-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 15px 0;
+}

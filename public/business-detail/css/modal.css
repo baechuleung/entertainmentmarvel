@@ -1,0 +1,174 @@
+/* ===== 모달 공통 ===== */
+.review-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+}
+
+.review-modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: #2a2a2a;
+    padding: 0;
+    border-radius: 10px;
+    width: calc(100% - 40px);
+    max-width: 420px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    position: relative;
+    margin: 0 20px;
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.modal-header h2 {
+    color: #fff;
+    font-size: 18px;
+    margin: 0;
+}
+
+.modal-header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #888;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    color: #fff;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* ===== 모달 버튼 ===== */
+.btn-edit, .btn-delete {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-edit {
+    background-color: #f39c12;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #e67e22;
+}
+
+.btn-delete {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #c0392b;
+}
+
+/* ===== 폼 스타일 ===== */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: #aaa;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.form-group input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #333;
+    border: 1px solid #444;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input[type="text"]:focus {
+    outline: none;
+    border-color: #1a5490;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.btn-submit,
+.btn-cancel {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-submit {
+    background-color: #1a5490;
+    color: #fff;
+}
+
+.btn-submit:hover {
+    background-color: #144170;
+}
+
+.btn-submit:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+}
+
+.btn-cancel {
+    background-color: #444;
+    color: #fff;
+}
+
+.btn-cancel:hover {
+    background-color: #555;
+}

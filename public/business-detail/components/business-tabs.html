@@ -7,16 +7,52 @@
     <!-- 상세내용 탭 -->
     <div class="tab-content active" id="detail-tab">
         <div class="detail-content-section">
-            <!-- 메인 상세 내용 (HTML 콘텐츠) -->
-            <div class="detail-content" id="detail-content">
-                <!-- 상세 내용이 여기에 로드됩니다 -->
+            <!-- 영업시간 (유흥주점, 건전마사지 공통) -->
+            <div class="business-hours-section" id="business-hours-section" style="display: none;">
+                <div class="section-header">
+                    <div class="section-label">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span>영업시간</span>
+                    </div>
+                    <div class="section-value" id="business-hours-content"></div>
+                </div>
+            </div>
+           
+            
+            <!-- 유흥주점 주대 안내 -->
+            <div class="table-price-section" id="table-price-section" style="display: none;">
+                <div class="section-header">
+                    <div class="section-label">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span>주대안내</span>
+                    </div>
+                </div>
+                <div class="table-price-list" id="table-price-list">
+                    <!-- 주대 가격 목록이 여기에 동적으로 생성됩니다 -->
+                </div>
             </div>
             
-            <!-- 유흥주점 이벤트 섹션 -->
-            <div class="event-section" id="event-section" style="display: none;">
-                <h3 class="section-title">이벤트 정보</h3>
-                <div class="event-content" id="event-content">
-                    <!-- 이벤트 HTML 내용이 여기에 로드됩니다 -->
+            <!-- 유흥주점 이벤트 정보 -->
+            <div class="event-info-section" id="event-info-section" style="display: none;">
+                <div class="section-header">
+                    <div class="section-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z"></path>
+                            <path d="M2 17L12 22L22 17"></path>
+                            <path d="M2 12L12 17L22 12"></path>
+                        </svg>
+                        <span>이벤트 정보</span>
+                    </div>
+                </div>
+                <div class="event-info-wrapper">
+                    <div class="event-info-content" id="event-info-content">
+                        <!-- 이벤트 HTML 내용이 여기에 로드됩니다 -->
+                    </div>
                 </div>
             </div>
             
@@ -28,32 +64,72 @@
                 </div>
             </div>
             
+            <!-- 건전마사지 휴무일 -->
+            <div class="closed-days-section" id="closed-days-section" style="display: none;">
+                <h3 class="section-title">휴무일</h3>
+                <div class="closed-days-content" id="closed-days-content"></div>
+            </div>
+            
+            <!-- 건전마사지 주차 정보 -->
+            <div class="parking-info-section" id="parking-info-section" style="display: none;">
+                <h3 class="section-title">주차 정보</h3>
+                <div class="parking-info-content" id="parking-info-content"></div>
+            </div>
+            
+            <!-- 건전마사지 오시는 길 -->
+            <div class="directions-section" id="directions-section" style="display: none;">
+                <h3 class="section-title">오시는 길</h3>
+                <div class="directions-content" id="directions-content"></div>
+            </div>
+            
             <!-- 건전마사지 이벤트 섹션 -->
             <div class="massage-event-section" id="massage-event-section" style="display: none;">
-                <h3 class="section-title">이벤트 정보</h3>
-                <div class="massage-event-content" id="massage-event-content">
-                    <!-- 이벤트 HTML 내용이 여기에 로드됩니다 -->
+                <div class="section-header">
+                    <div class="section-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z"></path>
+                            <path d="M2 17L12 22L22 17"></path>
+                            <path d="M2 12L12 17L22 12"></path>
+                        </svg>
+                        <span>이벤트 정보</span>
+                    </div>
+                </div>
+                <div class="massage-event-wrapper">
+                    <div class="massage-event-content" id="massage-event-content">
+                        <!-- 이벤트 HTML 내용이 여기에 로드됩니다 -->
+                    </div>
                 </div>
             </div>
             
-            <!-- 연락처 정보 섹션 -->
-            <div class="contact-section" id="contact-section" style="display: none;">
-                <h3 class="section-title">연락처</h3>
-                <div class="contact-items">
-                    <!-- 전화번호 -->
-                    <div class="contact-item" id="phone-item" style="display: none;">
-                        <div class="contact-icon phone">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                            </svg>
-                        </div>
-                        <div class="contact-info">
-                            <div class="contact-label">전화번호</div>
-                            <div class="contact-value phone" id="phone-number"></div>
-                        </div>
-                        <button class="btn-copy" id="btn-phone-action">복사</button>
+            <!-- content 필드 내용 (상세내용) - 이벤트 다음에 위치 -->
+            <div class="content-section" id="content-section" style="display: none;">
+                <div class="section-header">
+                    <div class="section-label">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <span>상세내용</span>
                     </div>
-                    
+                </div>
+                <div class="content-wrapper">
+                    <div class="content-text" id="content-text">
+                        <!-- content 필드 내용이 여기에 로드됩니다 -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 메인 상세 내용 (HTML 콘텐츠) - 숨김 처리 -->
+            <div class="detail-content" id="detail-content" style="display: none;">
+                <!-- 상세 내용이 여기에 로드됩니다 -->
+            </div>
+            
+            <!-- 연락처 정보 섹션 (기존 그대로) -->
+            <div class="contact-section" id="contact-section" style="display: none;">
+                <div class="contact-items">
                     <!-- 카카오톡 -->
                     <div class="contact-item" id="kakao-item" style="display: none;">
                         <div class="contact-icon kakao">
@@ -91,7 +167,7 @@
         <div class="reviews-tab-content">
             <div class="reviews-header">
                 <h3 class="reviews-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 5px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke-width="3" style="vertical-align: middle; margin-right: 5px;">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                     </svg>
                     리얼후기 <span id="review-total-count">(0)</span>

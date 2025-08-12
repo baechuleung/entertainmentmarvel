@@ -1,0 +1,193 @@
+/* content 필드 섹션 */
+.content-section {
+    margin-bottom: 10px;
+}
+
+.content-wrapper {
+    margin-top: 15px;
+}
+
+.content-text {
+    color: #e0e0e0;
+    line-height: 1.8;
+    font-size: 15px;
+}
+
+.content-text img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 15px 0;
+}/* ===== 카테고리별 추가 섹션 스타일 ===== */
+
+/* 섹션 공통 스타일 */
+.section-title {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 30px 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+/* 공통 섹션 스타일 */
+.business-hours-section,
+.table-price-section,
+.event-info-section,
+.courses-section,
+.closed-days-section,
+.parking-info-section,
+.directions-section,
+.massage-event-section {
+    margin-bottom: 10px;
+}
+
+/* 섹션 헤더 (영업시간 등) */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #FFF;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.section-value {
+    color: #FFF;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ===== 유흥주점 섹션 ===== */
+.business-hours-content {
+    color: #e0e0e0;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.table-price-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.price-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 15px;
+    background-color: #2a2a2a;
+    border-radius: 6px;
+    border: 1px solid #3a3a3a;
+}
+
+.price-name {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: left;
+}
+
+.price-value {
+    color: #00DD59;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: right;
+}
+
+.table-price-content {
+    color: #00DD59;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.event-info-wrapper {
+    padding: 12px 15px;
+    background-color: #2a2a2a;
+    border-radius: 6px;
+    border: 1px solid #3a3a3a;
+    margin-top: 15px;
+}
+
+.event-info-content {
+    color: #e0e0e0;
+    line-height: 1.8;
+    font-size: 15px;
+}
+
+.event-info-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+/* ===== 건전마사지 섹션 ===== */
+.courses-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.course-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: #2a2a2a;
+    border-radius: 6px;
+    border: 1px solid #3a3a3a;
+}
+
+.course-name {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.course-price {
+    color: #00DD59;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.closed-days-content {
+    color: #ff6b6b;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.parking-info-content,
+.directions-content {
+    color: #e0e0e0;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.massage-event-wrapper {
+    padding: 12px 15px;
+    background-color: #2a2a2a;
+    border-radius: 6px;
+    border: 1px solid #3a3a3a;
+    margin-top: 15px;
+}
+
+.massage-event-content {
+    color: #e0e0e0;
+    line-height: 1.8;
+    font-size: 15px;
+}
+
+.massage-event-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 15px 0;
+}
