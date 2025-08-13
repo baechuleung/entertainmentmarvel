@@ -225,17 +225,43 @@ async function handleSubmit(e) {
         }
         
         // 3. 나머지 필수 필드 검증
-        const title = document.getElementById('title').value.trim();
-        const businessName = document.getElementById('business-name').value.trim();
-        const contact = document.getElementById('contact').value.trim();
-        const address = document.getElementById('address').value.trim();
+        const businessNameValue = document.getElementById('business-name')?.value.trim();
+        const phoneValue = document.getElementById('phone')?.value.trim();
         
-        if (!title || !businessName || !contact || !address) {
-            alert('필수 입력 항목을 모두 작성해주세요.');
+        // 업소명 검증
+        if (!businessNameValue || businessNameValue === '') {
+            alert('업소명을 입력해주세요.');
             submitButton.disabled = false;
             submitButton.textContent = '광고 등록';
             return;
         }
+        
+        // 전화번호 검증
+        if (!phoneValue || phoneValue === '') {
+            alert('전화번호를 입력해주세요.');
+            submitButton.disabled = false;
+            submitButton.textContent = '광고 등록';
+            return;
+        }
+        
+        // 4. 지역 검증
+        if (!regionInput.value || regionInput.value === '') {
+            alert('지역을 선택해주세요.');
+            submitButton.disabled = false;
+            submitButton.textContent = '광고 등록';
+            return;
+        }
+        
+        // 5. 도시 검증
+        if (!cityInput.value || cityInput.value === '') {
+            alert('도시를 선택해주세요.');
+            submitButton.disabled = false;
+            submitButton.textContent = '광고 등록';
+            return;
+        }
+        
+        // 6. 상세 내용 검증 제거 - 이미지만 있어도 등록 가능
+        const editorContent = quill.root.innerHTML;
         
         // 먼저 Firebase에 광고 데이터 저장하여 ID 생성
         const newAdRef = push(ref(rtdb, 'advertisements'));
@@ -253,23 +279,35 @@ async function handleSubmit(e) {
         const processedImages = await processEditorImages(
             quill, 
             previewImages, 
-            async (file) => await uploadSingleDetailImage(file, adId),
+            async (file) => {
+                // file이 배열이 아닌 단일 파일 객체인지 확인
+                if (file instanceof File) {
+                    return await uploadSingleDetailImage(file, adId);
+                }
+                console.error('Invalid file type:', file);
+                return null;
+            },
             adId,
             'detail'
         );
         
         // 이벤트 에디터 이미지 처리 (유흥주점 카테고리)
-        let eventContent = '';
-        let eventImages = [];
+        let eventInfo = '';  // eventContent가 아니라 eventInfo
         if (categoryInput.value === '유흥주점' && eventQuill) {
-            eventImages = await processEditorImages(
+            // 이벤트 에디터의 이미지만 처리 (별도 배열 필요 없음)
+            await processEditorImages(
                 eventQuill, 
                 previewImages, 
-                async (file) => await uploadSingleEventImage(file, adId),
+                async (file) => {
+                    if (file instanceof File) {
+                        return await uploadSingleEventImage(file, adId);
+                    }
+                    return null;
+                },
                 adId,
                 'event'
             );
-            eventContent = eventQuill.root.innerHTML;
+            eventInfo = eventQuill.root.innerHTML;
         }
         
         // 카테고리별 추가 데이터 수집
@@ -280,28 +318,24 @@ async function handleSubmit(e) {
             // 기본 정보
             adId: adId,  // 광고 ID 추가
             author: authorInput.value,
-            authorId: currentUser.uid,
-            title: title,
+            authorId: [currentUser.uid],
             category: categoryInput.value,
-            businessName: businessName,
+            businessName: businessNameValue,
             businessType: businessTypeInput.value || '',
             
             // 위치 정보
             region: regionInput.value,
             city: cityInput.value || '',
-            address: address,
-            detailAddress: document.getElementById('detail-address').value || '',
             
             // 연락처 정보
-            contact: contact,
-            businessHours: document.getElementById('business-hours').value || '',
+            phone: phoneValue,
+            kakao: document.getElementById('kakao')?.value || '',
+            telegram: document.getElementById('telegram')?.value || '',
             
             // 콘텐츠
-            content: quill.root.innerHTML,
-            eventContent: eventContent,
-            description: document.getElementById('description').value || '',
+            content: editorContent,
+            eventInfo: eventInfo, 
             thumbnail: thumbnailUrl,
-            images: [...processedImages, ...eventImages],
             
             // 카테고리별 추가 데이터
             ...categoryData,

@@ -245,6 +245,49 @@ export async function uploadSingleEventImage(file, adId) {
     }
 }
 
+// 광고 전체 이미지 삭제 (폴더 전체 삭제)
+export async function deleteAdFolder(adId, userId) {
+    try {
+        if (!adId) {
+            throw new Error('광고 ID가 필요합니다.');
+        }
+        
+        console.log('광고 폴더 삭제 시작:', `/entmarvel/advertise/${adId}/`);
+        
+        // 기존 API에 폴더 삭제 요청
+        const response = await fetch('https://imagekit-delete-enujtcasca-uc.a.run.app', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                adId: adId,  // 광고 ID 전달
+                userId: userId
+            })
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('폴더 삭제 실패 응답:', errorText);
+            throw new Error('광고 이미지 폴더 삭제 실패');
+        }
+        
+        const result = await response.json();
+        console.log('광고 폴더 삭제 결과:', result);
+        
+        if (result.summary) {
+            console.log(`총 ${result.summary.total}개 파일 중 ${result.summary.deleted}개 삭제 성공`);
+        }
+        
+        return result;
+        
+    } catch (error) {
+        console.error('광고 폴더 삭제 오류:', error);
+        // 폴더 삭제 실패해도 광고는 삭제되도록 에러를 throw하지 않음
+        return { error: error.message };
+    }
+}
+
 // 이미지 삭제 (서버 함수 호출)
 export async function deleteAdImages(fileUrls, userId) {
     try {

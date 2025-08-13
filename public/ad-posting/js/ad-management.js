@@ -1,7 +1,9 @@
+// /ad-posting/js/ad-management.js
 import { auth, db, rtdb } from '/js/firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { ref, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { deleteAdFolder } from './modules/index.js';  // deleteAdFolder import 추가
 
 // 전역 변수
 let currentUser = null;
@@ -162,7 +164,7 @@ function hideAdSections() {
     actionButtons.style.display = 'none';
 }
 
-// ImageKit에서 이미지들 삭제
+// ImageKit에서 이미지들 삭제 (기존 함수 - 폴백용)
 async function deleteAllAdImages(ad) {
     const imageUrls = [];
     
@@ -185,6 +187,18 @@ async function deleteAllAdImages(ad) {
         const imgRegex = /<img[^>]+src="([^">]+)"/g;
         let match;
         while ((match = imgRegex.exec(ad.content)) !== null) {
+            const imageUrl = match[1];
+            if (imageUrl && imageUrl.includes('ik.imagekit.io')) {
+                imageUrls.push(imageUrl);
+            }
+        }
+    }
+    
+    // 이벤트 내용에서 이미지 URL 추출 (eventInfo)
+    if (ad.eventInfo) {
+        const imgRegex = /<img[^>]+src="([^">]+)"/g;
+        let match;
+        while ((match = imgRegex.exec(ad.eventInfo)) !== null) {
             const imageUrl = match[1];
             if (imageUrl && imageUrl.includes('ik.imagekit.io')) {
                 imageUrls.push(imageUrl);
@@ -267,8 +281,33 @@ function setupEventListeners() {
                 deleteBtn.disabled = true;
                 deleteBtn.textContent = '삭제 중...';
                 
-                // ImageKit에서 이미지들 삭제 (실패해도 계속 진행)
-                await deleteAllAdImages(currentAd);
+                // 광고 ID가 있으면 폴더 전체 삭제 시도
+                const adIdToDelete = currentAd.adId || currentAdId;
+                
+                if (adIdToDelete) {
+                    console.log(`광고 ID ${adIdToDelete}의 폴더 삭제 시작`);
+                    
+                    try {
+                        // 폴더 전체 삭제 시도
+                        const deleteResult = await deleteAdFolder(adIdToDelete, currentUser.uid);
+                        
+                        if (deleteResult && !deleteResult.error) {
+                            console.log('광고 폴더 삭제 성공:', deleteResult);
+                        } else if (deleteResult && deleteResult.error) {
+                            console.warn('폴더 삭제 실패, 개별 파일 삭제 시도:', deleteResult.error);
+                            // 폴더 삭제 실패 시 개별 파일 삭제 시도
+                            await deleteAllAdImages(currentAd);
+                        }
+                    } catch (folderError) {
+                        console.warn('폴더 삭제 오류, 개별 파일 삭제 시도:', folderError);
+                        // 폴더 삭제 실패 시 개별 파일 삭제 시도
+                        await deleteAllAdImages(currentAd);
+                    }
+                } else {
+                    // adId가 없는 경우 기존 방식으로 삭제
+                    console.log('광고 ID가 없어 개별 파일 삭제 시도');
+                    await deleteAllAdImages(currentAd);
+                }
                 
                 // Firebase에서 광고 삭제
                 await remove(ref(rtdb, `advertisements/${currentAdId}`));

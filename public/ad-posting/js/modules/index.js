@@ -64,5 +64,6 @@ export {
     uploadAdEventImages,
     uploadSingleDetailImage,
     uploadSingleEventImage,
-    deleteAdImages
+    deleteAdImages,
+    deleteAdFolder  // 추가
 } from './ad-imagekit-upload.js';
