@@ -1,13 +1,17 @@
+// admin/ads/js/ads.js
 import { checkAuthFirst, loadAdminHeader } from '/admin/js/admin-header.js';
 import { rtdb } from '/js/firebase-config.js';
 import { ref, onValue, update, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { openDetailModal, setupModalEventListeners } from './ads-modal.js';
+import { openAddModal } from './ads-add-modal.js';
 
-let allAds = [];
+// 전역 변수
+window.allAds = [];
 
-// 페이지 초기화 - 권한 체크 먼저!
+// 페이지 초기화
 (async function init() {
     try {
-        // 1. 권한 체크 먼저 (페이지 표시 전)
+        // 1. 권한 체크 먼저
         const user = await checkAuthFirst();
         
         // 2. 권한 확인 후 헤더 로드
@@ -20,21 +24,17 @@ let allAds = [];
         setupEventListeners();
         
     } catch (error) {
-        // 권한 없음 - checkAuthFirst에서 이미 리다이렉트 처리됨
         console.error('권한 체크 실패:', error);
     }
 })();
 
 // 업종 필터 옵션 설정
 function setupFilterOptions() {
-    // 광고 데이터에서 고유한 업종 추출
-    const uniqueBusinessTypes = [...new Set(allAds.map(ad => ad.businessType).filter(Boolean))];
+    const uniqueBusinessTypes = [...new Set(window.allAds.map(ad => ad.businessType).filter(Boolean))];
     const filterType = document.getElementById('filter-type');
     
-    // 기존 옵션 제거 (전체 업종 제외)
     filterType.innerHTML = '<option value="">전체 업종</option>';
     
-    // 업종 옵션 추가
     uniqueBusinessTypes.forEach(type => {
         const option = document.createElement('option');
         option.value = type;
@@ -48,21 +48,18 @@ function loadAds() {
     const adsRef = ref(rtdb, 'advertisements');
     
     onValue(adsRef, (snapshot) => {
-        allAds = [];
+        window.allAds = [];
         const data = snapshot.val();
         
         if (data) {
             Object.entries(data).forEach(([key, value]) => {
-                allAds.push({ id: key, ...value });
+                window.allAds.push({ id: key, ...value });
             });
             
-            // 최신순 정렬
-            allAds.sort((a, b) => b.createdAt - a.createdAt);
+            window.allAds.sort((a, b) => b.createdAt - a.createdAt);
         }
         
-        // 필터 옵션 설정
         setupFilterOptions();
-        
         displayAds();
     });
 }
@@ -75,11 +72,11 @@ function displayAds() {
     const searchText = document.getElementById('search-input').value.toLowerCase();
     
     // 필터링
-    let filteredAds = allAds.filter(ad => {
+    let filteredAds = window.allAds.filter(ad => {
         if (filterStatus && ad.status !== filterStatus) return false;
         if (filterType && ad.businessType !== filterType) return false;
-        if (searchText && !ad.title.toLowerCase().includes(searchText) && 
-            !ad.author.toLowerCase().includes(searchText)) return false;
+        if (searchText && !ad.title?.toLowerCase().includes(searchText) && 
+            !ad.author?.toLowerCase().includes(searchText)) return false;
         return true;
     });
     
@@ -111,8 +108,8 @@ function displayAds() {
                 <td>${ad.id.substring(0, 8)}...</td>
                 <td>${ad.category || '-'}</td>
                 <td>${ad.businessType || '-'}</td>
-                <td>${ad.author}</td>
-                <td>${ad.region} ${ad.city}</td>
+                <td>${ad.author || '-'}</td>
+                <td>${ad.region || ''} ${ad.city || ''}</td>
                 <td>
                     <span class="status-badge ${ad.status}">${ad.status === 'active' ? '활성' : '비활성'}</span>
                 </td>
@@ -122,13 +119,14 @@ function displayAds() {
                 </td>
                 <td>${new Date(ad.createdAt).toLocaleDateString('ko-KR')}</td>
                 <td>${ad.views || 0}</td>
+                <td>${ad.inquiries || 0}</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn btn-primary" onclick="openDetailModal('${ad.id}')">상세</button>
-                        <button class="btn btn-warning" onclick="toggleStatus('${ad.id}', '${ad.status}')">
+                        <button class="btn btn-primary" onclick="window.openDetailModal('${ad.id}')">상세</button>
+                        <button class="btn btn-warning" onclick="window.toggleStatus('${ad.id}', '${ad.status}')">
                             ${ad.status === 'active' ? '비활성화' : '활성화'}
                         </button>
-                        <button class="btn btn-danger" onclick="deleteAd('${ad.id}')">삭제</button>
+                        <button class="btn btn-danger" onclick="window.deleteAd('${ad.id}')">삭제</button>
                     </div>
                 </td>
             </tr>
@@ -136,64 +134,58 @@ function displayAds() {
     }).join('');
 }
 
-// 상세 관리 모달 열기
-window.openDetailModal = (adId) => {
-    const ad = allAds.find(a => a.id === adId);
-    if (!ad) return;
-    
-    document.getElementById('ad-id').value = adId;
-    document.getElementById('ad-title').value = ad.title;
-    document.getElementById('ad-author').value = ad.author;
-    document.getElementById('ad-end-date').value = ad.endDate || '';
-    document.getElementById('ad-payment-status').checked = ad.paymentStatus || false;
-    
-    document.getElementById('ad-detail-modal').classList.add('show');
-};
-
-// 상세 정보 저장
-async function saveAdDetail(e) {
-    e.preventDefault();
-    
-    const adId = document.getElementById('ad-id').value;
-    const endDate = document.getElementById('ad-end-date').value;
-    const paymentStatus = document.getElementById('ad-payment-status').checked;
+// 상태 토글
+window.toggleStatus = async function(adId, currentStatus) {
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
     
     try {
         await update(ref(rtdb, `advertisements/${adId}`), {
-            endDate: endDate || null,
-            paymentStatus: paymentStatus,
+            status: newStatus,
             updatedAt: Date.now()
         });
         
-        alert('저장되었습니다.');
-        document.getElementById('ad-detail-modal').classList.remove('show');
-        loadAds(); // 목록 새로고침
+        alert(`광고가 ${newStatus === 'active' ? '활성화' : '비활성화'}되었습니다.`);
+        loadAds();
         
     } catch (error) {
-        alert('저장에 실패했습니다.');
+        console.error('상태 변경 실패:', error);
+        alert('상태 변경에 실패했습니다.');
+    }
+}
+
+// 광고 삭제
+window.deleteAd = async function(adId) {
+    if (!confirm('정말로 이 광고를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+        return;
+    }
+    
+    try {
+        await remove(ref(rtdb, `advertisements/${adId}`));
+        
+        alert('광고가 삭제되었습니다.');
+        loadAds();
+        
+    } catch (error) {
+        console.error('광고 삭제 실패:', error);
+        alert('광고 삭제에 실패했습니다.');
     }
 }
 
 // 이벤트 리스너 설정
 function setupEventListeners() {
-    // 기존 검색 이벤트
-    document.getElementById('btn-search').addEventListener('click', displayAds);
-    document.getElementById('filter-status').addEventListener('change', displayAds);
-    document.getElementById('filter-type').addEventListener('change', displayAds);
-    document.getElementById('search-input').addEventListener('keypress', (e) => {
+    // 새 광고 추가 버튼
+    const addButton = document.getElementById('btn-add-ad');
+    if (addButton) {
+        addButton.addEventListener('click', openAddModal);
+    }
+    
+    // 필터 및 검색 이벤트
+    document.getElementById('btn-search')?.addEventListener('click', displayAds);
+    document.getElementById('filter-status')?.addEventListener('change', displayAds);
+    document.getElementById('filter-type')?.addEventListener('change', displayAds);
+    document.getElementById('search-input')?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') displayAds();
     });
-    
-    // 모달 관련 이벤트
-    document.getElementById('modal-close').addEventListener('click', () => {
-        document.getElementById('ad-detail-modal').classList.remove('show');
-    });
-    
-    document.getElementById('btn-cancel').addEventListener('click', () => {
-        document.getElementById('ad-detail-modal').classList.remove('show');
-    });
-    
-    document.getElementById('ad-detail-form').addEventListener('submit', saveAdDetail);
     
     // 모달 외부 클릭 시 닫기
     window.addEventListener('click', (e) => {
@@ -203,121 +195,6 @@ function setupEventListeners() {
     });
 }
 
-// ImageKit에서 이미지들 삭제
-async function deleteAllAdImages(ad) {
-    const imageUrls = [];
-    
-    // 썸네일 수집
-    if (ad.thumbnail && ad.thumbnail.includes('ik.imagekit.io')) {
-        imageUrls.push(ad.thumbnail);
-    }
-    
-    // 상세 이미지들 수집
-    if (ad.images && Array.isArray(ad.images)) {
-        ad.images.forEach(imageUrl => {
-            if (imageUrl && imageUrl.includes('ik.imagekit.io')) {
-                imageUrls.push(imageUrl);
-            }
-        });
-    }
-    
-    // 에디터 내용에서 이미지 URL 추출
-    if (ad.content) {
-        const imgRegex = /<img[^>]+src="([^">]+)"/g;
-        let match;
-        while ((match = imgRegex.exec(ad.content)) !== null) {
-            const imageUrl = match[1];
-            if (imageUrl && imageUrl.includes('ik.imagekit.io')) {
-                imageUrls.push(imageUrl);
-            }
-        }
-    }
-    
-    if (imageUrls.length === 0) {
-        console.log('삭제할 ImageKit 이미지가 없습니다.');
-        return;
-    }
-    
-    try {
-        // 배포된 Firebase Function 호출
-        const response = await fetch('https://imagekit-delete-enujtcasca-uc.a.run.app', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                fileUrls: imageUrls,
-                userId: ad.authorId || 'admin'
-            })
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            console.log('이미지 삭제 결과:', result);
-            
-            // 삭제 결과 확인
-            if (result.summary) {
-                console.log(`총 ${result.summary.total}개 중 ${result.summary.deleted}개 삭제 성공`);
-            }
-            
-            // 실패한 파일이 있으면 로그
-            if (result.failed && result.failed.length > 0) {
-                console.warn('삭제 실패한 파일들:', result.failed);
-            }
-        } else {
-            const errorText = await response.text();
-            console.error('이미지 삭제 요청 실패:', errorText);
-        }
-    } catch (error) {
-        console.error('ImageKit 이미지 삭제 오류:', error);
-        // 실패해도 광고 삭제는 계속 진행
-    }
-}
-
-// 광고 삭제
-window.deleteAd = async (adId) => {
-    const ad = allAds.find(a => a.id === adId);
-    const adName = ad?.businessName || ad?.title || '이 광고';
-    
-    if (!confirm(`"${adName}"를 삭제하시겠습니까?\n\n삭제된 광고와 이미지는 복구할 수 없습니다.`)) {
-        return;
-    }
-    
-    try {
-        // ImageKit에서 이미지들 삭제 (실패해도 계속 진행)
-        if (ad) {
-            await deleteAllAdImages(ad);
-        }
-        
-        // Firebase에서 광고 삭제
-        await remove(ref(rtdb, `advertisements/${adId}`));
-        
-        alert('광고가 삭제되었습니다.');
-        loadAds(); // 목록 새로고침
-    } catch (error) {
-        console.error('광고 삭제 실패:', error);
-        alert('광고 삭제에 실패했습니다.');
-    }
-};
-
-// 광고 상태 토글
-window.toggleStatus = async (adId, currentStatus) => {
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-    const statusText = newStatus === 'active' ? '활성화' : '비활성화';
-    
-    if (!confirm(`이 광고를 ${statusText}하시겠습니까?`)) {
-        return;
-    }
-    
-    try {
-        await update(ref(rtdb, `advertisements/${adId}`), {
-            status: newStatus,
-            updatedAt: Date.now()
-        });
-        alert(`광고가 ${statusText}되었습니다.`);
-        loadAds(); // 목록 새로고침
-    } catch (error) {
-        console.error('상태 변경 실패:', error);
-        alert('상태 변경에 실패했습니다.');
-    }
-};
+// 전역 함수로 노출 (onclick에서 사용하기 위해)
+window.openDetailModal = openDetailModal;
+window.loadAds = loadAds;

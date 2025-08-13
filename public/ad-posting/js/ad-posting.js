@@ -159,8 +159,71 @@ async function handleSubmit(e) {
     submitButton.textContent = '등록 중...';
     
     try {
-        // 에디터 내용 가져오기
+        // === 필수 입력 필드 유효성 검증 시작 ===
+        
+        // 1. 카테고리 검증
+        if (!categoryInput.value || categoryInput.value === '') {
+            alert('카테고리를 선택해주세요.');
+            submitButton.disabled = false;
+            submitButton.textContent = '광고 등록';
+            return;
+        }
+        
+        // 2. 업종 검증
+        if (!businessTypeInput.value || businessTypeInput.value === '') {
+            alert('업종을 선택해주세요.');
+            submitButton.disabled = false;
+            submitButton.textContent = '광고 등록';
+            return;
+        }
+        
+        // 3. 업소명 검증
+        const businessNameValue = document.getElementById('business-name').value.trim();
+        if (!businessNameValue || businessNameValue === '') {
+            alert('업소명을 입력해주세요.');
+            submitButton.disabled = false;
+            submitButton.textContent = '광고 등록';
+            return;
+        }
+        
+        // 4. 지역 검증
+        if (!regionInput.value || regionInput.value === '') {
+            alert('지역을 선택해주세요.');
+            submitButton.disabled = false;
+            submitButton.textContent = '광고 등록';
+            return;
+        }
+        
+        // 5. 도시 검증
+        if (!cityInput.value || cityInput.value === '') {
+            alert('도시를 선택해주세요.');
+            submitButton.disabled = false;
+            submitButton.textContent = '광고 등록';
+            return;
+        }
+        
+        // 6. 전화번호 검증
+        const phoneValue = document.getElementById('phone').value.trim();
+        if (!phoneValue || phoneValue === '') {
+            alert('전화번호를 입력해주세요.');
+            submitButton.disabled = false;
+            submitButton.textContent = '광고 등록';
+            return;
+        }
+        
+        // 7. 상세 내용 검증 (에디터)
         const editorContent = quill.root.innerHTML;
+        const textContent = quill.root.innerText.trim();
+        
+        // 빈 에디터 체크 (기본 HTML 태그만 있는 경우도 체크)
+        if (!textContent || textContent === '' || textContent.length < 10) {
+            alert('상세 내용을 10자 이상 입력해주세요.');
+            submitButton.disabled = false;
+            submitButton.textContent = '광고 등록';
+            return;
+        }
+        
+        // === 필수 입력 필드 유효성 검증 완료 ===
         
         // 에디터에서 이미지 추출 및 업로드
         const uploadedImages = await processEditorImages(quill, previewImages, uploadBusinessAdImages);
@@ -183,11 +246,11 @@ async function handleSubmit(e) {
             category: categoryInput.value,
             businessType: businessTypeInput.value,
             businessTypeCode: businessTypeCode,
-            businessName: document.getElementById('business-name').value,
+            businessName: businessNameValue, // trim된 값 사용
             region: regionInput.value,
             city: cityInput.value,
             content: editorContent,
-            phone: document.getElementById('phone').value,
+            phone: phoneValue, // trim된 값 사용
             kakao: document.getElementById('kakao').value || '',
             telegram: document.getElementById('telegram').value || '',
             thumbnail: thumbnailUrl || (businessTypeCode ? `/img/business-type/${businessTypeCode}.png` : uploadedImages[0] || null),

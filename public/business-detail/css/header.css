@@ -35,6 +35,7 @@
     color: #FFF;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;  /* 표준 속성 추가 */
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
