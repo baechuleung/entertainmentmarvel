@@ -265,17 +265,13 @@ async function handleSubmit(e) {
         const adId = newAdRef.key;
         console.log('생성된 광고 ID:', adId);
         
-        // 2. 썸네일 URL 생성
-        const thumbnailUrl = thumbnailFile 
-            ? generateImageUrl(adId, 'thumbnail', 0, thumbnailFile.name)
-            : '';
-        
-        // 3. 에디터 콘텐츠 복사 및 이미지 URL 교체
+        // 2. 에디터 콘텐츠 복사
         let contentHtml = quill.root.innerHTML;
         let eventHtml = eventQuill && categoryInput.value === '유흥주점' ? eventQuill.root.innerHTML : '';
         
-        // 상세 이미지 URL 생성 및 교체
+        // 3. 이미지 파일 수집
         const detailFiles = [];
+        const detailImageMap = new Map(); // base64 -> index 매핑
         const detailImages = quill.root.querySelectorAll('img');
         let detailIndex = 0;
         
@@ -284,16 +280,19 @@ async function handleSubmit(e) {
                 const file = previewImages.get(img.src);
                 if (file) {
                     detailFiles.push(file);
-                    const newUrl = generateImageUrl(adId, 'detail', detailIndex, file.name);
-                    // HTML 문자열에서 직접 교체
-                    contentHtml = contentHtml.replace(img.src, newUrl);
+                    detailImageMap.set(img.src, detailIndex);
+                    
+                    // 임시 placeholder 생성 (나중에 교체할 수 있도록)
+                    const placeholder = `DETAIL_IMAGE_${detailIndex}`;
+                    contentHtml = contentHtml.replace(img.src, placeholder);
                     detailIndex++;
                 }
             }
         });
         
-        // 이벤트 이미지 URL 생성 및 교체
+        // 이벤트 이미지 파일 수집
         const eventFiles = [];
+        const eventImageMap = new Map();
         let eventIndex = 0;
         
         if (eventQuill && categoryInput.value === '유흥주점') {
@@ -303,9 +302,11 @@ async function handleSubmit(e) {
                     const file = eventPreviewImages.get(img.src);
                     if (file) {
                         eventFiles.push(file);
-                        const newUrl = generateImageUrl(adId, 'event', eventIndex, file.name);
-                        // HTML 문자열에서 직접 교체
-                        eventHtml = eventHtml.replace(img.src, newUrl);
+                        eventImageMap.set(img.src, eventIndex);
+                        
+                        // 임시 placeholder 생성
+                        const placeholder = `EVENT_IMAGE_${eventIndex}`;
+                        eventHtml = eventHtml.replace(img.src, placeholder);
                         eventIndex++;
                     }
                 }
@@ -315,7 +316,7 @@ async function handleSubmit(e) {
         // 4. 카테고리별 추가 데이터 수집
         const categoryData = collectCategoryData(categoryInput.value, eventQuill);
         
-        // 5. 광고 데이터 생성 (실제 URL이 포함된 HTML)
+        // 5. 광고 데이터 생성 (placeholder 포함)
         const adData = {
             // 기본 정보
             adId: adId,
@@ -334,15 +335,15 @@ async function handleSubmit(e) {
             kakao: document.getElementById('kakao')?.value || '',
             telegram: document.getElementById('telegram')?.value || '',
             
-            // 콘텐츠 (이미지 URL이 교체된 HTML)
+            // 콘텐츠 (placeholder 포함)
             content: contentHtml,
             eventInfo: eventHtml,
             
-            // 썸네일
-            thumbnail: thumbnailUrl,
+            // 썸네일 (일단 빈 값)
+            thumbnail: '',
             
             // 업로드 상태
-            uploadStatus: thumbnailFile || detailFiles.length > 0 || eventFiles.length > 0 ? 'uploading' : 'completed',
+            uploadStatus: (thumbnailFile || detailFiles.length > 0 || eventFiles.length > 0) ? 'uploading' : 'completed',
             
             // 카테고리별 추가 데이터
             ...categoryData,
@@ -360,51 +361,23 @@ async function handleSubmit(e) {
         await set(newAdRef, adData);
         console.log('광고 저장 완료:', adId);
         
-        // 7. 백그라운드 업로드 시작
+        // 7. 백그라운드에서 이미지 업로드 (fire and forget)
         if (thumbnailFile || detailFiles.length > 0 || eventFiles.length > 0) {
             console.log('백그라운드 업로드 시작...');
             
-            // 비동기로 업로드 시작 (응답 기다리지 않음)
-            startBackgroundUpload(adId, thumbnailFile, detailFiles, eventFiles)
-                .then(result => {
-                    console.log('백그라운드 업로드 완료:', result);
-                    // 업로드 완료 시 상태만 업데이트
-                    update(ref(rtdb, `advertisements/${adId}`), {
-                        uploadStatus: 'completed',
-                        uploadedAt: Date.now()
-                    }).then(() => {
-                        console.log('업로드 상태 업데이트 완료');
-                    }).catch(error => {
-                        console.error('상태 업데이트 실패:', error);
-                    });
-                })
-                .catch(error => {
-                    console.error('백그라운드 업로드 실패:', error);
-                    // 실패 시 플레이스홀더로 되돌리기
-                    update(ref(rtdb, `advertisements/${adId}`), {
-                        uploadStatus: 'failed',
-                        uploadError: error.message,
-                        content: contentHtml.replace(/https:\/\/ik\.imagekit\.io[^"]+/g, '/img/error.png'),
-                        eventInfo: eventHtml.replace(/https:\/\/ik\.imagekit\.io[^"]+/g, '/img/error.png')
-                    }).then(() => {
-                        console.log('실패 상태 업데이트 완료');
-                    }).catch(updateError => {
-                        console.error('실패 상태 업데이트 에러:', updateError);
-                    });
-                });
+            // 응답을 기다리지 않고 바로 실행
+            startBackgroundUpload(adId, thumbnailFile, detailFiles, eventFiles);
+            // .then이나 await 없이 바로 진행
         }
-        
+
         // 8. 즉시 성공 메시지 & 페이지 이동
-        alert('광고가 성공적으로 등록되었습니다!');
-        
-        // 1초 후 페이지 이동 (업로드 시작 시간 확보)
-        setTimeout(() => {
-            if (currentUserData.userType === 'administrator') {
-                window.location.href = '/ad-posting/ad-management.html';
-            } else {
-                window.location.href = '/main/main.html';
-            }
-        }, 1000);
+        alert('광고가 성공적으로 등록되었습니다! 이미지는 백그라운드에서 업로드됩니다.');
+
+        if (currentUserData.userType === 'administrator') {
+            window.location.href = '/ad-posting/ad-management.html';
+        } else {
+            window.location.href = '/main/main.html';
+        }
         
     } catch (error) {
         console.error('광고 등록 실패:', error);
