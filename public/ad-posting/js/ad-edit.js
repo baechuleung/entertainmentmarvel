@@ -3,7 +3,6 @@ import { auth, db, rtdb } from '/js/firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { ref, get, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-import { uploadBusinessAdImages, uploadSingleImage } from '/js/imagekit-upload.js';
 import { 
     loadCategoryData, 
     createCategoryButtons,
@@ -23,7 +22,11 @@ import {
     initializeEventEditor,
     setupTablePriceEvents,
     toggleCategorySpecificFields,
-    collectCategoryData
+    collectCategoryData,
+    // 광고 전용 ImageKit 업로드 함수들
+    uploadAdThumbnail,
+    uploadSingleDetailImage,
+    uploadSingleEventImage
 } from './modules/index.js';
 
 // 전역 변수
@@ -80,13 +83,28 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // 데이터 로드
     await loadCategoryData();
-    createCategoryButtons(categoryButtons, categoryInput, async (categoryName) => {
-        toggleCategorySpecificFields(categoryName, eventQuill);
-        const types = await loadBusinessTypes(categoryName);
-        if (types) {
-            createBusinessTypeOptions(types);
-        }
-    });
+    
+    // 카테고리 버튼 생성 및 이벤트 처리
+    if (categoryButtons) {
+        createCategoryButtons(categoryButtons, categoryInput, async (categoryName) => {
+            // 카테고리 선택 시 입력 필드에 값 설정
+            if (categoryInput) {
+                categoryInput.value = categoryName;
+                console.log('선택된 카테고리:', categoryName);
+            }
+            
+            // 카테고리별 필드 표시/숨김
+            toggleCategorySpecificFields(categoryName, eventQuill);
+            
+            // 업종 데이터 로드
+            const types = await loadBusinessTypes(categoryName);
+            if (types) {
+                createBusinessTypeOptions(types);
+            }
+        });
+    } else {
+        console.error('카테고리 버튼 컨테이너를 찾을 수 없습니다.');
+    }
     
     const { regionData } = await loadRegionData();
     createRegionOptions(regionData);
@@ -161,211 +179,112 @@ async function loadAdData() {
     } catch (error) {
         console.error('광고 데이터 로드 실패:', error);
         alert('광고 데이터를 불러오는데 실패했습니다.');
+        window.location.href = '/ad-posting/ad-management.html';
     }
 }
 
 // 폼에 데이터 채우기
 async function fillFormData() {
     // 기본 정보
-    authorInput.value = currentAd.author || currentUserData.nickname || currentUserData.email || '익명';
+    authorInput.value = currentAd.author || '';
+    document.getElementById('title').value = currentAd.title || '';
+    document.getElementById('business-name').value = currentAd.businessName || '';
+    document.getElementById('contact').value = currentAd.contact || '';
+    document.getElementById('business-hours').value = currentAd.businessHours || '';
+    document.getElementById('description').value = currentAd.description || '';
     
     // 카테고리 선택
-    if (currentAd.category) {
-        categoryInput.value = currentAd.category;
-        // 카테고리 버튼 활성화
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            if (btn.dataset.category === currentAd.category) {
-                btn.classList.add('active');
-            }
-        });
+    const categoryButton = Array.from(categoryButtons.querySelectorAll('.category-button'))
+        .find(btn => btn.textContent === currentAd.category);
+    if (categoryButton) {
+        categoryButton.click();
         
-        // 카테고리별 필드 표시
-        toggleCategorySpecificFields(currentAd.category, eventQuill);
-        
-        // 해당 카테고리의 업종 로드
+        // 업종 데이터 로드 후 선택
         const types = await loadBusinessTypes(currentAd.category);
         if (types) {
             createBusinessTypeOptions(types);
+            setTimeout(() => {
+                setSelectValue('business-type', currentAd.businessType);
+            }, 100);
         }
     }
     
-    // 업종 선택
-    if (currentAd.businessType) {
-        setSelectValue('business-type-wrapper', currentAd.businessType, currentAd.businessType);
-        businessTypeInput.value = currentAd.businessType;
-    }
-    
-    // 업소명
-    if (currentAd.businessName) {
-        document.getElementById('business-name').value = currentAd.businessName;
-    }
-    
-    // 지역 선택
+    // 지역 정보
+    setSelectValue('region', currentAd.region);
     if (currentAd.region) {
-        setSelectValue('region-wrapper', currentAd.region, currentAd.region);
-        regionInput.value = currentAd.region;
-        
-        // 도시 옵션 업데이트
         await updateCityOptions(currentAd.region);
-        
-        // 도시 선택
-        if (currentAd.city) {
-            setSelectValue('city-wrapper', currentAd.city, currentAd.city);
-            cityInput.value = currentAd.city;
-        }
+        setTimeout(() => {
+            setSelectValue('city', currentAd.city);
+        }, 100);
     }
     
-    // 연락처 정보
-    document.getElementById('phone').value = currentAd.phone || '';
-    document.getElementById('kakao').value = currentAd.kakao || '';
-    document.getElementById('telegram').value = currentAd.telegram || '';
+    // 주소
+    document.getElementById('address').value = currentAd.address || '';
+    document.getElementById('detail-address').value = currentAd.detailAddress || '';
     
-    // 카테고리별 추가 필드 채우기
-    if (currentAd.category === '유흥주점') {
-        fillKaraokeFields();
-    } else if (currentAd.category === '건전마사지') {
-        fillMassageFields();
-    }
-    
-    // Quill 에디터에 내용 설정
+    // 에디터 내용
     if (currentAd.content) {
         setEditorContent(quill, currentAd.content);
     }
     
-    // 이벤트 에디터에 내용 설정
-    if (currentAd.eventInfo && eventQuill) {
-        setEditorContent(eventQuill, currentAd.eventInfo);
+    // 이벤트 에디터 내용 (유흥주점)
+    if (currentAd.category === '유흥주점' && currentAd.eventContent) {
+        setEditorContent(eventQuill, currentAd.eventContent);
     }
     
-    // 기존 썸네일 표시
+    // 썸네일
     if (currentAd.thumbnail) {
         existingThumbnail = currentAd.thumbnail;
-        showThumbnailFromUrl(
-            currentAd.thumbnail,
-            document.getElementById('thumbnail-image'),
-            document.getElementById('thumbnail-preview'),
-            document.getElementById('thumbnail-upload-btn')
-        );
+        const thumbnailImage = document.getElementById('thumbnail-image');
+        const thumbnailPreview = document.getElementById('thumbnail-preview');
+        const thumbnailUploadBtn = document.getElementById('thumbnail-upload-btn');
+        showThumbnailFromUrl(currentAd.thumbnail, thumbnailImage, thumbnailPreview, thumbnailUploadBtn);
+    }
+    
+    // 카테고리별 추가 데이터 (주대, 코스 등)
+    if (currentAd.tablePrices && currentAd.tablePrices.length > 0) {
+        fillTablePrices(currentAd.tablePrices);
+    }
+    
+    if (currentAd.courses && currentAd.courses.length > 0) {
+        fillCourses(currentAd.courses);
     }
 }
 
-// 유흥주점 필드 채우기
-function fillKaraokeFields() {
-    // 영업시간
-    if (currentAd.businessHours) {
-        document.getElementById('business-hours').value = currentAd.businessHours;
-    }
+// 주대 정보 채우기
+function fillTablePrices(tablePrices) {
+    const container = document.getElementById('table-price-items');
+    if (!container) return;
     
-    // 주대설정
-    if (currentAd.tablePrice && typeof currentAd.tablePrice === 'object') {
-        const priceList = document.getElementById('table-price-list');
-        priceList.innerHTML = ''; // 기존 내용 초기화
-        
-        Object.entries(currentAd.tablePrice).forEach(([name, price], index) => {
-            const item = document.createElement('div');
-            item.className = 'table-price-item';
-            
-            const nameInput = document.createElement('input');
-            nameInput.type = 'text';
-            nameInput.className = 'table-price-name';
-            nameInput.value = name;
-            nameInput.placeholder = '예: 일반룸';
-            
-            const priceWrapper = document.createElement('div');
-            priceWrapper.className = 'price-input-wrapper';
-            
-            const valueInput = document.createElement('input');
-            valueInput.type = 'text';
-            valueInput.className = 'table-price-value';
-            valueInput.value = price;
-            valueInput.placeholder = '예: 30만';
-            
-            const priceUnit = document.createElement('span');
-            priceUnit.className = 'price-unit';
-            priceUnit.textContent = '원';
-            
-            priceWrapper.appendChild(valueInput);
-            priceWrapper.appendChild(priceUnit);
-            
-            const removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.className = 'btn-remove-price';
-            removeBtn.textContent = '×';
-            removeBtn.style.display = Object.keys(currentAd.tablePrice).length > 1 ? 'flex' : 'none';
-            
-            item.appendChild(nameInput);
-            item.appendChild(priceWrapper);
-            item.appendChild(removeBtn);
-            priceList.appendChild(item);
-        });
-    }
+    container.innerHTML = '';
+    tablePrices.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'table-price-item';
+        div.innerHTML = `
+            <input type="text" placeholder="주대 이름" value="${item.name || ''}" class="table-name">
+            <input type="text" placeholder="가격" value="${item.price || ''}" class="table-price">
+            <button type="button" class="delete-table-btn">삭제</button>
+        `;
+        container.appendChild(div);
+    });
 }
 
-// 건전마사지 필드 채우기
-function fillMassageFields() {
-    // 영업시간
-    if (currentAd.businessHours) {
-        document.getElementById('massage-business-hours').value = currentAd.businessHours;
-    }
+// 코스 정보 채우기
+function fillCourses(courses) {
+    const container = document.getElementById('course-items');
+    if (!container) return;
     
-    // 휴무일
-    if (currentAd.closedDays) {
-        document.getElementById('closed-days').value = currentAd.closedDays;
-    }
-    
-    // 주차안내
-    if (currentAd.parkingInfo) {
-        document.getElementById('parking-info').value = currentAd.parkingInfo;
-    }
-    
-    // 오시는 길
-    if (currentAd.directions) {
-        document.getElementById('directions').value = currentAd.directions;
-    }
-    
-    // 코스설정
-    if (currentAd.courses && typeof currentAd.courses === 'object') {
-        const courseList = document.getElementById('course-list');
-        courseList.innerHTML = ''; // 기존 내용 초기화
-        
-        Object.entries(currentAd.courses).forEach(([name, price], index) => {
-            const item = document.createElement('div');
-            item.className = 'course-item';
-            
-            const nameInput = document.createElement('input');
-            nameInput.type = 'text';
-            nameInput.className = 'course-name';
-            nameInput.value = name;
-            nameInput.placeholder = '예: 전신관리';
-            
-            const priceWrapper = document.createElement('div');
-            priceWrapper.className = 'price-input-wrapper';
-            
-            const priceInput = document.createElement('input');
-            priceInput.type = 'text';
-            priceInput.className = 'course-price';
-            priceInput.value = price;
-            priceInput.placeholder = '예: 10만';
-            
-            const priceUnit = document.createElement('span');
-            priceUnit.className = 'price-unit';
-            priceUnit.textContent = '원';
-            
-            priceWrapper.appendChild(priceInput);
-            priceWrapper.appendChild(priceUnit);
-            
-            const removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.className = 'btn-remove-course';
-            removeBtn.textContent = '×';
-            removeBtn.style.display = Object.keys(currentAd.courses).length > 1 ? 'flex' : 'none';
-            
-            item.appendChild(nameInput);
-            item.appendChild(priceWrapper);
-            item.appendChild(removeBtn);
-            courseList.appendChild(item);
-        });
-    }
+    container.innerHTML = '';
+    courses.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'course-item';
+        div.innerHTML = `
+            <input type="text" placeholder="코스 이름" value="${item.name || ''}" class="course-name">
+            <input type="text" placeholder="가격" value="${item.price || ''}" class="course-price">
+            <button type="button" class="delete-course-btn">삭제</button>
+        `;
+        container.appendChild(div);
+    });
 }
 
 // 폼 제출 처리
@@ -377,112 +296,111 @@ async function handleSubmit(e) {
     submitButton.textContent = '수정 중...';
     
     try {
-        // === 필수 입력 필드 유효성 검증 시작 ===
+        // 필수 입력 필드 유효성 검증
         
-        // 1. 카테고리 검증
-        if (!categoryInput.value || categoryInput.value === '') {
+        // 1. 카테고리 확인
+        if (!categoryInput.value) {
             alert('카테고리를 선택해주세요.');
             submitButton.disabled = false;
-            submitButton.textContent = '수정 완료';
+            submitButton.textContent = '광고 수정';
             return;
         }
         
-        // 2. 업종 검증
-        if (!businessTypeInput.value || businessTypeInput.value === '') {
-            alert('업종을 선택해주세요.');
+        // 2. 작성자 확인
+        if (!authorInput.value.trim()) {
+            alert('작성자를 입력해주세요.');
             submitButton.disabled = false;
-            submitButton.textContent = '수정 완료';
+            submitButton.textContent = '광고 수정';
             return;
         }
         
-        // 3. 업소명 검증
-        const businessNameValue = document.getElementById('business-name').value.trim();
-        if (!businessNameValue || businessNameValue === '') {
-            alert('업소명을 입력해주세요.');
+        // 3. 나머지 필수 필드 검증
+        const title = document.getElementById('title').value.trim();
+        const businessName = document.getElementById('business-name').value.trim();
+        const contact = document.getElementById('contact').value.trim();
+        const address = document.getElementById('address').value.trim();
+        
+        if (!title || !businessName || !contact || !address) {
+            alert('필수 입력 항목을 모두 작성해주세요.');
             submitButton.disabled = false;
-            submitButton.textContent = '수정 완료';
+            submitButton.textContent = '광고 수정';
             return;
         }
         
-        // 4. 지역 검증
-        if (!regionInput.value || regionInput.value === '') {
-            alert('지역을 선택해주세요.');
-            submitButton.disabled = false;
-            submitButton.textContent = '수정 완료';
-            return;
-        }
-        
-        // 5. 도시 검증
-        if (!cityInput.value || cityInput.value === '') {
-            alert('도시를 선택해주세요.');
-            submitButton.disabled = false;
-            submitButton.textContent = '수정 완료';
-            return;
-        }
-        
-        // 6. 전화번호 검증
-        const phoneValue = document.getElementById('phone').value.trim();
-        if (!phoneValue || phoneValue === '') {
-            alert('전화번호를 입력해주세요.');
-            submitButton.disabled = false;
-            submitButton.textContent = '수정 완료';
-            return;
-        }
-        
-        // 7. 상세 내용 검증 (에디터)
-        const editorContent = quill.root.innerHTML;
-        const textContent = quill.root.innerText.trim();
-        
-        // 빈 에디터 체크 (기본 HTML 태그만 있는 경우도 체크)
-        if (!textContent || textContent === '' || textContent.length < 10) {
-            alert('상세 내용을 10자 이상 입력해주세요.');
-            submitButton.disabled = false;
-            submitButton.textContent = '수정 완료';
-            return;
-        }
-        
-        // === 필수 입력 필드 유효성 검증 완료 ===
-        
-        // 에디터에서 이미지 추출 및 업로드
-        const uploadedImages = await processEditorImages(quill, previewImages, uploadBusinessAdImages);
-        
-        // 썸네일 업로드 (새 파일이 선택된 경우에만)
+        // 썸네일 처리 (광고 ID 사용)
         let thumbnailUrl = existingThumbnail;
         if (thumbnailFile) {
-            thumbnailUrl = await uploadSingleImage(thumbnailFile);
+            thumbnailUrl = await uploadAdThumbnail(thumbnailFile, adId);
         }
         
-        // 업종 코드 가져오기
-        const selectedBusinessType = businessTypeInput.value;
-        const businessTypeCode = window.businessTypes && window.businessTypes[selectedBusinessType] 
-            ? window.businessTypes[selectedBusinessType] : null;
+        // 에디터 이미지 처리 (광고 ID 사용)
+        const processedImages = await processEditorImages(
+            quill, 
+            previewImages, 
+            async (file) => await uploadSingleDetailImage(file, adId),
+            adId,
+            'detail'
+        );
         
-        // 광고 데이터 준비 (title 제외)
-        const adData = {
+        // 이벤트 에디터 이미지 처리 (유흥주점 카테고리)
+        let eventContent = '';
+        let eventImages = [];
+        if (categoryInput.value === '유흥주점' && eventQuill) {
+            eventImages = await processEditorImages(
+                eventQuill, 
+                previewImages, 
+                async (file) => await uploadSingleEventImage(file, adId),
+                adId,
+                'event'
+            );
+            eventContent = eventQuill.root.innerHTML;
+        }
+        
+        // 카테고리별 추가 데이터 수집
+        const categoryData = collectCategoryData(categoryInput.value, eventQuill);
+        
+        // 업데이트할 광고 데이터
+        const updatedData = {
+            // 기본 정보
+            adId: adId,  // 광고 ID 유지
             author: authorInput.value,
+            authorId: currentAd.authorId,  // 기존 authorId 유지
+            title: title,
             category: categoryInput.value,
-            businessType: businessTypeInput.value,
-            businessTypeCode: businessTypeCode,
-            businessName: businessNameValue, // trim된 값 사용
+            businessName: businessName,
+            businessType: businessTypeInput.value || '',
+            
+            // 위치 정보
             region: regionInput.value,
-            city: cityInput.value,
-            content: editorContent,
-            phone: phoneValue, // trim된 값 사용
-            kakao: document.getElementById('kakao').value || '',
-            telegram: document.getElementById('telegram').value || '',
-            thumbnail: thumbnailUrl || (businessTypeCode ? `/img/business-type/${businessTypeCode}.png` : uploadedImages[0] || null),
-            images: uploadedImages,
-            updatedAt: Date.now()
+            city: cityInput.value || '',
+            address: address,
+            detailAddress: document.getElementById('detail-address').value || '',
+            
+            // 연락처 정보
+            contact: contact,
+            businessHours: document.getElementById('business-hours').value || '',
+            
+            // 콘텐츠
+            content: quill.root.innerHTML,
+            eventContent: eventContent,
+            description: document.getElementById('description').value || '',
+            thumbnail: thumbnailUrl,
+            images: [...processedImages, ...eventImages],
+            
+            // 카테고리별 추가 데이터
+            ...categoryData,
+            
+            // 메타 정보 (기존 값 유지 및 업데이트)
+            createdAt: currentAd.createdAt,  // 생성일은 유지
+            updatedAt: Date.now(),  // 수정일만 업데이트
+            views: currentAd.views || 0,
+            bookmarks: currentAd.bookmarks || [],
+            reviews: currentAd.reviews || {},
+            status: currentAd.status || 'pending'
         };
         
-        // 카테고리별 추가 필드 저장
-        if (categoryInput.value === '유흥주점' || categoryInput.value === '건전마사지') {
-            const categoryData = collectCategoryData(categoryInput.value, eventQuill);
-            Object.assign(adData, categoryData);
-        }
-        
-        // 리얼타임 데이터베이스 업데이트
-        await update(ref(rtdb, `advertisements/${adId}`), adData);
+        // Firebase 업데이트
+        await update(ref(rtdb, `advertisements/${adId}`), updatedData);
         
         alert('광고가 성공적으로 수정되었습니다.');
         window.location.href = '/ad-posting/ad-management.html';
@@ -491,6 +409,6 @@ async function handleSubmit(e) {
         console.error('광고 수정 실패:', error);
         alert('광고 수정에 실패했습니다. 다시 시도해주세요.');
         submitButton.disabled = false;
-        submitButton.textContent = '수정 완료';
+        submitButton.textContent = '광고 수정';
     }
 }

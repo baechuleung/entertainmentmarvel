@@ -56,3 +56,13 @@ export {
     collectTablePrices,
     collectCategoryData
 } from './category-fields.js';
+
+// 광고 전용 ImageKit 업로드 모듈
+export {
+    uploadAdThumbnail,
+    uploadAdDetailImages,
+    uploadAdEventImages,
+    uploadSingleDetailImage,
+    uploadSingleEventImage,
+    deleteAdImages
+} from './ad-imagekit-upload.js';

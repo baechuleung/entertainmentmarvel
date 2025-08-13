@@ -1,4 +1,4 @@
-/* admin/ads/css/ads-modal.css - 광고 상세 모달 스타일 */
+/* admin/ads/css/ads-modal.css - 광고 추가/수정 모달 스타일 */
 
 /* ===== 모달 기본 스타일 ===== */
 .modal {
@@ -33,7 +33,7 @@
 .modal-content {
     background-color: #ffffff;
     width: 90%;
-    max-width: 900px;
+    max-width: 1200px;
     max-height: 90vh;
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
@@ -118,23 +118,27 @@
     background: #555;
 }
 
-/* ===== 섹션 타이틀 ===== */
-.modal-body h3 {
-    color: #2c3e50;
+/* ===== 폼 섹션 ===== */
+.form-section {
+    margin-bottom: 30px;
+    padding: 25px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
     font-size: 18px;
     font-weight: 600;
-    margin-top: 25px;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
+    color: #2c3e50;
+    margin: 0 0 20px 0;
+    padding-bottom: 12px;
     border-bottom: 2px solid #667eea;
     position: relative;
 }
 
-.modal-body h3:first-child {
-    margin-top: 0;
-}
-
-.modal-body h3::after {
+.section-title::after {
     content: '';
     position: absolute;
     bottom: -2px;
@@ -193,6 +197,11 @@
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
+.form-group input[readonly] {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
 .form-group textarea {
     resize: vertical;
     min-height: 100px;
@@ -211,153 +220,230 @@
     padding-right: 40px;
 }
 
-/* ===== 체크박스 ===== */
-.form-group input[type="checkbox"] {
-    width: auto;
-    margin-right: 8px;
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-}
-
-.form-group label:has(input[type="checkbox"]) {
+/* ===== 카테고리 버튼 ===== */
+.category-buttons {
     display: flex;
-    align-items: center;
-    cursor: pointer;
-    user-select: none;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
-.form-group label:has(input[type="checkbox"])::after {
-    content: none;
-}
-
-/* ===== 정보 표시 영역 (주대설정, 코스설정) ===== */
-#table-price-container,
-#course-container {
-    background-color: white;
-    padding: 15px;
-    border-radius: 6px;
-    border: 1px solid #dee2e6;
-    min-height: 60px;
-}
-
-#table-price-container > div,
-#course-container > div {
-    padding: 8px 0;
-    border-bottom: 1px solid #f1f1f1;
-}
-
-#table-price-container > div:last-child,
-#course-container > div:last-child {
-    border-bottom: none;
-}
-
-#table-price-container strong,
-#course-container strong {
-    color: #495057;
-    margin-right: 10px;
-}
-
-/* ===== Quill 에디터 스타일 ===== */
-#ad-content-editor,
-#ad-event-editor {
-    background-color: white;
-    border-radius: 6px;
-    overflow: hidden;
-}
-
-.ql-toolbar.ql-snow {
+.category-btn {
+    flex: 1;
+    padding: 12px 20px;
     background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 6px 6px 0 0;
-    padding: 10px;
-}
-
-.ql-container.ql-snow {
-    border: 1px solid #dee2e6;
-    border-top: none;
-    border-radius: 0 0 6px 6px;
-    font-size: 14px;
-}
-
-.ql-editor {
-    min-height: 200px;
-    max-height: 400px;
-    overflow-y: auto;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-#ad-event-editor .ql-editor {
-    min-height: 150px;
-    max-height: 300px;
-}
-
-.ql-editor.ql-blank::before {
-    color: #999;
-    font-style: normal;
-    font-size: 14px;
-}
-
-/* Quill 툴바 버튼 스타일 */
-.ql-toolbar button {
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    color: #495057;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.ql-toolbar button:hover {
-    background-color: #667eea !important;
-    color: white !important;
+.category-btn:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+    transform: translateY(-1px);
 }
 
-.ql-toolbar button:hover .ql-stroke {
-    stroke: white !important;
+.category-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.ql-toolbar button:hover .ql-fill {
-    fill: white !important;
+/* ===== 커스텀 셀렉트 ===== */
+.custom-select {
+    position: relative;
+    width: 100%;
 }
 
-/* ===== 썸네일 업로드 영역 ===== */
-.thumbnail-upload-area {
+.select-selected {
+    background-color: white;
+    padding: 10px 14px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 35px;
+    transition: all 0.3s ease;
+}
+
+.select-selected::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-top-color: #495057;
+    transition: transform 0.3s ease;
+}
+
+.select-selected.select-arrow-active::after {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.select-selected:hover {
+    border-color: #667eea;
+}
+
+.select-items {
+    position: absolute;
+    background-color: white;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    border: 1px solid #ced4da;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    max-height: 240px;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.select-hide {
+    display: none;
+}
+
+.select-items div {
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.select-items div:hover {
+    background-color: #f8f9fa;
+}
+
+.select-items div.same-as-selected {
+    background-color: #667eea;
+    color: white;
+}
+
+/* ===== 폼 그룹 행 (지역/도시) ===== */
+.form-group-row {
     display: flex;
-    flex-direction: column;
     gap: 15px;
 }
 
-.thumbnail-upload-btn {
-    padding: 12px 24px;
-    background-color: white;
-    border: 2px dashed #dee2e6;
-    border-radius: 8px;
-    color: #6c757d;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: fit-content;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.form-group-row .form-group {
+    flex: 1;
 }
 
-.thumbnail-upload-btn:hover {
+/* ===== 주대/코스 설정 ===== */
+.table-price-item,
+.course-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.table-price-name,
+.course-name {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.price-input-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.table-price-value,
+.course-price {
+    width: 100%;
+    padding: 10px 14px;
+    padding-right: 35px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.price-unit {
+    position: absolute;
+    right: 14px;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.btn-remove-price,
+.btn-remove-course {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #dc3545;
+    background-color: #fff;
+    color: #dc3545;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-remove-price:hover,
+.btn-remove-course:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-add-price,
+.btn-add-course {
+    width: 100%;
+    padding: 10px;
     background-color: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 6px;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.btn-add-price:hover,
+.btn-add-course:hover {
+    background-color: #e9ecef;
     border-color: #667eea;
     color: #667eea;
 }
 
-.upload-icon {
-    font-size: 20px;
+/* ===== 썸네일 업로드 ===== */
+.thumbnail-upload-container {
+    position: relative;
+    display: inline-block;
 }
 
 .thumbnail-preview {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-    height: 250px;
+    width: 200px;
+    height: 200px;
+    border: 2px dashed #dee2e6;
     border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     overflow: hidden;
-    border: 2px solid #dee2e6;
+    transition: all 0.3s ease;
     background-color: #f8f9fa;
+}
+
+.thumbnail-preview:hover {
+    border-color: #667eea;
+    background-color: #f0f3ff;
 }
 
 .thumbnail-preview img {
@@ -366,49 +452,109 @@
     object-fit: cover;
 }
 
-.delete-thumbnail {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 36px;
-    height: 36px;
-    background-color: rgba(231, 76, 60, 0.9);
-    border: none;
-    border-radius: 50%;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+.upload-text {
+    color: #6c757d;
+    font-size: 14px;
+    text-align: center;
 }
 
-.delete-thumbnail:hover {
-    background-color: #c0392b;
+.btn-delete-thumbnail {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #dc3545;
+    color: white;
+    border: 2px solid white;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-delete-thumbnail:hover {
+    background-color: #c82333;
     transform: scale(1.1);
+}
+
+/* ===== Quill 에디터 스타일 ===== */
+#add-editor-container,
+#add-event-editor-container {
+    background-color: white;
+    border-radius: 6px;
+}
+
+#add-editor,
+#add-event-editor {
+    min-height: 200px;
+}
+
+#add-event-editor {
+    min-height: 150px;
+}
+
+.ql-toolbar {
+    border: 1px solid #ced4da;
+    border-radius: 6px 6px 0 0;
+    background-color: #f8f9fa;
+}
+
+.ql-container {
+    border: 1px solid #ced4da;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    font-size: 14px;
+}
+
+.ql-editor {
+    min-height: 150px;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 /* ===== 폼 액션 버튼 ===== */
 .form-actions {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #dee2e6;
     display: flex;
-    gap: 12px;
     justify-content: flex-end;
+    gap: 10px;
+    padding: 20px 30px;
+    border-top: 1px solid #e9ecef;
+    background-color: white;
 }
 
-.form-actions button {
-    padding: 12px 30px;
+.btn {
+    padding: 10px 24px;
     border: none;
     border-radius: 6px;
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
-    min-width: 100px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .btn-secondary {
@@ -419,120 +565,63 @@
 .btn-secondary:hover {
     background-color: #5a6268;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+/* ===== 체크박스 스타일 ===== */
+.form-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+    cursor: pointer;
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+.form-group label input[type="checkbox"] {
+    vertical-align: middle;
 }
 
-.btn-primary:disabled,
-.btn-secondary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* ===== 상태 배지 ===== */
-.status-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.status-badge.active {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.status-badge.inactive {
-    background-color: #f8d7da;
-    color: #721c24;
-}
-
-.status-badge.pending {
-    background-color: #fff3cd;
-    color: #856404;
-}
-
-.status-badge.rejected {
-    background-color: #f5c6cb;
-    color: #721c24;
+/* ===== 카테고리별 필드 숨김 ===== */
+.karaoke-field,
+.massage-field {
+    display: none;
 }
 
 /* ===== 반응형 디자인 ===== */
 @media (max-width: 768px) {
     .modal-content {
         width: 95%;
-        max-height: 95vh;
-        margin: 10px;
-    }
-    
-    .modal-header {
-        padding: 20px;
+        max-width: none;
+        margin: 20px;
     }
     
     .modal-body {
         padding: 20px;
     }
     
-    .modal-header h2 {
-        font-size: 20px;
+    .form-section {
+        padding: 15px;
     }
     
-    .form-actions {
+    .category-buttons {
         flex-direction: column;
     }
     
-    .form-actions button {
+    .form-group-row {
+        flex-direction: column;
+    }
+    
+    .table-price-item,
+    .course-item {
+        flex-direction: column;
+    }
+    
+    .btn-remove-price,
+    .btn-remove-course {
         width: 100%;
-    }
-    
-    .thumbnail-preview {
-        max-width: 100%;
-        height: 200px;
-    }
-}
-
-@media (max-width: 480px) {
-    .modal-header {
-        padding: 16px;
-    }
-    
-    .modal-body {
-        padding: 16px;
-    }
-    
-    .modal-header h2 {
-        font-size: 18px;
-    }
-    
-    .modal-body h3 {
-        font-size: 16px;
-    }
-    
-    .form-group label {
-        font-size: 13px;
-    }
-    
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        font-size: 13px;
-        padding: 8px 12px;
+        margin-top: 5px;
     }
 }
 
 /* ===== 로딩 상태 ===== */
-.modal-loading {
+.loading-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -542,12 +631,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10001;
-    border-radius: 12px;
+    z-index: 100;
 }
 
-.modal-loading::after {
-    content: '';
+.spinner {
     width: 40px;
     height: 40px;
     border: 4px solid #f3f3f3;

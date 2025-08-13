@@ -157,10 +157,6 @@
     transition: all 0.3s ease;
 }
 
-.save-btn:hover {
-    background: #FF5420;
-}
-
 /* 구분선 */
 .divider-bar {
     height: 1px;
@@ -604,18 +600,12 @@
     color: #FFF;
 }
 
-.share-all-btn:hover {
-    background: #FF5420;
-}
 
 .save-result-btn {
     background: #5C82FF;
     color: #FFF;
 }
 
-.save-result-btn:hover {
-    background: #FF5420;
-}
 
 /* divider 스타일 */
 .result-divider {

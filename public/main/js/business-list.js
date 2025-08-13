@@ -50,8 +50,28 @@ function shuffleArray(array) {
 export async function loadAdvertisements() {
     console.log('광고 목록 로드 시작');
     
-    // 캐시 확인 (랜덤이므로 캐시 사용 안함)
-    const cacheKey = 'mainPageAds_random_' + Date.now();
+    // 캐시 키와 만료 시간 (1시간)
+    const CACHE_KEY = 'business_list_ads';
+    const CACHE_EXPIRY = 1 * 60 * 60 * 1000; // 1시간
+    
+    // 캐시 확인
+    try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+            const data = JSON.parse(cached);
+            const now = Date.now();
+            
+            // 캐시가 만료되지 않은 경우
+            if (data.expiry > now) {
+                console.log('캐시된 데이터 사용');
+                allAdvertisements = data.advertisements;
+                initializeDisplay();
+                return;
+            }
+        }
+    } catch (error) {
+        console.error('캐시 읽기 실패:', error);
+    }
     
     // Firebase에서 새 데이터 로드
     try {
@@ -75,6 +95,18 @@ export async function loadAdvertisements() {
             
             // 처음 100개만 가져오기
             allAdvertisements = activeAds.slice(0, INITIAL_LOAD);
+            
+            // 캐시에 저장
+            try {
+                const cacheData = {
+                    advertisements: allAdvertisements,
+                    expiry: Date.now() + CACHE_EXPIRY
+                };
+                localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+                console.log('데이터 캐시 저장됨');
+            } catch (error) {
+                console.error('캐시 저장 실패:', error);
+            }
             
             console.log(`총 ${allAdvertisements.length}개의 광고 랜덤 로드됨`);
         } else {

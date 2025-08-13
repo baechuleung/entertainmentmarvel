@@ -190,9 +190,6 @@
     transition: all 0.3s ease;
 }
 
-.save-btn:hover {
-    background: #FF5420;
-}
 
 /* 언니리스트 섹션 */
 .sister-list-section {
@@ -467,10 +464,6 @@
     font-weight: 600;
     cursor: pointer;
     margin-top: 10px;
-}
-
-.popup-submit:hover {
-    background: #FF5420;
 }
 
 /* 시간 계산 섹션 */
@@ -935,9 +928,6 @@
     color: #FFF;
 }
 
-.share-all-btn:hover {
-    background: #FF5420;
-}
 
 /* 공유 옵션 모달 */
 .share-options-modal {

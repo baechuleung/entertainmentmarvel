@@ -25,15 +25,12 @@ let cityData = {};
 // 지역 데이터 로드
 async function loadLocationData() {
     try {
-        // region1.json 로드 (지역 목록)
         const region1Response = await fetch('/data/region1.json');
         const region1Data = await region1Response.json();
         
-        // region2.json 로드 (도시 목록)
         const region2Response = await fetch('/data/region2.json');
         cityData = await region2Response.json();
         
-        // 지역 데이터 매핑
         regionData = {};
         region1Data.regions.forEach(region => {
             regionData[region.name] = region.code;
@@ -104,8 +101,8 @@ function updateModalHTML(ad) {
             </div>
             
             <div class="form-group">
-                <label for="ad-event-info">이벤트 정보</label>
-                <textarea id="ad-event-info" rows="4" placeholder="이벤트 내용을 입력하세요"></textarea>
+                <label for="ad-event-editor">이벤트 정보</label>
+                <div id="ad-event-editor"></div>
             </div>
         `;
     }
@@ -119,8 +116,11 @@ function updateModalHTML(ad) {
                 <h3 style="margin-top: 0; margin-bottom: 15px; color: #2c3e50;">기본 정보</h3>
                 
                 <div class="form-group">
-                    <label for="ad-author">작성자</label>
-                    <input type="text" id="ad-author" required>
+                    <label for="ad-author">작성자 *</label>
+                    <input type="text" id="ad-author" placeholder="작성자명을 입력하세요 (자유롭게 수정 가능)" required>
+                    <small style="color: #6c757d; font-size: 12px;">
+                        실제 광고에 표시될 작성자명입니다. 업체명이나 담당자명을 입력하세요.
+                    </small>
                 </div>
                 
                 <div class="form-group">
@@ -278,7 +278,6 @@ function updateCityOptions(regionName) {
 
 // 모달 열기
 export async function openDetailModal(adId) {
-    // window.allAds에서 광고 찾기
     const ad = window.allAds.find(a => a.id === adId);
     if (!ad) {
         console.error('광고를 찾을 수 없습니다:', adId);
@@ -398,9 +397,9 @@ function fillCategorySpecificData(ad) {
             document.getElementById('course-container').innerHTML = courseHtml || '코스 정보 없음';
         }
         
-        if (document.getElementById('ad-event-info')) {
-            document.getElementById('ad-event-info').value = ad.eventInfo ? 
-                ad.eventInfo.replace(/<[^>]*>/g, '') : '';
+        // 이벤트 정보 (에디터에 설정)
+        if (ad.eventInfo) {
+            setEditorContent('event', ad.eventInfo);
         }
     }
 }
@@ -435,7 +434,7 @@ async function saveAdDetail(e) {
     
     try {
         // 에디터 이미지 처리
-        const userId = currentEditingAd.authorId || 'admin';
+        const userId = currentEditingAd.authorId?.[0] || 'admin';
         await processEditorImages('content', userId);
         await processEditorImages('event', userId);
         
@@ -495,18 +494,6 @@ function collectFormData() {
         updatedAt: Date.now()
     };
     
-    // 광고 내용 저장
-    if (document.getElementById('ad-content')) {
-        const contentValue = document.getElementById('ad-content').value;
-        if (contentValue) {
-            updateData.content = contentValue.replace(/\n/g, '<br>');
-        }
-    }
-    
-    if (document.getElementById('ad-thumbnail')) {
-        updateData.thumbnail = document.getElementById('ad-thumbnail').value || null;
-    }
-    
     // 카테고리별 추가 필드 저장
     const category = document.getElementById('ad-category').value;
     
@@ -523,13 +510,6 @@ function collectFormData() {
 function collectKaraokeData(updateData) {
     if (document.getElementById('ad-business-hours')) {
         updateData.businessHours = document.getElementById('ad-business-hours').value || '';
-    }
-    
-    if (document.getElementById('ad-event-info')) {
-        const eventValue = document.getElementById('ad-event-info').value;
-        if (eventValue) {
-            updateData.eventInfo = eventValue.replace(/\n/g, '<br>');
-        }
     }
     
     // 주대설정은 기존 값 유지
@@ -551,13 +531,6 @@ function collectMassageData(updateData) {
     }
     if (document.getElementById('ad-directions')) {
         updateData.directions = document.getElementById('ad-directions').value || '';
-    }
-    
-    if (document.getElementById('ad-event-info')) {
-        const eventValue = document.getElementById('ad-event-info').value;
-        if (eventValue) {
-            updateData.eventInfo = eventValue.replace(/\n/g, '<br>');
-        }
     }
     
     // 코스설정은 기존 값 유지

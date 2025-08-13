@@ -14,6 +14,9 @@ window.allAds = [];
         // 1. 권한 체크 먼저
         const user = await checkAuthFirst();
         
+        // 전역으로 사용자 정보 저장
+        window.currentUser = user;
+        
         // 2. 권한 확인 후 헤더 로드
         await loadAdminHeader(user);
         
@@ -75,8 +78,10 @@ function displayAds() {
     let filteredAds = window.allAds.filter(ad => {
         if (filterStatus && ad.status !== filterStatus) return false;
         if (filterType && ad.businessType !== filterType) return false;
-        if (searchText && !ad.title?.toLowerCase().includes(searchText) && 
-            !ad.author?.toLowerCase().includes(searchText)) return false;
+        if (searchText) {
+            const searchableText = `${ad.businessName || ''} ${ad.author || ''}`.toLowerCase();
+            if (!searchableText.includes(searchText)) return false;
+        }
         return true;
     });
     
@@ -103,21 +108,30 @@ function displayAds() {
         const paymentStatus = ad.paymentStatus ? 'paid' : 'unpaid';
         const paymentText = ad.paymentStatus ? '완료' : '미납';
         
+        // 상태 뱃지 클래스
+        const statusClass = ad.status || 'pending';
+        const statusText = {
+            'active': '활성',
+            'inactive': '비활성',
+            'pending': '승인대기',
+            'rejected': '거절됨'
+        }[ad.status] || '알 수 없음';
+        
         return `
             <tr>
-                <td>${ad.id.substring(0, 8)}...</td>
+                <td title="${ad.id}">${ad.id.substring(0, 8)}...</td>
                 <td>${ad.category || '-'}</td>
                 <td>${ad.businessType || '-'}</td>
                 <td>${ad.author || '-'}</td>
                 <td>${ad.region || ''} ${ad.city || ''}</td>
                 <td>
-                    <span class="status-badge ${ad.status}">${ad.status === 'active' ? '활성' : '비활성'}</span>
+                    <span class="status-badge ${statusClass}">${statusText}</span>
                 </td>
                 <td class="end-date ${endDateClass}">${endDateHtml}</td>
                 <td>
                     <span class="payment-badge ${paymentStatus}">${paymentText}</span>
                 </td>
-                <td>${new Date(ad.createdAt).toLocaleDateString('ko-KR')}</td>
+                <td>${ad.createdAt ? new Date(ad.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
                 <td>${ad.views || 0}</td>
                 <td>${ad.inquiries || 0}</td>
                 <td>
@@ -137,6 +151,11 @@ function displayAds() {
 // 상태 토글
 window.toggleStatus = async function(adId, currentStatus) {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    const statusText = newStatus === 'active' ? '활성화' : '비활성화';
+    
+    if (!confirm(`이 광고를 ${statusText}하시겠습니까?`)) {
+        return;
+    }
     
     try {
         await update(ref(rtdb, `advertisements/${adId}`), {
@@ -144,7 +163,7 @@ window.toggleStatus = async function(adId, currentStatus) {
             updatedAt: Date.now()
         });
         
-        alert(`광고가 ${newStatus === 'active' ? '활성화' : '비활성화'}되었습니다.`);
+        alert(`광고가 ${statusText}되었습니다.`);
         loadAds();
         
     } catch (error) {
@@ -155,11 +174,20 @@ window.toggleStatus = async function(adId, currentStatus) {
 
 // 광고 삭제
 window.deleteAd = async function(adId) {
-    if (!confirm('정말로 이 광고를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+    const ad = window.allAds.find(a => a.id === adId);
+    const adName = ad?.businessName || '이 광고';
+    
+    if (!confirm(`"${adName}"를 삭제하시겠습니까?\n\n삭제된 광고는 복구할 수 없습니다.`)) {
         return;
     }
     
     try {
+        // ImageKit 이미지 삭제 (있는 경우)
+        if (ad) {
+            await deleteAllAdImages(ad);
+        }
+        
+        // Firebase에서 광고 삭제
         await remove(ref(rtdb, `advertisements/${adId}`));
         
         alert('광고가 삭제되었습니다.');
@@ -168,6 +196,62 @@ window.deleteAd = async function(adId) {
     } catch (error) {
         console.error('광고 삭제 실패:', error);
         alert('광고 삭제에 실패했습니다.');
+    }
+}
+
+// ImageKit 이미지 삭제
+async function deleteAllAdImages(ad) {
+    const imageUrls = [];
+    
+    // 썸네일 수집
+    if (ad.thumbnail && ad.thumbnail.includes('ik.imagekit.io')) {
+        imageUrls.push(ad.thumbnail);
+    }
+    
+    // 상세 이미지들 수집
+    if (ad.images && Array.isArray(ad.images)) {
+        ad.images.forEach(imageUrl => {
+            if (imageUrl && imageUrl.includes('ik.imagekit.io')) {
+                imageUrls.push(imageUrl);
+            }
+        });
+    }
+    
+    // 에디터 내용에서 이미지 URL 추출
+    if (ad.content) {
+        const imgRegex = /<img[^>]+src="([^">]+)"/g;
+        let match;
+        while ((match = imgRegex.exec(ad.content)) !== null) {
+            const imageUrl = match[1];
+            if (imageUrl && imageUrl.includes('ik.imagekit.io')) {
+                imageUrls.push(imageUrl);
+            }
+        }
+    }
+    
+    if (imageUrls.length === 0) {
+        return;
+    }
+    
+    try {
+        // Firebase Function 호출하여 이미지 삭제
+        const response = await fetch('https://imagekit-delete-enujtcasca-uc.a.run.app', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                fileUrls: imageUrls,
+                userId: ad.authorId?.[0] || 'admin'
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('이미지 삭제 결과:', result);
+        }
+    } catch (error) {
+        console.error('ImageKit 이미지 삭제 오류:', error);
     }
 }
 

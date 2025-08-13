@@ -3,7 +3,6 @@ import { auth, db, rtdb } from '/js/firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { ref, push, set, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-import { uploadBusinessAdImages, uploadSingleImage } from '/js/imagekit-upload.js';
 import { 
     loadCategoryData, 
     createCategoryButtons,
@@ -19,14 +18,18 @@ import {
     initializeEventEditor,
     setupTablePriceEvents,
     toggleCategorySpecificFields,
-    collectCategoryData
+    collectCategoryData,
+    // 광고 전용 ImageKit 업로드 함수들
+    uploadAdThumbnail,
+    uploadSingleDetailImage,
+    uploadSingleEventImage
 } from './modules/index.js';
 
 // 전역 변수
 let currentUser = null;
 let currentUserData = null;
 let quill = null;
-let eventQuill = null; // 이벤트 에디터 추가
+let eventQuill = null;
 let previewImages = new Map();
 let thumbnailFile = null;
 
@@ -42,6 +45,22 @@ const contentInput = document.getElementById('content');
 
 // 초기화
 document.addEventListener('DOMContentLoaded', async function() {
+    // DOM 요소가 제대로 로드되었는지 확인
+    console.log('DOM 요소 확인:');
+    console.log('폼:', form);
+    console.log('작성자 입력:', authorInput);
+    console.log('카테고리 입력:', categoryInput);
+    console.log('카테고리 버튼 컨테이너:', categoryButtons);
+    
+    if (!form || !authorInput || !categoryInput || !categoryButtons) {
+        console.error('필수 DOM 요소를 찾을 수 없습니다!');
+        console.error('form:', form);
+        console.error('authorInput:', authorInput);
+        console.error('categoryInput:', categoryInput);
+        console.error('categoryButtons:', categoryButtons);
+        return;
+    }
+    
     // Quill 에디터 초기화
     quill = initializeQuillEditor();
     
@@ -62,17 +81,41 @@ document.addEventListener('DOMContentLoaded', async function() {
     checkAuth();
     
     // 데이터 로드 및 카테고리 버튼 생성 (카테고리 선택 시 처리 포함)
-    await loadCategoryData();
-    createCategoryButtons(categoryButtons, categoryInput, async (categoryName) => {
-        // 카테고리별 필드 표시/숨김
-        toggleCategorySpecificFields(categoryName, eventQuill);
+    const categoryData = await loadCategoryData();
+    console.log('로드된 카테고리 데이터:', categoryData);
+    
+    // 카테고리 버튼이 제대로 생성되는지 확인
+    if (categoryButtons && categoryData) {
+        console.log('카테고리 버튼 생성 시작');
+        createCategoryButtons(categoryButtons, categoryInput, async (categoryName) => {
+            // 카테고리 선택 시 입력 필드에 값 설정
+            if (categoryInput) {
+                categoryInput.value = categoryName;
+                console.log('선택된 카테고리:', categoryName);
+            }
+            
+            // 카테고리별 필드 표시/숨김
+            toggleCategorySpecificFields(categoryName, eventQuill);
+            
+            // 업종 데이터 로드
+            const types = await loadBusinessTypes(categoryName);
+            if (types) {
+                createBusinessTypeOptions(types);
+            }
+        });
         
-        // 업종 데이터 로드
-        const types = await loadBusinessTypes(categoryName);
-        if (types) {
-            createBusinessTypeOptions(types);
+        // 카테고리 버튼이 생성되었는지 확인
+        const generatedButtons = categoryButtons.querySelectorAll('.category-btn');
+        console.log('생성된 카테고리 버튼 수:', generatedButtons.length);
+        if (generatedButtons.length === 0) {
+            console.error('카테고리 버튼이 생성되지 않았습니다!');
+            console.error('categories 객체:', categories);
         }
-    });
+    } else {
+        console.error('카테고리 버튼 컨테이너 또는 데이터가 없습니다.');
+        console.error('categoryButtons:', categoryButtons);
+        console.error('categoryData:', categoryData);
+    }
     
     const { regionData } = await loadRegionData();
     createRegionOptions(regionData);
@@ -88,7 +131,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // 폼 제출 이벤트
     form.addEventListener('submit', handleSubmit);
 });
-
 
 // 인증 상태 확인
 function checkAuth() {
@@ -118,8 +160,13 @@ async function loadUserData() {
                 return;
             }
             
-            // 작성자 필드 설정
-            authorInput.value = currentUserData.nickname || currentUserData.email || '익명';
+            // 작성자 필드 설정 - authorInput이 존재하는지 확인
+            if (authorInput) {
+                authorInput.value = currentUserData.nickname || currentUserData.email || '익명';
+                console.log('작성자 설정:', authorInput.value);
+            } else {
+                console.error('작성자 입력 필드를 찾을 수 없습니다.');
+            }
         }
     } catch (error) {
         console.error('사용자 데이터 로드 실패:', error);
@@ -159,118 +206,116 @@ async function handleSubmit(e) {
     submitButton.textContent = '등록 중...';
     
     try {
-        // === 필수 입력 필드 유효성 검증 시작 ===
+        // 필수 입력 필드 유효성 검증
         
-        // 1. 카테고리 검증
-        if (!categoryInput.value || categoryInput.value === '') {
+        // 1. 카테고리 확인
+        if (!categoryInput.value) {
             alert('카테고리를 선택해주세요.');
             submitButton.disabled = false;
             submitButton.textContent = '광고 등록';
             return;
         }
         
-        // 2. 업종 검증
-        if (!businessTypeInput.value || businessTypeInput.value === '') {
-            alert('업종을 선택해주세요.');
+        // 2. 작성자 확인
+        if (!authorInput.value.trim()) {
+            alert('작성자를 입력해주세요.');
             submitButton.disabled = false;
             submitButton.textContent = '광고 등록';
             return;
         }
         
-        // 3. 업소명 검증
-        const businessNameValue = document.getElementById('business-name').value.trim();
-        if (!businessNameValue || businessNameValue === '') {
-            alert('업소명을 입력해주세요.');
+        // 3. 나머지 필수 필드 검증
+        const title = document.getElementById('title').value.trim();
+        const businessName = document.getElementById('business-name').value.trim();
+        const contact = document.getElementById('contact').value.trim();
+        const address = document.getElementById('address').value.trim();
+        
+        if (!title || !businessName || !contact || !address) {
+            alert('필수 입력 항목을 모두 작성해주세요.');
             submitButton.disabled = false;
             submitButton.textContent = '광고 등록';
             return;
         }
         
-        // 4. 지역 검증
-        if (!regionInput.value || regionInput.value === '') {
-            alert('지역을 선택해주세요.');
-            submitButton.disabled = false;
-            submitButton.textContent = '광고 등록';
-            return;
-        }
+        // 먼저 Firebase에 광고 데이터 저장하여 ID 생성
+        const newAdRef = push(ref(rtdb, 'advertisements'));
+        const adId = newAdRef.key;  // 생성된 광고 ID
         
-        // 5. 도시 검증
-        if (!cityInput.value || cityInput.value === '') {
-            alert('도시를 선택해주세요.');
-            submitButton.disabled = false;
-            submitButton.textContent = '광고 등록';
-            return;
-        }
+        console.log('생성된 광고 ID:', adId);
         
-        // 6. 전화번호 검증
-        const phoneValue = document.getElementById('phone').value.trim();
-        if (!phoneValue || phoneValue === '') {
-            alert('전화번호를 입력해주세요.');
-            submitButton.disabled = false;
-            submitButton.textContent = '광고 등록';
-            return;
-        }
-        
-        // 7. 상세 내용 검증 (에디터)
-        const editorContent = quill.root.innerHTML;
-        const textContent = quill.root.innerText.trim();
-        
-        // 빈 에디터 체크 (기본 HTML 태그만 있는 경우도 체크)
-        if (!textContent || textContent === '' || textContent.length < 10) {
-            alert('상세 내용을 10자 이상 입력해주세요.');
-            submitButton.disabled = false;
-            submitButton.textContent = '광고 등록';
-            return;
-        }
-        
-        // === 필수 입력 필드 유효성 검증 완료 ===
-        
-        // 에디터에서 이미지 추출 및 업로드
-        const uploadedImages = await processEditorImages(quill, previewImages, uploadBusinessAdImages);
-        
-        // 썸네일 업로드
+        // 썸네일 업로드 (광고 ID 사용)
         let thumbnailUrl = null;
         if (thumbnailFile) {
-            thumbnailUrl = await uploadSingleImage(thumbnailFile);
+            thumbnailUrl = await uploadAdThumbnail(thumbnailFile, adId);
         }
         
-        // 업종 코드 가져오기
-        const selectedBusinessType = businessTypeInput.value;
-        const businessTypeCode = window.businessTypes && window.businessTypes[selectedBusinessType] 
-            ? window.businessTypes[selectedBusinessType] : null;
+        // 에디터 이미지 처리 (광고 ID 사용)
+        const processedImages = await processEditorImages(
+            quill, 
+            previewImages, 
+            async (file) => await uploadSingleDetailImage(file, adId),
+            adId,
+            'detail'
+        );
         
-        // 기본 광고 데이터
+        // 이벤트 에디터 이미지 처리 (유흥주점 카테고리)
+        let eventContent = '';
+        let eventImages = [];
+        if (categoryInput.value === '유흥주점' && eventQuill) {
+            eventImages = await processEditorImages(
+                eventQuill, 
+                previewImages, 
+                async (file) => await uploadSingleEventImage(file, adId),
+                adId,
+                'event'
+            );
+            eventContent = eventQuill.root.innerHTML;
+        }
+        
+        // 카테고리별 추가 데이터 수집
+        const categoryData = collectCategoryData(categoryInput.value, eventQuill);
+        
+        // 최종 광고 데이터
         const adData = {
+            // 기본 정보
+            adId: adId,  // 광고 ID 추가
             author: authorInput.value,
-            authorId: [currentUser.uid],
+            authorId: currentUser.uid,
+            title: title,
             category: categoryInput.value,
-            businessType: businessTypeInput.value,
-            businessTypeCode: businessTypeCode,
-            businessName: businessNameValue, // trim된 값 사용
+            businessName: businessName,
+            businessType: businessTypeInput.value || '',
+            
+            // 위치 정보
             region: regionInput.value,
-            city: cityInput.value,
-            content: editorContent,
-            phone: phoneValue, // trim된 값 사용
-            kakao: document.getElementById('kakao').value || '',
-            telegram: document.getElementById('telegram').value || '',
-            thumbnail: thumbnailUrl || (businessTypeCode ? `/img/business-type/${businessTypeCode}.png` : uploadedImages[0] || null),
-            images: uploadedImages,
+            city: cityInput.value || '',
+            address: address,
+            detailAddress: document.getElementById('detail-address').value || '',
+            
+            // 연락처 정보
+            contact: contact,
+            businessHours: document.getElementById('business-hours').value || '',
+            
+            // 콘텐츠
+            content: quill.root.innerHTML,
+            eventContent: eventContent,
+            description: document.getElementById('description').value || '',
+            thumbnail: thumbnailUrl,
+            images: [...processedImages, ...eventImages],
+            
+            // 카테고리별 추가 데이터
+            ...categoryData,
+            
+            // 메타 정보
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
             views: 0,
             bookmarks: [],
             reviews: {},
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
             status: currentUserData.userType === 'administrator' ? 'active' : 'pending'
         };
         
-        // 카테고리별 추가 필드 저장
-        if (categoryInput.value === '유흥주점' || categoryInput.value === '건전마사지') {
-            const categoryData = collectCategoryData(categoryInput.value, eventQuill);
-            Object.assign(adData, categoryData);
-        }
-        
-        // 리얼타임 데이터베이스에 저장
-        const newAdRef = push(ref(rtdb, 'advertisements'));
+        // Firebase에 최종 데이터 저장
         await set(newAdRef, adData);
         
         alert('광고가 성공적으로 등록되었습니다.');
