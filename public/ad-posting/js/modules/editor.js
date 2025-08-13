@@ -1,18 +1,16 @@
 // /ad-posting/js/modules/editor.js
 
+import { uploadBusinessAdImages } from '/js/imagekit-upload.js';
+
 // Quill 에디터 초기화
 export function initializeQuillEditor(placeholder = '광고 상세 내용을 입력하세요...') {
     const quill = new Quill('#editor', {
         theme: 'snow',
         modules: {
             toolbar: [
-                [{ 'header': [1, 2, 3, false] }],
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ 'color': [] }, { 'background': [] }],
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                [{ 'align': [] }],
-                ['link', 'image'],
-                ['clean']
+                [{ 'size': ['small', false, 'large', 'huge'] }],  // 글자 크기
+                [{ 'color': [] }],  // 글자 색상
+                ['link', 'image'],  // 링크, 이미지
             ]
         },
         placeholder: placeholder

@@ -21,31 +21,22 @@ export function setBusinessHeader(data) {
         }
     }
     
-    // businessName과 author를 조합 (건전마사지는 author 제외)
+    // businessName만 표시 (작성자 제외, 업종도 제외)
     if (businessName) {
-        let fullName = '';
+        let fullName = data.businessName || '';
         
-        // 업종이 있으면 맨 앞에 추가
-        if (data.businessType) {
-            fullName = `[${data.businessType}] `;
-        }
-        
-        // 업체명과 작성자 추가
-        if (data.category === '건전마사지') {
-            fullName += data.businessName || '';
-        } else {
-            fullName += `${data.businessName || ''} - ${data.author || ''}`;
-        }
-        
-        // 텍스트 길이 제한 (대략 70자 정도로 제한하여 3줄 이내로 유지)
-        if (fullName.length > 70) {
-            fullName = fullName.substring(0, 67) + '...';
+        // 텍스트 길이 제한
+        if (fullName.length > 40) {
+            fullName = fullName.substring(0, 37) + '...';
         }
         
         businessName.textContent = fullName;
     }
     
-    // businessType는 이제 사용하지 않음 (제목에 포함됨)
+    // businessType 별도 표시 (두번째 줄)
+    if (businessType) {
+        businessType.textContent = data.businessType || '';
+    }
     
     // 위치 정보 설정 및 표시
     if (businessLocation) {

@@ -41,7 +41,7 @@
                     <!-- 작성자 (수정 가능) -->
                     <div class="form-group">
                         <label for="author">작성자</label>
-                        <input type="text" id="author" name="author">
+                        <input type="text" id="author" name="author" readonly>
                     </div>
                     
                     <!-- 카테고리 선택 (새로 추가) -->
@@ -63,10 +63,10 @@
                         <input type="hidden" id="business-type" name="business-type" required>
                     </div>
                     
-                    <!-- 업소명 추가 -->
+                    <!-- 업소명 -->
                     <div class="form-group">
                         <label for="business-name">업소명 *</label>
-                        <input type="text" id="business-name" name="business-name" placeholder="업소명을 입력하세요" required>
+                        <input type="text" id="business-name" name="business-name" placeholder="예) 도파민 제니상무 (15자 이내로 작성해주세요)" maxlength="15" required>
                     </div>
                     
                     <!-- 지역과 도시 선택 (한 줄에 표시) -->

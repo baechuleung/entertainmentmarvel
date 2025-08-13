@@ -6,10 +6,9 @@ export function initializeEventEditor(previewImages) {
         theme: 'snow',
         modules: {
             toolbar: [
-                ['bold', 'italic', 'underline'],
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                ['link', 'image'],
-                ['clean']
+                [{ 'size': ['small', false, 'large', 'huge'] }],  // 글자 크기
+                [{ 'color': [] }],  // 글자 색상
+                ['link', 'image'],  // 링크, 이미지
             ]
         },
         placeholder: '이벤트 내용을 입력하세요...'
