@@ -2,7 +2,7 @@
 import { auth, db, rtdb } from '/js/firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { ref, push, set, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { ref, push, set, update, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 import { 
     loadCategoryData, 
     createCategoryButtons,
@@ -19,8 +19,8 @@ import {
     setupTablePriceEvents,
     toggleCategorySpecificFields,
     collectCategoryData,
-    // 광고 전용 ImageKit 업로드 함수들
-    uploadAdThumbnail,
+    // 백그라운드 업로드 함수
+    startBackgroundUpload,
     uploadSingleDetailImage,
     uploadSingleEventImage
 } from './modules/index.js';
@@ -31,6 +31,7 @@ let currentUserData = null;
 let quill = null;
 let eventQuill = null;
 let previewImages = new Map();
+let eventPreviewImages = new Map();
 let thumbnailFile = null;
 
 // DOM 요소
@@ -42,6 +43,14 @@ const regionInput = document.getElementById('region');
 const cityInput = document.getElementById('city');
 const businessTypeInput = document.getElementById('business-type');
 const contentInput = document.getElementById('content');
+
+// 이미지 URL 생성 함수
+function generateImageUrl(adId, type, index, fileName) {
+    const timestamp = Date.now();
+    const cleanFileName = fileName.replace(/[^a-zA-Z0-9.]/g, '_');
+    const imageName = `${type}_${index}_${timestamp}_${cleanFileName}`;
+    return `https://ik.imagekit.io/leadproject/entmarvel/advertise/${adId}/${type}/${imageName}`;
+}
 
 // 초기화
 document.addEventListener('DOMContentLoaded', async function() {
@@ -65,14 +74,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     quill = initializeQuillEditor();
     
     // 이벤트 에디터 초기화 (유흥주점용)
-    eventQuill = initializeEventEditor(previewImages);
+    eventQuill = initializeEventEditor(eventPreviewImages);
     
     // 이미지 핸들러 설정
     const toolbar = quill.getModule('toolbar');
     toolbar.addHandler('image', createImageHandler(quill, previewImages));
     
     const eventToolbar = eventQuill.getModule('toolbar');
-    eventToolbar.addHandler('image', createImageHandler(eventQuill, previewImages));
+    eventToolbar.addHandler('image', createImageHandler(eventQuill, eventPreviewImages));
     
     // 주대 추가/삭제 이벤트 설정
     setupTablePriceEvents();
@@ -80,11 +89,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     // 인증 상태 확인
     checkAuth();
     
-    // 데이터 로드 및 카테고리 버튼 생성 (카테고리 선택 시 처리 포함)
+    // 데이터 로드 및 카테고리 버튼 생성
     const categoryData = await loadCategoryData();
     console.log('로드된 카테고리 데이터:', categoryData);
     
-    // 카테고리 버튼이 제대로 생성되는지 확인
+    // 카테고리 버튼 생성
     if (categoryButtons && categoryData) {
         console.log('카테고리 버튼 생성 시작');
         createCategoryButtons(categoryButtons, categoryInput, async (categoryName) => {
@@ -107,14 +116,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         // 카테고리 버튼이 생성되었는지 확인
         const generatedButtons = categoryButtons.querySelectorAll('.category-btn');
         console.log('생성된 카테고리 버튼 수:', generatedButtons.length);
-        if (generatedButtons.length === 0) {
-            console.error('카테고리 버튼이 생성되지 않았습니다!');
-            console.error('categories 객체:', categories);
-        }
-    } else {
-        console.error('카테고리 버튼 컨테이너 또는 데이터가 없습니다.');
-        console.error('categoryButtons:', categoryButtons);
-        console.error('categoryData:', categoryData);
     }
     
     const { regionData } = await loadRegionData();
@@ -126,6 +127,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // 썸네일 업로드 설정
     setupThumbnailUpload((file) => {
         thumbnailFile = file;
+        console.log('썸네일 파일 선택:', file);
     });
     
     // 폼 제출 이벤트
@@ -160,12 +162,10 @@ async function loadUserData() {
                 return;
             }
             
-            // 작성자 필드 설정 - authorInput이 존재하는지 확인
+            // 작성자 필드 설정
             if (authorInput) {
                 authorInput.value = currentUserData.nickname || currentUserData.email || '익명';
                 console.log('작성자 설정:', authorInput.value);
-            } else {
-                console.error('작성자 입력 필드를 찾을 수 없습니다.');
             }
         }
     } catch (error) {
@@ -206,7 +206,7 @@ async function handleSubmit(e) {
     submitButton.textContent = '등록 중...';
     
     try {
-        // 필수 입력 필드 유효성 검증
+        // ===== 필수 입력 필드 유효성 검증 =====
         
         // 1. 카테고리 확인
         if (!categoryInput.value) {
@@ -224,11 +224,8 @@ async function handleSubmit(e) {
             return;
         }
         
-        // 3. 나머지 필수 필드 검증
+        // 3. 업소명 검증
         const businessNameValue = document.getElementById('business-name')?.value.trim();
-        const phoneValue = document.getElementById('phone')?.value.trim();
-        
-        // 업소명 검증
         if (!businessNameValue || businessNameValue === '') {
             alert('업소명을 입력해주세요.');
             submitButton.disabled = false;
@@ -236,7 +233,8 @@ async function handleSubmit(e) {
             return;
         }
         
-        // 전화번호 검증
+        // 4. 전화번호 검증
+        const phoneValue = document.getElementById('phone')?.value.trim();
         if (!phoneValue || phoneValue === '') {
             alert('전화번호를 입력해주세요.');
             submitButton.disabled = false;
@@ -244,7 +242,7 @@ async function handleSubmit(e) {
             return;
         }
         
-        // 4. 지역 검증
+        // 5. 지역 검증
         if (!regionInput.value || regionInput.value === '') {
             alert('지역을 선택해주세요.');
             submitButton.disabled = false;
@@ -252,7 +250,7 @@ async function handleSubmit(e) {
             return;
         }
         
-        // 5. 도시 검증
+        // 6. 도시 검증
         if (!cityInput.value || cityInput.value === '') {
             alert('도시를 선택해주세요.');
             submitButton.disabled = false;
@@ -260,63 +258,67 @@ async function handleSubmit(e) {
             return;
         }
         
-        // 6. 상세 내용 검증 제거 - 이미지만 있어도 등록 가능
-        const editorContent = quill.root.innerHTML;
+        // ===== 광고 데이터 처리 =====
         
-        // 먼저 Firebase에 광고 데이터 저장하여 ID 생성
+        // 1. 먼저 광고 ID 생성
         const newAdRef = push(ref(rtdb, 'advertisements'));
-        const adId = newAdRef.key;  // 생성된 광고 ID
-        
+        const adId = newAdRef.key;
         console.log('생성된 광고 ID:', adId);
         
-        // 썸네일 업로드 (광고 ID 사용)
-        let thumbnailUrl = null;
-        if (thumbnailFile) {
-            thumbnailUrl = await uploadAdThumbnail(thumbnailFile, adId);
-        }
+        // 2. 썸네일 URL 생성
+        const thumbnailUrl = thumbnailFile 
+            ? generateImageUrl(adId, 'thumbnail', 0, thumbnailFile.name)
+            : '';
         
-        // 에디터 이미지 처리 (광고 ID 사용)
-        const processedImages = await processEditorImages(
-            quill, 
-            previewImages, 
-            async (file) => {
-                // file이 배열이 아닌 단일 파일 객체인지 확인
-                if (file instanceof File) {
-                    return await uploadSingleDetailImage(file, adId);
+        // 3. 에디터 콘텐츠 복사 및 이미지 URL 교체
+        let contentHtml = quill.root.innerHTML;
+        let eventHtml = eventQuill && categoryInput.value === '유흥주점' ? eventQuill.root.innerHTML : '';
+        
+        // 상세 이미지 URL 생성 및 교체
+        const detailFiles = [];
+        const detailImages = quill.root.querySelectorAll('img');
+        let detailIndex = 0;
+        
+        detailImages.forEach((img) => {
+            if (img.src.startsWith('data:')) {
+                const file = previewImages.get(img.src);
+                if (file) {
+                    detailFiles.push(file);
+                    const newUrl = generateImageUrl(adId, 'detail', detailIndex, file.name);
+                    // HTML 문자열에서 직접 교체
+                    contentHtml = contentHtml.replace(img.src, newUrl);
+                    detailIndex++;
                 }
-                console.error('Invalid file type:', file);
-                return null;
-            },
-            adId,
-            'detail'
-        );
+            }
+        });
         
-        // 이벤트 에디터 이미지 처리 (유흥주점 카테고리)
-        let eventInfo = '';  // eventContent가 아니라 eventInfo
-        if (categoryInput.value === '유흥주점' && eventQuill) {
-            // 이벤트 에디터의 이미지만 처리 (별도 배열 필요 없음)
-            await processEditorImages(
-                eventQuill, 
-                previewImages, 
-                async (file) => {
-                    if (file instanceof File) {
-                        return await uploadSingleEventImage(file, adId);
+        // 이벤트 이미지 URL 생성 및 교체
+        const eventFiles = [];
+        let eventIndex = 0;
+        
+        if (eventQuill && categoryInput.value === '유흥주점') {
+            const eventImages = eventQuill.root.querySelectorAll('img');
+            eventImages.forEach((img) => {
+                if (img.src.startsWith('data:')) {
+                    const file = eventPreviewImages.get(img.src);
+                    if (file) {
+                        eventFiles.push(file);
+                        const newUrl = generateImageUrl(adId, 'event', eventIndex, file.name);
+                        // HTML 문자열에서 직접 교체
+                        eventHtml = eventHtml.replace(img.src, newUrl);
+                        eventIndex++;
                     }
-                    return null;
-                },
-                adId,
-                'event'
-            );
-            eventInfo = eventQuill.root.innerHTML;
+                }
+            });
         }
         
-        // 카테고리별 추가 데이터 수집
+        // 4. 카테고리별 추가 데이터 수집
         const categoryData = collectCategoryData(categoryInput.value, eventQuill);
         
-        // 최종 광고 데이터
+        // 5. 광고 데이터 생성 (실제 URL이 포함된 HTML)
         const adData = {
             // 기본 정보
-            adId: adId,  // 광고 ID 추가
+            adId: adId,
             author: authorInput.value,
             authorId: [currentUser.uid],
             category: categoryInput.value,
@@ -332,10 +334,15 @@ async function handleSubmit(e) {
             kakao: document.getElementById('kakao')?.value || '',
             telegram: document.getElementById('telegram')?.value || '',
             
-            // 콘텐츠
-            content: editorContent,
-            eventInfo: eventInfo, 
+            // 콘텐츠 (이미지 URL이 교체된 HTML)
+            content: contentHtml,
+            eventInfo: eventHtml,
+            
+            // 썸네일
             thumbnail: thumbnailUrl,
+            
+            // 업로드 상태
+            uploadStatus: thumbnailFile || detailFiles.length > 0 || eventFiles.length > 0 ? 'uploading' : 'completed',
             
             // 카테고리별 추가 데이터
             ...categoryData,
@@ -349,17 +356,55 @@ async function handleSubmit(e) {
             status: currentUserData.userType === 'administrator' ? 'active' : 'pending'
         };
         
-        // Firebase에 최종 데이터 저장
+        // 6. DB에 저장
         await set(newAdRef, adData);
+        console.log('광고 저장 완료:', adId);
         
-        alert('광고가 성공적으로 등록되었습니다.');
-        
-        // administrator는 광고 관리 페이지로, 일반 업체는 메인으로
-        if (currentUserData.userType === 'administrator') {
-            window.location.href = '/ad-posting/ad-management.html';
-        } else {
-            window.location.href = '/main/main.html';
+        // 7. 백그라운드 업로드 시작
+        if (thumbnailFile || detailFiles.length > 0 || eventFiles.length > 0) {
+            console.log('백그라운드 업로드 시작...');
+            
+            // 비동기로 업로드 시작 (응답 기다리지 않음)
+            startBackgroundUpload(adId, thumbnailFile, detailFiles, eventFiles)
+                .then(result => {
+                    console.log('백그라운드 업로드 완료:', result);
+                    // 업로드 완료 시 상태만 업데이트
+                    update(ref(rtdb, `advertisements/${adId}`), {
+                        uploadStatus: 'completed',
+                        uploadedAt: Date.now()
+                    }).then(() => {
+                        console.log('업로드 상태 업데이트 완료');
+                    }).catch(error => {
+                        console.error('상태 업데이트 실패:', error);
+                    });
+                })
+                .catch(error => {
+                    console.error('백그라운드 업로드 실패:', error);
+                    // 실패 시 플레이스홀더로 되돌리기
+                    update(ref(rtdb, `advertisements/${adId}`), {
+                        uploadStatus: 'failed',
+                        uploadError: error.message,
+                        content: contentHtml.replace(/https:\/\/ik\.imagekit\.io[^"]+/g, '/img/error.png'),
+                        eventInfo: eventHtml.replace(/https:\/\/ik\.imagekit\.io[^"]+/g, '/img/error.png')
+                    }).then(() => {
+                        console.log('실패 상태 업데이트 완료');
+                    }).catch(updateError => {
+                        console.error('실패 상태 업데이트 에러:', updateError);
+                    });
+                });
         }
+        
+        // 8. 즉시 성공 메시지 & 페이지 이동
+        alert('광고가 성공적으로 등록되었습니다!');
+        
+        // 1초 후 페이지 이동 (업로드 시작 시간 확보)
+        setTimeout(() => {
+            if (currentUserData.userType === 'administrator') {
+                window.location.href = '/ad-posting/ad-management.html';
+            } else {
+                window.location.href = '/main/main.html';
+            }
+        }, 1000);
         
     } catch (error) {
         console.error('광고 등록 실패:', error);

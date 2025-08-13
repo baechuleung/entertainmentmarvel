@@ -57,13 +57,14 @@ export {
     collectCategoryData
 } from './category-fields.js';
 
-// 광고 전용 ImageKit 업로드 모듈
+// 광고 전용 ImageKit 업로드 모듈 - 백그라운드 업로드 함수 추가
 export {
-    uploadAdThumbnail,
-    uploadAdDetailImages,
-    uploadAdEventImages,
+    startBackgroundUpload,  // 새로운 백그라운드 업로드 함수
+    uploadAdThumbnail,      // 호환성을 위해 유지 (deprecated)
+    uploadAdDetailImages,   // 호환성을 위해 유지 (deprecated)
+    uploadAdEventImages,    // 호환성을 위해 유지 (deprecated)
     uploadSingleDetailImage,
     uploadSingleEventImage,
     deleteAdImages,
-    deleteAdFolder  // 추가
+    deleteAdFolder
 } from './ad-imagekit-upload.js';

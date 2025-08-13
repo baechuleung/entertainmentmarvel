@@ -50,9 +50,9 @@ function shuffleArray(array) {
 export async function loadAdvertisements() {
     console.log('광고 목록 로드 시작');
     
-    // 캐시 키와 만료 시간 (1시간)
+    // 캐시 키와 만료 시간 (10분)
     const CACHE_KEY = 'business_list_ads';
-    const CACHE_EXPIRY = 1 * 60 * 60 * 1000; // 1시간
+    const CACHE_EXPIRY = 10 * 60 * 1000; // 10분
     
     // 캐시 확인
     try {
