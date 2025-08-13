@@ -1,298 +1,251 @@
-<!-- 파일경로: /tc-calculate/pro-tc.html -->
-<!-- 파일이름: pro-tc.html -->
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>티씨계산기 프로모드 - BAMDA</title>
     
-    <!-- 기본 메타 태그 추가 -->
-    <meta name="description" content="BAMDA 반티완티 프로모드입니다. 언니별 상세한 TC 계산과 관리가 가능한 전문가용 계산기입니다.">
-    <meta name="keywords" content="BAMDA, 밤다, 반티완티, TC계산기, 프로모드, 시간계산">
-    <meta name="author" content="BAMDA Team">
-    
-    <!-- 헤더 프리로드 -->
-    <link rel="preload" href="/header.html" as="fetch" crossorigin>
-    
-    <!-- 헤더 CSS 먼저 로드 -->
-    <link rel="stylesheet" href="/css/header.css">
-    
-    <!-- SEO 태그는 seo-manager.js가 동적으로 삽입 -->
-    <script type="module" src="/js/seo-manager.js"></script>
+    <title>티씨계산기 프로모드 - 유흥마블</title>
+    <meta name="description" content="유흥마블 TC계산기 프로모드입니다. 언니별 상세한 TC 계산과 관리가 가능한 전문가용 계산기입니다.">
+    <meta name="keywords" content="유흥마블, TC계산기, 프로모드, 시간계산, 티씨, 언니관리">
+    <meta name="author" content="유흥마블">
     
     <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="css/pro-tc.css">
     
-    <!-- 전역 설정 스크립트 -->
-    <script src="/js/config.js"></script>
+    <script src="/js/seo.js"></script>
     <!-- 카카오 SDK -->
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" integrity="sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4" crossorigin="anonymous"></script>
 </head>
 <body>
-    <!-- 메인 헤더 포함 -->
-    <div id="header-container"></div>
+    <main>
+        <div class="container">
+            <!-- 모드 선택 탭 -->
+            <div class="mode-tabs">            
+                <button class="mode-tab" onclick="location.href='simple-tc.html'">간편모드</button>
+                <button class="mode-tab active">프로모드⚡</button>
+            </div>
+
+            <!-- 반티완티 안내 박스 -->
+            <div class="intro-box">
+                <h3 class="intro-title">TC 계산기 ⏰</h3>
+                <p class="intro-text">✅ 유흥마블의 TC계산기는 TC계산에 대한 번거로움을 줄이기 위해 만들어진 신개념 서비스입니다! 이제 유흥마블 TC계산기로 쉽고 편리하게 계산해보세요!</p>
+            </div>
+
+            <!-- TC 기준 설정 -->
+            <div class="tc-settings">
+                <div class="setting-row">
+                    <label class="setting-label">완티기준</label>
+                    <div class="setting-controls">
+                        <button class="setting-btn active" data-value="60">60분</button>
+                        <button class="setting-btn" data-value="90">90분</button>
+                    </div>
+                </div>
+                
+                <div class="setting-row">
+                    <label class="setting-label">반티기준<br><span class="sub-label">(직접입력)</span></label>
+                    <div class="setting-controls">
+                        <input type="text" class="setting-input" placeholder="00분 부터" id="halfTcStart">
+                        <span class="separator">~</span>
+                        <input type="text" class="setting-input" placeholder="00분 까지" id="halfTcEnd">
+                    </div>
+                </div>
+                
+                <button class="save-btn" id="saveTcSettings">저장</button>
+            </div>
+
+            <!-- 구분선 -->
+            <div class="divider-bar"></div>
+
+            <!-- 언니리스트 섹션 -->
+            <div class="sister-list-section">
+                <div class="sister-header">
+                    <button class="sister-select-btn" id="sisterSelectBtn">
+                        <span class="select-value" id="selectedSisterText">언니리스트 및 선택</span>
+                        <span class="select-arrow">▼</span>
+                    </button>
+                    <button class="add-sister-btn" id="addSisterBtn">+ 추가</button>
+                    <button class="delete-sister-btn" id="deleteSisterBtn" style="display: none;">삭제</button>
+                </div>
+            </div>
+
+            <!-- 언니 선택 팝업 -->
+            <div class="popup-overlay" id="sisterSelectPopup">
+                <div class="popup-content sister-select-popup">
+                    <div class="popup-header">
+                        <h3>언니 선택</h3>
+                        <button class="popup-close" id="sisterSelectClose">×</button>
+                    </div>
+                    <div class="popup-body">
+                        <div class="search-input-wrapper">
+                            <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M7.333 12.667A5.333 5.333 0 1 0 7.333 2a5.333 5.333 0 0 0 0 10.667zM14 14l-2.9-2.9" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <input type="text" class="search-input" id="sisterSearchInput" placeholder="이름 또는 업체명으로 검색">
+                        </div>
+                        <div class="sister-list-container" id="sisterListContainer">
+                            <!-- 언니 리스트가 여기에 동적으로 추가됩니다 -->
+                        </div>
+                        <div class="no-result-message" id="noResultMessage" style="display: none;">
+                            검색 결과가 없습니다.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 계산 결과 카드 컨테이너 -->
+            <div class="result-cards-container" id="resultCardsContainer">
+                <!-- 결과 카드 (기본적으로 숨김) -->
+                <div class="result-card" id="resultCard" style="display: none;">
+                    <div class="result-items-container" id="resultItemsContainer">
+                        <!-- 결과 아이템들이 여기에 동적으로 추가됩니다 -->
+                    </div>
+                    
+                    <!-- 총 개수 표시 박스 위 구분선 -->
+                    <div class="result-divider"></div>
+                    
+                    <!-- 총 개수 표시 박스 -->
+                    <div class="result-summary-box" id="resultSummaryBox">
+                        <div class="summary-item">
+                            <span class="summary-label">총 완티</span>
+                            <span class="summary-value" id="totalFullTc">0개</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">총 반티</span>
+                            <span class="summary-value" id="totalHalfTc">0개</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">차비</span>
+                            <span class="summary-value" id="totalCar">0개</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">지명</span>
+                            <span class="summary-value" id="totalNomination">0개</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">팅김</span>
+                            <span class="summary-value" id="totalTing">0개</span>
+                        </div>
+                    </div>
+                    
+                    <div class="result-card-buttons">
+                        <button class="card-btn reset-all-btn" id="resetAllBtn">초기화</button>
+                        <button class="card-btn share-all-btn" id="shareAllBtn">공유하기</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 언니 추가 팝업 -->
+            <div class="popup-overlay" id="addSisterPopup">
+                <div class="popup-content">
+                    <div class="popup-header">
+                        <h3>언니 추가</h3>
+                        <button class="popup-close" id="popupClose">×</button>
+                    </div>
+                    <div class="popup-body">
+                        <div class="popup-input-group">
+                            <label>언니이름</label>
+                            <input type="text" class="popup-input" id="sisterName" placeholder="이름(활동명)을 입력해주세요">
+                        </div>
+                        <div class="popup-input-group">
+                            <label>소속업체</label>
+                            <input type="text" class="popup-input" id="sisterCompany" placeholder="소속업체를 입력해주세요">
+                        </div>
+                        <button class="popup-submit" id="submitSister">저장하기</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 시간 계산 섹션 -->
+            <div class="time-calc-section">
+                <div class="time-input-row">
+                    <input type="text" class="store-input" id="storeInfo" placeholder="가게명/방번호">
+                    <div class="custom-time-picker" id="startTimePicker">
+                        <input type="text" class="time-display" id="startTimeDisplay" readonly placeholder="시작 00:00" value="00:00">
+                        <div class="time-picker-dropdown">
+                            <div class="time-picker-header">시작 시간</div>
+                            <div class="time-picker-content">
+                                <div class="time-column">
+                                    <div class="column-header">시</div>
+                                    <div class="time-options hours" id="startHours"></div>
+                                </div>
+                                <div class="time-column">
+                                    <div class="column-header">분</div>
+                                    <div class="time-options minutes" id="startMinutes"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="time-separator">~</span>
+                    <div class="custom-time-picker" id="endTimePicker">
+                        <input type="text" class="time-display" id="endTimeDisplay" readonly placeholder="마감 00:00" value="00:00">
+                        <div class="time-picker-dropdown">
+                            <div class="time-picker-header">마감 시간</div>
+                            <div class="time-picker-content">
+                                <div class="time-column">
+                                    <div class="column-header">시</div>
+                                    <div class="time-options hours" id="endHours"></div>
+                                </div>
+                                <div class="time-column">
+                                    <div class="column-header">분</div>
+                                    <div class="time-options minutes" id="endMinutes"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="calc-btn" id="calculateBtn">계산하기</button>
+            </div>
+        </div>
+
+        <!-- 결과 아이템 템플릿 (숨김) -->
+        <template id="resultItemTemplate">
+            <div class="result-item">
+                <button class="delete-item-btn">×</button>
+                <div class="result-item-details">
+                    <span class="result-item-number">NO.1</span>
+                    <span class="result-divider-text"> | </span>
+                    <span class="result-item-store">가게명</span>
+                    <span class="result-divider-text"> | </span>
+                    <span class="result-item-sister-name">언니이름</span>
+                    <span class="result-divider-text"> | </span>
+                    <span class="result-item-sister-company">소속업체</span>
+                </div>
+                <div class="result-item-date">
+                    <span>2025년 7월 29일 (화) 01:01 - 02:02</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M2.66634 15.9987C2.29967 15.9987 1.98579 15.8681 1.72467 15.607C1.46356 15.3459 1.33301 15.032 1.33301 14.6654C1.33301 14.2987 1.46356 13.9848 1.72467 13.7237C1.98579 13.4626 2.29967 13.332 2.66634 13.332H13.333C13.6997 13.332 14.0136 13.4626 14.2747 13.7237C14.5358 13.9848 14.6663 14.2987 14.6663 14.6654C14.6663 15.032 14.5358 15.3459 14.2747 15.607C14.0136 15.8681 13.6997 15.9987 13.333 15.9987H2.66634ZM3.99967 10.6654H4.93301L10.133 5.48203L9.64967 4.9987L9.18301 4.53203L3.99967 9.73203V10.6654ZM2.66634 11.332V9.4487C2.66634 9.35981 2.68301 9.2737 2.71634 9.19036C2.74967 9.10703 2.79967 9.03203 2.86634 8.96536L10.133 1.71536C10.2552 1.59314 10.3969 1.4987 10.558 1.43203C10.7191 1.36536 10.8886 1.33203 11.0663 1.33203C11.2441 1.33203 11.4163 1.36536 11.583 1.43203C11.7497 1.4987 11.8997 1.5987 12.033 1.73203L12.9497 2.66536C13.083 2.78759 13.1802 2.93203 13.2413 3.0987C13.3025 3.26536 13.333 3.43759 13.333 3.61536C13.333 3.78203 13.3025 3.94592 13.2413 4.10703C13.1802 4.26814 13.083 4.41536 12.9497 4.5487L5.69967 11.7987C5.63301 11.8654 5.55801 11.9154 5.47467 11.9487C5.39134 11.982 5.30523 11.9987 5.21634 11.9987H3.33301C3.14412 11.9987 2.98579 11.9348 2.85801 11.807C2.73023 11.6793 2.66634 11.5209 2.66634 11.332ZM10.133 5.48203L9.64967 4.9987L9.18301 4.53203L10.133 5.48203Z" fill="white"/>
+                    </svg>
+                </div>
+                <div class="result-item-time">총 시간 1시간 1분</div>
+                <div class="result-item-counts">
+                    <div class="result-count">✓ 완티 <input type="number" class="count-input full-tc-input" value="1" min="0">개</div>
+                    <div class="result-count">✓ 반티 <input type="number" class="count-input half-tc-input" value="0" min="0">개</div>
+                </div>
+                <div class="result-item-options">
+                    <label class="option-checkbox">
+                        <input type="checkbox" value="차비">
+                        <div class="checkbox-custom"></div>
+                        <span>차비</span>
+                    </label>
+                    <label class="option-checkbox">
+                        <input type="checkbox" value="지명">
+                        <div class="checkbox-custom"></div>
+                        <span>지명</span>
+                    </label>
+                    <label class="option-checkbox">
+                        <input type="checkbox" value="팅김">
+                        <div class="checkbox-custom"></div>
+                        <span>팅김</span>
+                    </label>
+                </div>
+            </div>
+        </template>
+    </main>
     
-    <div class="container">
-        <!-- 모드 선택 탭 -->
-        <div class="mode-tabs">            
-            <button class="mode-tab" onclick="location.href='simple-tc.html'">간편모드</button>
-            <button class="mode-tab active">프로모드⚡</button>
-        </div>
-
-        <!-- 반티완티 안내 박스 -->
-        <div class="intro-box">
-            <h3 class="intro-title">반티완티 ⏰</h3>
-            <p class="intro-text">✅ 밤다의 반티완티는 TC계산에 대한 번거로움을 줄이기 위해 만들어진 신개념 서비스입니다! 이제 밤다의 반티완티로 쉽고 편리하게 계산해보세요!</p>
-        </div>
-
-        <!-- TC 기준 설정 -->
-        <div class="tc-settings">
-            <div class="setting-row">
-                <label class="setting-label">완티기준</label>
-                <div class="setting-controls">
-                    <button class="setting-btn active" data-value="60">60분</button>
-                    <button class="setting-btn" data-value="90">90분</button>
-                </div>
-            </div>
-            
-            <div class="setting-row">
-                <label class="setting-label">반티기준<br><span class="sub-label">(직접입력)</span></label>
-                <div class="setting-controls">
-                    <input type="text" class="setting-input" placeholder="00분 부터" id="halfTcStart">
-                    <span class="separator">~</span>
-                    <input type="text" class="setting-input" placeholder="00분 까지" id="halfTcEnd">
-                </div>
-            </div>
-            
-            <button class="save-btn" id="saveTcSettings">저장</button>
-        </div>
-
-        <!-- 구분선 -->
-        <div class="divider-bar"></div>
-
-        <!-- 언니리스트 섹션 -->
-        <div class="sister-list-section">
-            <div class="sister-header">
-                <button class="sister-select-btn" id="sisterSelectBtn">
-                    <span class="select-value" id="selectedSisterText">언니리스트 및 선택</span>
-                    <span class="select-arrow">▼</span>
-                </button>
-                <button class="add-sister-btn" id="addSisterBtn">+ 추가</button>
-                <button class="delete-sister-btn" id="deleteSisterBtn" style="display: none;">삭제</button>
-            </div>
-        </div>
-
-        <!-- 언니 선택 팝업 -->
-        <div class="popup-overlay" id="sisterSelectPopup">
-            <div class="popup-content sister-select-popup">
-                <div class="popup-header">
-                    <h3>언니 선택</h3>
-                    <button class="popup-close" id="sisterSelectClose">×</button>
-                </div>
-                <div class="popup-body">
-                    <div class="search-input-wrapper">
-                        <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M7.333 12.667A5.333 5.333 0 1 0 7.333 2a5.333 5.333 0 0 0 0 10.667zM14 14l-2.9-2.9" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <input type="text" class="search-input" id="sisterSearchInput" placeholder="이름 또는 업체명으로 검색">
-                    </div>
-                    <div class="sister-list-container" id="sisterListContainer">
-                        <!-- 언니 리스트가 여기에 동적으로 추가됩니다 -->
-                    </div>
-                    <div class="no-result-message" id="noResultMessage" style="display: none;">
-                        검색 결과가 없습니다.
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 계산 결과 카드 컨테이너 -->
-        <div class="result-cards-container" id="resultCardsContainer">
-            <!-- 결과 카드 (기본적으로 숨김) -->
-            <div class="result-card" id="resultCard" style="display: none;">
-                <div class="result-items-container" id="resultItemsContainer">
-                    <!-- 결과 아이템들이 여기에 동적으로 추가됩니다 -->
-                </div>
-                
-                <!-- 총 개수 표시 박스 위 구분선 -->
-                <div class="result-divider"></div>
-                
-                <!-- 총 개수 표시 박스 -->
-                <div class="result-summary-box" id="resultSummaryBox">
-                    <div class="summary-item">
-                        <span class="summary-label">총 완티</span>
-                        <span class="summary-value" id="totalFullTc">0개</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="summary-label">총 반티</span>
-                        <span class="summary-value" id="totalHalfTc">0개</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="summary-label">차비</span>
-                        <span class="summary-value" id="totalCar">0개</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="summary-label">지명</span>
-                        <span class="summary-value" id="totalNomination">0개</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="summary-label">팅김</span>
-                        <span class="summary-value" id="totalTing">0개</span>
-                    </div>
-                </div>
-                
-                <div class="result-card-buttons">
-                    <button class="card-btn reset-all-btn" id="resetAllBtn">초기화</button>
-                    <button class="card-btn share-all-btn" id="shareAllBtn">공유하기</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 언니 추가 팝업 -->
-        <div class="popup-overlay" id="addSisterPopup">
-            <div class="popup-content">
-                <div class="popup-header">
-                    <h3>언니 추가</h3>
-                    <button class="popup-close" id="popupClose">×</button>
-                </div>
-                <div class="popup-body">
-                    <div class="popup-input-group">
-                        <label>언니이름</label>
-                        <input type="text" class="popup-input" id="sisterName" placeholder="이름(활동명)을 입력해주세요">
-                    </div>
-                    <div class="popup-input-group">
-                        <label>소속업체</label>
-                        <input type="text" class="popup-input" id="sisterCompany" placeholder="소속업체를 입력해주세요">
-                    </div>
-                    <button class="popup-submit" id="submitSister">저장하기</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 시간 계산 섹션 -->
-        <div class="time-calc-section">
-            <div class="time-input-row">
-                <input type="text" class="store-input" id="storeInfo" placeholder="가게명/방번호">
-                <div class="custom-time-picker" id="startTimePicker">
-                    <input type="text" class="time-display" id="startTimeDisplay" readonly placeholder="시작 00:00" value="00:00">
-                    <div class="time-picker-dropdown">
-                        <div class="time-picker-header">시작 시간</div>
-                        <div class="time-picker-content">
-                            <div class="time-column">
-                                <div class="column-header">시</div>
-                                <div class="time-options hours" id="startHours"></div>
-                            </div>
-                            <div class="time-column">
-                                <div class="column-header">분</div>
-                                <div class="time-options minutes" id="startMinutes"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <span class="time-separator">~</span>
-                <div class="custom-time-picker" id="endTimePicker">
-                    <input type="text" class="time-display" id="endTimeDisplay" readonly placeholder="마감 00:00" value="00:00">
-                    <div class="time-picker-dropdown">
-                        <div class="time-picker-header">마감 시간</div>
-                        <div class="time-picker-content">
-                            <div class="time-column">
-                                <div class="column-header">시</div>
-                                <div class="time-options hours" id="endHours"></div>
-                            </div>
-                            <div class="time-column">
-                                <div class="column-header">분</div>
-                                <div class="time-options minutes" id="endMinutes"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <button class="calc-btn" id="calculateBtn">계산하기</button>
-        </div>
-    </div>
-
-    <!-- 결과 아이템 템플릿 (숨김) -->
-    <template id="resultItemTemplate">
-        <div class="result-item">
-            <button class="delete-item-btn">×</button>
-            <div class="result-item-details">
-                <span class="result-item-number">NO.1</span>
-                <span class="result-divider-text"> | </span>
-                <span class="result-item-store">가게명</span>
-                <span class="result-divider-text"> | </span>
-                <span class="result-item-sister-name">언니이름</span>
-                <span class="result-divider-text"> | </span>
-                <span class="result-item-sister-company">소속업체</span>
-            </div>
-            <div class="result-item-date">
-                <span>2025년 7월 29일 (화) 01:01 - 02:02</span>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M2.66634 15.9987C2.29967 15.9987 1.98579 15.8681 1.72467 15.607C1.46356 15.3459 1.33301 15.032 1.33301 14.6654C1.33301 14.2987 1.46356 13.9848 1.72467 13.7237C1.98579 13.4626 2.29967 13.332 2.66634 13.332H13.333C13.6997 13.332 14.0136 13.4626 14.2747 13.7237C14.5358 13.9848 14.6663 14.2987 14.6663 14.6654C14.6663 15.032 14.5358 15.3459 14.2747 15.607C14.0136 15.8681 13.6997 15.9987 13.333 15.9987H2.66634ZM3.99967 10.6654H4.93301L10.133 5.48203L9.64967 4.9987L9.18301 4.53203L3.99967 9.73203V10.6654ZM2.66634 11.332V9.4487C2.66634 9.35981 2.68301 9.2737 2.71634 9.19036C2.74967 9.10703 2.79967 9.03203 2.86634 8.96536L10.133 1.71536C10.2552 1.59314 10.3969 1.4987 10.558 1.43203C10.7191 1.36536 10.8886 1.33203 11.0663 1.33203C11.2441 1.33203 11.4163 1.36536 11.583 1.43203C11.7497 1.4987 11.8997 1.5987 12.033 1.73203L12.9497 2.66536C13.083 2.78759 13.1802 2.93203 13.2413 3.0987C13.3025 3.26536 13.333 3.43759 13.333 3.61536C13.333 3.78203 13.3025 3.94592 13.2413 4.10703C13.1802 4.26814 13.083 4.41536 12.9497 4.5487L5.69967 11.7987C5.63301 11.8654 5.55801 11.9154 5.47467 11.9487C5.39134 11.982 5.30523 11.9987 5.21634 11.9987H3.33301C3.14412 11.9987 2.98579 11.9348 2.85801 11.807C2.73023 11.6793 2.66634 11.5209 2.66634 11.332ZM10.133 5.48203L9.64967 4.9987L9.18301 4.53203L10.133 5.48203Z" fill="white"/>
-                </svg>
-            </div>
-            <div class="result-item-time">총 시간 1시간 1분</div>
-            <div class="result-item-counts">
-                <div class="result-count">✓ 완티 <input type="number" class="count-input full-tc-input" value="1" min="0">개</div>
-                <div class="result-count">✓ 반티 <input type="number" class="count-input half-tc-input" value="0" min="0">개</div>
-            </div>
-            <div class="result-item-options">
-                <label class="option-checkbox">
-                    <input type="checkbox" value="차비">
-                    <div class="checkbox-custom"></div>
-                    <span>차비</span>
-                </label>
-                <label class="option-checkbox">
-                    <input type="checkbox" value="지명">
-                    <div class="checkbox-custom"></div>
-                    <span>지명</span>
-                </label>
-                <label class="option-checkbox">
-                    <input type="checkbox" value="팅김">
-                    <div class="checkbox-custom"></div>
-                    <span>팅김</span>
-                </label>
-            </div>
-        </div>
-    </template>
-
-    <!-- Footer 포함 -->
-    <div id="footer-container"></div>
-
+    <script src="/js/header.js"></script>
     <script type="module" src="/js/firebase-config.js"></script>
-    <script type="module" src="js/pro-tc.js"></script>
+    <script type="module" src="/tc-calculate/js/pro-tc.js"></script>
     <script src="/js/footer.js"></script>
-    <script>
-        // 메인 헤더 로드 후 페이지 타이틀 설정
-        loadHeader('header-container');
-        
-        // 페이지 타이틀 설정을 위한 전역 변수
-        window.pageTitle = '반티완티';
-        
-        // DOM 로드 후 페이지 타이틀 추가
-        document.addEventListener('DOMContentLoaded', function() {
-            // header.js가 로드되기를 기다림
-            const checkInterval = setInterval(function() {
-                const backButton = document.querySelector('.back-button');
-                const hamburgerMenu = document.querySelector('.hamburger-menu');
-                
-                if (backButton && hamburgerMenu && !document.querySelector('.page-title')) {
-                    // 페이지 타이틀 요소 생성
-                    const pageTitle = document.createElement('h1');
-                    pageTitle.className = 'page-title';
-                    pageTitle.textContent = window.pageTitle || 'Pro TC';
-                    
-                    // 뒤로가기 버튼과 햄버거 메뉴 사이에 삽입
-                    backButton.parentNode.insertBefore(pageTitle, hamburgerMenu);
-                    
-                    clearInterval(checkInterval);
-                }
-            }, 100);
-            
-            // 5초 후에는 체크 중지
-            setTimeout(() => clearInterval(checkInterval), 5000);
-        });
-    </script>
 </body>
 </html>

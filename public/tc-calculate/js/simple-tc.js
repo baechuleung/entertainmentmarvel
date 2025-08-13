@@ -5,26 +5,26 @@
 import { auth } from '/js/firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-// 공통 모듈 import
+// 공통 모듈 import - 모두 절대 경로로 변경
 import { 
     setCurrentUser, 
     currentUser, 
     generateId, 
     formatDate,
     resetToDefaults
-} from './tc-common.js';
-import { initializeTcSettings, loadTcSettings } from './tc-settings.js';
-import { initializeTimePickers } from './time-picker.js';
-import { calculateTimeDifference, calculateTC, validateTime } from './tc-calculator.js';
+} from '/tc-calculate/js/tc-common.js';
+import { initializeTcSettings, loadTcSettings } from '/tc-calculate/js/tc-settings.js';
+import { initializeTimePickers } from '/tc-calculate/js/time-picker.js';
+import { calculateTimeDifference, calculateTC, validateTime } from '/tc-calculate/js/tc-calculator.js';
 import { 
     createResultItem, 
     saveResultsToFirestore, 
     loadResultsFromFirestore,
     renumberResults,
     getMaxResultNumber
-} from './result-manager.js';
-import { captureAndShare, showShareModalWithText } from './share-manager.js';
-import { createTimeEditModal } from './time-edit-modal.js';
+} from '/tc-calculate/js/result-manager.js';
+import { captureAndShare, showShareModalWithText } from '/tc-calculate/js/share-manager.js';
+import { createTimeEditModal } from '/tc-calculate/js/time-edit-modal.js';
 
 // Simple 모드 전용 전역 변수
 let simpleResultsList = [];

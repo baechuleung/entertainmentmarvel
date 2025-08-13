@@ -6,25 +6,25 @@ import { auth, db } from '/js/firebase-config.js';
 import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-// 공통 모듈 import
+// 공통 모듈 import - 모두 절대 경로로 변경
 import { 
     setCurrentUser, 
     currentUser, 
     generateId, 
     formatDate 
-} from './tc-common.js';
-import { initializeTcSettings, loadTcSettings } from './tc-settings.js';
-import { initializeTimePickers, resetTimePicker } from './time-picker.js';
-import { calculateTimeDifference, calculateTC, validateTimeProMode } from './tc-calculator.js';
+} from '/tc-calculate/js/tc-common.js';
+import { initializeTcSettings, loadTcSettings } from '/tc-calculate/js/tc-settings.js';
+import { initializeTimePickers, resetTimePicker } from '/tc-calculate/js/time-picker.js';
+import { calculateTimeDifference, calculateTC, validateTimeProMode } from '/tc-calculate/js/tc-calculator.js';
 import { 
     createResultItem, 
     saveResultsToFirestore, 
     loadResultsFromFirestore,
     renumberResults,
     getMaxResultNumber
-} from './result-manager.js';
-import { captureAndShare } from './share-manager.js';
-import { createTimeEditModal, initializeEditTimePickers } from './time-edit-modal.js';
+} from '/tc-calculate/js/result-manager.js';
+import { captureAndShare } from '/tc-calculate/js/share-manager.js';
+import { createTimeEditModal, initializeEditTimePickers } from '/tc-calculate/js/time-edit-modal.js';
 
 // Pro 모드 전용 전역 변수
 let sisterList = {};

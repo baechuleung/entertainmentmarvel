@@ -3,7 +3,7 @@
 
 import { db } from '/js/firebase-config.js';
 import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { currentUser, setTcSettings, resetToDefaults } from './tc-common.js';
+import { currentUser, setTcSettings, resetToDefaults } from '/tc-calculate/js/tc-common.js';
 
 // TC 설정 초기화
 export function initializeTcSettings() {

@@ -1,7 +1,7 @@
 // 파일경로: /tc-calculate/js/tc-calculator.js
 // 파일이름: tc-calculator.js
 
-import { getTcSettings } from './tc-common.js';
+import { getTcSettings } from '/tc-calculate/js/tc-common.js';
 
 // 시간 차이 계산
 export function calculateTimeDifference(startTime, endTime) {

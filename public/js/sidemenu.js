@@ -293,6 +293,7 @@ const SideMenu = {
         const pageMap = {
             '홈으로 가기': '/',
             '광고 관리': '/ad-posting/ad-management.html',
+            'TC 계산기': '/tc-calculate/simple-tc.html',
             '관리자 모드': '/admin/index.html',  // 관리자 모드 추가
             '1:1 고객센터': 'https://open.kakao.com/o/skhPJeLh',
             'FAQ': '/faq/faq.html',

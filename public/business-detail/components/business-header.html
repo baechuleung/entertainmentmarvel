@@ -2,40 +2,40 @@
     <div class="business-item" data-id="{{id}}">
         <img id="business-thumbnail" style="display: none;" alt="업체 이미지">
         <div class="business-info">
-            <!-- 업체명 -->
+            <!-- 업체명과 업종을 하나의 div에 -->
             <div class="ad-title" id="business-name"></div>
             
-            <!-- 업종 -->
-            <div class="ad-type" id="business-type"></div>
-            
-            <!-- 위치 -->
-            <div class="ad-location" style="display: none;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#ff4757"/>
-                </svg>
-                <span id="business-location"></span>
-            </div>
-            
-            <!-- 통계 정보 -->
-            <div class="business-stats">
-                <div class="stat-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
+            <!-- 위치와 통계를 같은 줄에 -->
+            <div class="ad-location-stats">
+                <!-- 위치 (왼쪽) -->
+                <div class="ad-location" style="display: none;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#ff4757"/>
                     </svg>
-                    <span id="view-count">0</span>
+                    <span id="business-location"></span>
                 </div>
-                <div class="stat-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                    <span id="review-count">0</span>
-                </div>
-                <div class="stat-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                    <span id="bookmark-count">0</span>
+                
+                <!-- 통계 정보 (오른쪽) -->
+                <div class="business-stats">
+                    <div class="stat-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <span id="view-count">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span id="review-count">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                        <span id="bookmark-count">0</span>
+                    </div>
                 </div>
             </div>
         </div>

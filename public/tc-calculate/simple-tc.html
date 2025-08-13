@@ -2,123 +2,110 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>티씨계산기 간편모드</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- 기본 메타 태그 추가 -->
-    <meta name="description" content="BAMDA 반티완티 간편모드입니다. 빠르고 쉽게 TC를 계산할 수 있는 초보자용 계산기입니다.">
-    <meta name="keywords" content="BAMDA, 밤다, 반티완티, TC계산기, 간편모드, 시간계산">
-    <meta name="author" content="BAMDA Team">
-    
-    <!-- 헤더 프리로드 -->
-    <link rel="preload" href="/header.html" as="fetch" crossorigin>
-    
-    <!-- 헤더 CSS 먼저 로드 -->
-    <link rel="stylesheet" href="/css/header.css">
-    
-    <!-- SEO 태그는 seo-manager.js가 동적으로 삽입 -->
-    <script type="module" src="/js/seo-manager.js"></script>
+    <title>티씨계산기 간편모드 - 유흥마블</title>
+    <meta name="description" content="유흥마블 TC계산기 간편모드입니다. 빠르고 쉽게 TC를 계산할 수 있는 초보자용 계산기입니다.">
+    <meta name="keywords" content="유흥마블, TC계산기, 간편모드, 시간계산, 티씨">
+    <meta name="author" content="유흥마블">
     
     <link rel="stylesheet" href="/css/common.css">
-    <link rel="stylesheet" href="css/pro-tc.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="css/simple-tc.css">
     
-    <!-- 전역 설정 스크립트 -->
-    <script src="/js/config.js"></script>
+    <script src="/js/seo.js"></script>
 </head>
 <body>
-    <!-- 메인 헤더 포함 -->
-    <div id="header-container"></div>
+    <main>
+        <div class="container">
+            <!-- 모드 선택 탭 -->
+            <div class="mode-tabs">
+                <button class="mode-tab active">간편모드</button>
+                <button class="mode-tab" onclick="location.href='pro-tc.html'">Pro 모드⚡</button>
+            </div>
+
+            <!-- 반티완티 안내 박스 -->
+            <div class="intro-box">
+                <h3 class="intro-title">TC 계산기 ⏰</h3>
+                <p class="intro-text">✅ 유흥마블의 TC계산기는 TC계산에 대한 번거로움을 줄이기 위해 만들어진 신개념 서비스입니다! 이제 유흥마블 TC계산기로 쉽고 편리하게 계산해보세요!</p>
+            </div>
+
+            <!-- TC 기준 설정 -->
+            <div class="tc-settings">
+                <div class="setting-row">
+                    <label class="setting-label">완티기준</label>
+                    <div class="setting-controls">
+                        <button class="setting-btn active" data-value="60">60분</button>
+                        <button class="setting-btn" data-value="90">90분</button>
+                    </div>
+                </div>
+                
+                <div class="setting-row">
+                    <label class="setting-label">반티기준<br><span class="sub-label">(직접입력)</span></label>
+                    <div class="setting-controls">
+                        <input type="text" class="setting-input" placeholder="00분 부터" id="halfTcStart">
+                        <span class="separator">~</span>
+                        <input type="text" class="setting-input" placeholder="00분 까지" id="halfTcEnd">
+                    </div>
+                </div>
+                
+                <button class="save-btn" id="saveTcSettings">저장</button>
+            </div>
+
+            <!-- 구분선 -->
+            <div class="divider-bar"></div>
+
+            <!-- 계산 결과 카드 컨테이너 -->
+            <div class="result-cards-container" id="resultCardsContainer">
+                <!-- 결과 카드들이 여기에 동적으로 추가됩니다 -->
+            </div>
+
+            <!-- 시간 계산 섹션 -->
+            <div class="time-calc-section">
+                <div class="time-input-row">
+                    <input type="text" class="store-input" id="storeInfo" placeholder="가게명/방번호">
+                    <div class="custom-time-picker" id="startTimePicker">
+                        <input type="text" class="time-display" id="startTimeDisplay" readonly placeholder="시작 00:00" value="00:00">
+                        <div class="time-picker-dropdown">
+                            <div class="time-picker-header">시작 시간</div>
+                            <div class="time-picker-content">
+                                <div class="time-column">
+                                    <div class="column-header">시</div>
+                                    <div class="time-options hours" id="startHours"></div>
+                                </div>
+                                <div class="time-column">
+                                    <div class="column-header">분</div>
+                                    <div class="time-options minutes" id="startMinutes"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="time-separator">~</span>
+                    <div class="custom-time-picker" id="endTimePicker">
+                        <input type="text" class="time-display" id="endTimeDisplay" readonly placeholder="마감 00:00" value="00:00">
+                        <div class="time-picker-dropdown">
+                            <div class="time-picker-header">마감 시간</div>
+                            <div class="time-picker-content">
+                                <div class="time-column">
+                                    <div class="column-header">시</div>
+                                    <div class="time-options hours" id="endHours"></div>
+                                </div>
+                                <div class="time-column">
+                                    <div class="column-header">분</div>
+                                    <div class="time-options minutes" id="endMinutes"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="calc-btn" id="calculateBtn">계산하기</button>
+            </div>
+        </div>
+    </main>
     
-    <div class="container">
-        <!-- 모드 선택 탭 -->
-        <div class="mode-tabs">
-            <button class="mode-tab active">간편모드</button>
-            <button class="mode-tab" onclick="location.href='pro-tc.html'">Pro 모드⚡</button>
-        </div>
-
-        <!-- 반티완티 안내 박스 -->
-        <div class="intro-box">
-            <h3 class="intro-title">반티완티 ⏰</h3>
-            <p class="intro-text">✅ 밤다의 반티완티는 TC계산에 대한 번거로움을 줄이기 위해 만들어진 신개념 서비스입니다! 이제 밤다의 반티완티로 쉽고 편리하게 계산해보세요!</p>
-        </div>
-
-        <!-- TC 기준 설정 -->
-        <div class="tc-settings">
-            <div class="setting-row">
-                <label class="setting-label">완티기준</label>
-                <div class="setting-controls">
-                    <button class="setting-btn active" data-value="60">60분</button>
-                    <button class="setting-btn" data-value="90">90분</button>
-                </div>
-            </div>
-            
-            <div class="setting-row">
-                <label class="setting-label">반티기준<br><span class="sub-label">(직접입력)</span></label>
-                <div class="setting-controls">
-                    <input type="text" class="setting-input" placeholder="00분 부터" id="halfTcStart">
-                    <span class="separator">~</span>
-                    <input type="text" class="setting-input" placeholder="00분 까지" id="halfTcEnd">
-                </div>
-            </div>
-            
-            <button class="save-btn" id="saveTcSettings">저장</button>
-        </div>
-
-        <!-- 구분선 -->
-        <div class="divider-bar"></div>
-
-        <!-- 계산 결과 카드 컨테이너 -->
-        <div class="result-cards-container" id="resultCardsContainer">
-            <!-- 결과 카드들이 여기에 동적으로 추가됩니다 -->
-        </div>
-
-        <!-- 시간 계산 섹션 -->
-        <div class="time-calc-section">
-            <div class="time-input-row">
-                <input type="text" class="store-input" id="storeInfo" placeholder="가게명/방번호">
-                <div class="custom-time-picker" id="startTimePicker">
-                    <input type="text" class="time-display" id="startTimeDisplay" readonly placeholder="시작 00:00" value="00:00">
-                    <div class="time-picker-dropdown">
-                        <div class="time-picker-header">시작 시간</div>
-                        <div class="time-picker-content">
-                            <div class="time-column">
-                                <div class="column-header">시</div>
-                                <div class="time-options hours" id="startHours"></div>
-                            </div>
-                            <div class="time-column">
-                                <div class="column-header">분</div>
-                                <div class="time-options minutes" id="startMinutes"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <span class="time-separator">~</span>
-                <div class="custom-time-picker" id="endTimePicker">
-                    <input type="text" class="time-display" id="endTimeDisplay" readonly placeholder="마감 00:00" value="00:00">
-                    <div class="time-picker-dropdown">
-                        <div class="time-picker-header">마감 시간</div>
-                        <div class="time-picker-content">
-                            <div class="time-column">
-                                <div class="column-header">시</div>
-                                <div class="time-options hours" id="endHours"></div>
-                            </div>
-                            <div class="time-column">
-                                <div class="column-header">분</div>
-                                <div class="time-options minutes" id="endMinutes"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <button class="calc-btn" id="calculateBtn">계산하기</button>
-        </div>
-    </div>
-
-    <!-- Footer 포함 -->
-    <div id="footer-container"></div>
     <script src="/js/header.js"></script>
     <script type="module" src="/js/firebase-config.js"></script>
-    <script type="module" src="js/simple-tc.js"></script>
+    <script type="module" src="/tc-calculate/js/simple-tc.js"></script>
     <script src="/js/footer.js"></script>
 </body>
 </html>

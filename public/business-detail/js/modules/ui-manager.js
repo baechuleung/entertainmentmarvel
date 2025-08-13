@@ -23,14 +23,41 @@ export function setBusinessHeader(data) {
     
     // businessName과 author를 조합 (건전마사지는 author 제외)
     if (businessName) {
+        let fullName = '';
+        
+        // 업종이 있으면 맨 앞에 추가
+        if (data.businessType) {
+            fullName = `[${data.businessType}] `;
+        }
+        
+        // 업체명과 작성자 추가
         if (data.category === '건전마사지') {
-            businessName.textContent = data.businessName || '';
+            fullName += data.businessName || '';
         } else {
-            businessName.textContent = `${data.businessName || ''} - ${data.author || ''}`;
+            fullName += `${data.businessName || ''} - ${data.author || ''}`;
+        }
+        
+        // 텍스트 길이 제한 (대략 70자 정도로 제한하여 3줄 이내로 유지)
+        if (fullName.length > 70) {
+            fullName = fullName.substring(0, 67) + '...';
+        }
+        
+        businessName.textContent = fullName;
+    }
+    
+    // businessType는 이제 사용하지 않음 (제목에 포함됨)
+    
+    // 위치 정보 설정 및 표시
+    if (businessLocation) {
+        businessLocation.textContent = `${data.region || ''} ${data.city || ''}`;
+        // 위치 정보가 있으면 부모 요소 표시
+        if (data.region || data.city) {
+            const locationContainer = businessLocation.closest('.ad-location');
+            if (locationContainer) {
+                locationContainer.style.display = 'flex';
+            }
         }
     }
-    if (businessType) businessType.textContent = `${data.businessType || ''}`;
-    if (businessLocation) businessLocation.textContent = `${data.region || ''} ${data.city || ''}`;
     
     // 통계 정보 표시
     if (viewCount) viewCount.textContent = data.views || 0;
