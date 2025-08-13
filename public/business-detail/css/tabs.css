@@ -60,3 +60,13 @@
     border-radius: 8px;
     margin: 15px 0;
 }
+
+/* ===== 면책 조항 (눈에 덜 띄게 스타일링) ===== */
+.site-disclaimer {
+    padding: 8px 15px;
+    text-align: center;
+    font-size: 10px;
+    color: #989898;
+    opacity: 0.6;
+    letter-spacing: -0.5px;
+}

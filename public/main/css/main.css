@@ -1,3 +1,5 @@
+/* /main/css/main.css */
+
 /* 업종 목록 섹션 */
 .business-list-section {
     background-color: #131217;
@@ -31,7 +33,7 @@
     height: 100px;
     object-fit: cover;
     flex-shrink: 0;
-    border-radius: 10px;  /* 라운드 10px */
+    border-radius: 10px;
 }
 
 .business-info {
@@ -49,7 +51,7 @@
     margin-bottom: 10px;
     display: -webkit-box;
     -webkit-line-clamp: 3;
-    line-clamp: 3;  /* 표준 속성 추가 */
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -57,18 +59,27 @@
 }
 
 .ad-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-size: 13px;
     color: #999;
     margin-top: 8px;
 }
 
-.ad-type-author {
+.ad-type {
     color: #999;
     font-size: 13px;
 }
 
 .ad-location {
     color: #999;
+    font-size: 13px;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    justify-content: flex-end;
 }
 
 /* 버튼 영역 */
@@ -79,7 +90,7 @@
 }
 
 .btn-detail, .btn-review {
-    flex: 1;  /* 버튼을 균등하게 배분 */
+    flex: 1;
     padding: 8px 0;
     border: 1px solid #333;
     background-color: #2a2a2a;
@@ -144,4 +155,11 @@
     padding: 60px 20px;
     color: #999;
     font-size: 16px;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 450px) {
+    .ad-title {
+        font-size: 14px;
+    }
 }

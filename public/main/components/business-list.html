@@ -1,10 +1,17 @@
+<!-- /main/components/business-list.html -->
 <div class="business-item" data-id="{{id}}">
     <img src="{{thumbnail}}" alt="{{businessName}}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 150 100&quot;><rect fill=&quot;%23ddd&quot; width=&quot;150&quot; height=&quot;100&quot;/><text x=&quot;50%&quot; y=&quot;50%&quot; text-anchor=&quot;middle&quot; dy=&quot;.3em&quot; fill=&quot;%23999&quot; font-size=&quot;14&quot;>No Image</text></svg>'">
     <div class="business-info">
         <div>
-            <div class="ad-title">{{businessName}} - {{author}}</div>
+            <div class="ad-title">{{businessName}}</div>
             <div class="ad-meta">
-                <span class="ad-type-author">{{businessType}} - {{region}} {{city}}</span>
+                <div class="ad-type">{{businessType}}</div>
+                <div class="ad-location">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#ff4757"/>
+                    </svg>
+                    <span>{{region}} {{city}}</span>
+                </div>
             </div>
         </div>
         <div class="business-buttons">
