@@ -25,7 +25,9 @@ import {
     collectCategoryData,
     // 백그라운드 업로드 함수
     startBackgroundUpload,
-    uploadSingleDetailImage
+    uploadSingleDetailImage,
+    // 이미지 삭제 함수 추가 ★★★
+    deleteAdImages
 } from './modules/index.js';
 
 // 전역 변수
@@ -47,6 +49,70 @@ const regionInput = document.getElementById('region');
 const cityInput = document.getElementById('city');
 const businessTypeInput = document.getElementById('business-type');
 const contentInput = document.getElementById('content');
+
+// ★★★ 썸네일 삭제 함수 추가 ★★★
+async function deleteThumbnailFromImageKit() {
+    if (!existingThumbnail || !existingThumbnail.includes('ik.imagekit.io')) {
+        console.log('삭제할 썸네일이 없거나 ImageKit URL이 아닙니다.');
+        existingThumbnail = null;
+        return;
+    }
+    
+    const deleteThumbnailBtn = document.getElementById('delete-thumbnail');
+    
+    try {
+        // 버튼 비활성화
+        if (deleteThumbnailBtn) {
+            deleteThumbnailBtn.disabled = true;
+            deleteThumbnailBtn.textContent = '삭제 중...';
+        }
+        
+        console.log('썸네일 삭제 시작:', existingThumbnail);
+        
+        // deleteAdImages 함수 사용하여 ImageKit에서 삭제
+        const deleteResult = await deleteAdImages(
+            [existingThumbnail],  // 배열로 전달
+            currentUser.uid
+        );
+        
+        if (deleteResult && deleteResult.summary) {
+            console.log(`썸네일 삭제 성공: ${deleteResult.summary.deleted}개 삭제`);
+            
+            // 성공 시 existingThumbnail 초기화
+            existingThumbnail = null;
+            
+            console.log('썸네일이 성공적으로 삭제되었습니다.');
+        } else {
+            console.warn('썸네일 삭제 결과를 확인할 수 없습니다.');
+            // 그래도 UI상에서는 삭제 처리
+            existingThumbnail = null;
+        }
+        
+    } catch (error) {
+        console.error('썸네일 삭제 실패:', error);
+        alert('썸네일 삭제에 실패했습니다. 다시 시도해주세요.');
+        
+        // 실패 시 UI 복구
+        const thumbnailImage = document.getElementById('thumbnail-image');
+        const thumbnailPreview = document.getElementById('thumbnail-preview');
+        const thumbnailUploadBtn = document.getElementById('thumbnail-upload-btn');
+        
+        if (existingThumbnail) {
+            showThumbnailFromUrl(
+                existingThumbnail,
+                thumbnailImage,
+                thumbnailPreview,
+                thumbnailUploadBtn
+            );
+        }
+    } finally {
+        // 버튼 복구
+        if (deleteThumbnailBtn) {
+            deleteThumbnailBtn.disabled = false;
+            deleteThumbnailBtn.textContent = '×';
+        }
+    }
+}
 
 // 초기화
 document.addEventListener('DOMContentLoaded', async function() {
@@ -123,10 +189,22 @@ document.addEventListener('DOMContentLoaded', async function() {
     // 커스텀 셀렉트 초기화
     setupCustomSelects();
     
-    // 썸네일 업로드 설정
+    // ★★★ 썸네일 업로드 설정 - 삭제 기능 추가 ★★★
     setupThumbnailUpload((file) => {
-        thumbnailFile = file;
-        existingThumbnail = null; // 새 파일 선택 시 기존 썸네일 무효화
+        if (file === null) {
+            // X 버튼 클릭 시 - 썸네일 삭제
+            console.log('썸네일 삭제 요청');
+            thumbnailFile = null;
+            if (existingThumbnail) {
+                // ImageKit에서 삭제
+                deleteThumbnailFromImageKit();
+            }
+        } else {
+            // 새 썸네일 선택
+            console.log('새 썸네일 선택:', file.name);
+            thumbnailFile = file;
+            existingThumbnail = null; // 새 파일 선택 시 기존 썸네일 무효화
+        }
     });
     
     // 폼 제출 이벤트
@@ -302,7 +380,7 @@ async function fillFormData() {
     }
     
     // 썸네일
-    if (currentAd.thumbnail) {
+    if (currentAd.thumbnail && !currentAd.thumbnail.includes('THUMBNAIL_')) {
         existingThumbnail = currentAd.thumbnail;
         const thumbnailImage = document.getElementById('thumbnail-image');
         const thumbnailPreview = document.getElementById('thumbnail-preview');
@@ -513,6 +591,25 @@ async function handleSubmit(e) {
         console.log('Content HTML (처음 200자):', contentHtml.substring(0, 200));
         console.log('Event Text:', eventText);
         console.log('상세 이미지 파일 수:', detailFiles.length);
+        console.log('썸네일 파일:', thumbnailFile ? '있음' : '없음');
+        console.log('기존 썸네일:', existingThumbnail || '없음');
+        
+        // ★★★ 썸네일 처리 - 수정된 부분 ★★★
+        let finalThumbnailUrl = '';
+        
+        if (thumbnailFile) {
+            // 새 썸네일 업로드 필요
+            console.log('새 썸네일 업로드 필요');
+            finalThumbnailUrl = ''; // 백그라운드 업로드에서 처리
+        } else if (existingThumbnail) {
+            // 기존 썸네일 유지
+            console.log('기존 썸네일 유지:', existingThumbnail);
+            finalThumbnailUrl = existingThumbnail;
+        } else {
+            // 썸네일이 삭제됨 (X 버튼 눌러서 삭제한 경우)
+            console.log('썸네일이 삭제되었습니다.');
+            finalThumbnailUrl = '';  // 빈 문자열로 설정
+        }
         
         // 카테고리별 추가 데이터 수집
         const categoryData = collectCategoryData(categoryInput.value);
@@ -541,8 +638,8 @@ async function handleSubmit(e) {
             content: contentHtml,
             eventInfo: eventText || currentAd.eventInfo || '',  // 기존 값 유지
             
-            // 썸네일 (변경되지 않았으면 기존 값 유지)
-            thumbnail: existingThumbnail || currentAd.thumbnail || '',
+            // ★★★ 썸네일 - 삭제된 경우 빈 문자열 ★★★
+            thumbnail: finalThumbnailUrl,
             
             // 업로드 상태
             uploadStatus: (thumbnailFile || detailFiles.length > 0) ? 'uploading' : currentAd.uploadStatus || 'completed',
@@ -554,7 +651,7 @@ async function handleSubmit(e) {
             updatedAt: Date.now(),
             
             // 명시적으로 유지해야 할 필드들
-            adId: adId,
+            adId: currentAd.adId || adId,
             authorId: currentAd.authorId,
             createdAt: currentAd.createdAt,
             views: currentAd.views || 0,
@@ -571,6 +668,7 @@ async function handleSubmit(e) {
         // Firebase 업데이트 - update 함수 사용 (merge)
         await update(ref(rtdb, `advertisements/${adId}`), updatedData);
         console.log('광고 업데이트 완료:', adId);
+        console.log('썸네일 URL:', updatedData.thumbnail || '삭제됨');
         
         // 이미지 업로드 API 호출
         if (thumbnailFile || detailFiles.length > 0) {
@@ -578,7 +676,7 @@ async function handleSubmit(e) {
             
             // startBackgroundUpload 호출 - await 없이 백그라운드에서 실행
             startBackgroundUpload(
-                adId, 
+                currentAd.adId || adId, 
                 thumbnailFile, 
                 detailFiles, 
                 [] // eventFiles는 이제 없음
