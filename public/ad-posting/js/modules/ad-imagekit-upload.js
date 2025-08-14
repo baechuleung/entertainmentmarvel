@@ -116,7 +116,7 @@ export async function startBackgroundUpload(adId, thumbnailFile, detailFiles, ev
 
         // 요청 크기 체크 (10MB 제한)
         const requestSize = JSON.stringify(requestData).length;
-        const MAX_SIZE = 9 * 1024 * 1024; // 9MB로 안전하게 설정 (Base64 오버헤드 고려)
+        const MAX_SIZE = 20 * 1024 * 1024; // 9MB로 안전하게 설정 (Base64 오버헤드 고려)
         
         if (requestSize > MAX_SIZE) {
             console.log(`요청 크기(${requestSize} bytes)가 제한(${MAX_SIZE} bytes)을 초과하여 분할 업로드합니다.`);

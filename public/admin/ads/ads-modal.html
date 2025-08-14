@@ -1,0 +1,189 @@
+<!-- admin/ads/ads-modal.html - 광고 수정 모달 -->
+<div class="modal" id="ad-detail-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>광고 상세 관리</h2>
+            <button class="modal-close" id="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="modal-edit-form" class="ad-edit-form">
+                <!-- 1. 기본정보 섹션 -->
+                <div class="form-section">
+                    <h2 class="section-title">1. 기본정보</h2>
+                    
+                    <input type="hidden" id="modal-ad-id">
+                    
+                    <div class="form-group">
+                        <label for="modal-author">작성자</label>
+                        <input type="text" id="modal-author" name="author" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>카테고리 *</label>
+                        <div class="category-buttons" id="modal-category-buttons"></div>
+                        <input type="hidden" id="modal-category" name="category" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modal-business-type">업종 *</label>
+                        <div class="custom-select" id="business-type-wrapper">
+                            <div class="select-selected" data-value="">먼저 카테고리를 선택하세요</div>
+                            <div class="select-items select-hide" id="business-type-options"></div>
+                        </div>
+                        <input type="hidden" id="modal-business-type" name="business-type" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modal-business-name">업소명 *</label>
+                        <input type="text" id="modal-business-name" name="business-name" placeholder="예) 도파민 제니상무" maxlength="15" required>
+                    </div>
+                    
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="modal-region">지역 *</label>
+                            <div class="custom-select" id="region-wrapper">
+                                <div class="select-selected" data-value="">지역 선택</div>
+                                <div class="select-items select-hide" id="region-options"></div>
+                            </div>
+                            <input type="hidden" id="modal-region" name="region" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="modal-city">도시 *</label>
+                            <div class="custom-select" id="city-wrapper">
+                                <div class="select-selected" data-value="">먼저 지역을 선택하세요</div>
+                                <div class="select-items select-hide" id="city-options"></div>
+                            </div>
+                            <input type="hidden" id="modal-city" name="city" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 2. 연락처 정보 섹션 -->
+                <div class="form-section">
+                    <h2 class="section-title">2. 연락처 정보</h2>
+                    
+                    <div class="form-group">
+                        <label for="modal-phone">전화번호 *</label>
+                        <input type="text" id="modal-phone" name="phone" placeholder="예) 010-1234-5678" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modal-kakao">카카오톡 ID</label>
+                        <input type="text" id="modal-kakao" name="kakao" placeholder="카카오톡 ID">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modal-telegram">텔레그램 ID</label>
+                        <input type="text" id="modal-telegram" name="telegram" placeholder="텔레그램 ID">
+                    </div>
+                </div>
+                
+                <!-- 3. 광고 내용 섹션 -->
+                <div class="form-section">
+                    <h2 class="section-title">3. 광고 내용</h2>
+                    
+                    <!-- 카테고리별 추가 필드 (유흥주점) -->
+                    <div class="karaoke-field" style="display: none;">
+                        <div class="form-group">
+                            <label for="modal-business-hours">영업시간</label>
+                            <input type="text" id="modal-business-hours" placeholder="예: PM 6:00 ~ AM 5:00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>주대설정</label>
+                            <div id="table-price-list"></div>
+                            <button type="button" id="btn-add-price" class="btn-add-price">+ 주대 추가</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 카테고리별 추가 필드 (건전마사지) -->
+                    <div class="massage-field" style="display: none;">
+                        <div class="form-group">
+                            <label for="modal-massage-business-hours">영업시간</label>
+                            <input type="text" id="modal-massage-business-hours" placeholder="예: AM 10:00 ~ PM 10:00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="modal-closed-days">휴무일</label>
+                            <input type="text" id="modal-closed-days" placeholder="예: 연중무휴">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="modal-parking-info">주차안내</label>
+                            <input type="text" id="modal-parking-info" placeholder="예: 건물 내 주차장 이용">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="modal-directions">오시는 길</label>
+                            <textarea id="modal-directions" placeholder="오시는 길을 입력하세요" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>코스설정</label>
+                            <div id="course-list"></div>
+                            <button type="button" id="btn-add-course" class="btn-add-course">+ 코스 추가</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 이벤트 정보 (유흥주점/건전마사지 공통) -->
+                    <div class="karaoke-field massage-field" style="display: none;">
+                        <div class="form-group">
+                            <label for="modal-event-textarea">이벤트 정보</label>
+                            <textarea id="modal-event-textarea" placeholder="이벤트 정보를 입력하세요" rows="5"></textarea>
+                            <input type="hidden" id="modal-event-info" name="event-info">
+                        </div>
+                    </div>
+                    
+                    <!-- 상세 내용 -->
+                    <div class="form-group">
+                        <label for="modal-content">상세 내용</label>
+                        <div id="editor-container">
+                            <div id="editor"></div>
+                        </div>
+                        <input type="hidden" id="modal-content" name="content">
+                    </div>
+                    
+                    <!-- 썸네일 -->
+                    <div class="form-group">
+                        <label>대표 이미지 (썸네일)</label>
+                        <div class="thumbnail-upload-area">
+                            <input type="file" id="thumbnail-input" accept="image/*" style="display: none;">
+                            <button type="button" id="thumbnail-upload-btn" class="thumbnail-upload-btn">
+                                <span class="upload-icon">📷</span>
+                                <span class="upload-text">이미지 업로드</span>
+                            </button>
+                            <div id="thumbnail-preview" class="thumbnail-preview" style="display: none;">
+                                <img id="thumbnail-image" src="" alt="썸네일">
+                                <button type="button" id="delete-thumbnail" class="delete-thumbnail">×</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 통계 정보 (수정 모달 전용) -->
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="modal-views">조회수</label>
+                            <input type="number" id="modal-views" min="0" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="modal-status">상태</label>
+                            <select id="modal-status">
+                                <option value="active">활성</option>
+                                <option value="inactive">비활성</option>
+                                <option value="pending">승인대기</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 제출 버튼 -->
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" id="modal-cancel">취소</button>
+                    <button type="submit" class="btn-submit">수정 완료</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -209,15 +209,57 @@ async function fillFormData() {
         console.log('작성자 설정:', authorInput.value);
     }
     
-    // 카테고리 선택
+    // 카테고리 선택 및 업종 설정
     if (currentAd.category) {
         categoryInput.value = currentAd.category;
         
-        // 카테고리 버튼 활성화
+        // 카테고리 버튼 찾기
         const categoryButton = Array.from(categoryButtons.querySelectorAll('.category-btn'))
             .find(btn => btn.textContent === currentAd.category);
+            
         if (categoryButton) {
-            categoryButton.click();
+            // 카테고리 버튼 클릭 이벤트를 Promise로 래핑
+            await new Promise(async (resolve) => {
+                // 카테고리 선택 콜백이 완료될 때까지 대기
+                const originalOnClick = categoryButton.onclick;
+                
+                // 임시로 클릭 이벤트 오버라이드
+                categoryButton.click();
+                
+                // 업종 옵션이 로드될 때까지 대기 (비동기 처리 완료 대기)
+                setTimeout(async () => {
+                    // 업종 값 설정
+                    if (currentAd.businessType) {
+                        console.log('업종 설정 시도:', currentAd.businessType);
+                        
+                        // 업종 옵션이 실제로 생성되었는지 확인
+                        const businessTypeOptions = document.getElementById('business-type-options');
+                        const options = businessTypeOptions?.querySelectorAll('div[data-value]');
+                        
+                        if (options && options.length > 0) {
+                            // 해당 업종 옵션 찾기
+                            const targetOption = Array.from(options).find(
+                                opt => opt.getAttribute('data-value') === currentAd.businessType || 
+                                       opt.textContent === currentAd.businessType
+                            );
+                            
+                            if (targetOption) {
+                                // 옵션 클릭하여 선택
+                                targetOption.click();
+                                console.log('업종 선택 완료:', currentAd.businessType);
+                            } else {
+                                // 옵션을 찾지 못한 경우 직접 설정
+                                setSelectValue('business-type-wrapper', currentAd.businessType, currentAd.businessType);
+                                businessTypeInput.value = currentAd.businessType;
+                                console.log('업종 직접 설정:', currentAd.businessType);
+                            }
+                        } else {
+                            console.error('업종 옵션이 로드되지 않았습니다.');
+                        }
+                    }
+                    resolve();
+                }, 500); // 업종 옵션 로드를 위한 충분한 대기 시간
+            });
         }
     }
     
@@ -474,20 +516,17 @@ async function handleSubmit(e) {
         
         // 카테고리별 추가 데이터 수집
         const categoryData = collectCategoryData(categoryInput.value);
-        // eventInfo는 텍스트로 설정
-        if (categoryInput.value === '유흥주점' || categoryInput.value === '건전마사지') {
-            categoryData.eventInfo = eventText;
-        }
         
-        // 업데이트할 광고 데이터
+        // *** 중요: 기존 데이터를 먼저 가져와서 병합 ***
         const updatedData = {
-            // 기본 정보
-            adId: adId,  // 광고 ID 유지
+            // 기존 데이터 전체를 먼저 스프레드
+            ...currentAd,
+            
+            // 수정할 필드만 덮어쓰기
             author: authorInput.value,
-            authorId: currentAd.authorId,  // 기존 authorId 유지
             category: categoryInput.value,
             businessName: businessNameValue,
-            businessType: businessTypeInput.value || '',
+            businessType: businessTypeInput.value || currentAd.businessType || '',
             
             // 위치 정보
             region: regionInput.value,
@@ -495,32 +534,41 @@ async function handleSubmit(e) {
             
             // 연락처 정보
             phone: phoneValue,
-            kakao: document.getElementById('kakao')?.value || '',
-            telegram: document.getElementById('telegram')?.value || '',
+            kakao: document.getElementById('kakao')?.value || currentAd.kakao || '',
+            telegram: document.getElementById('telegram')?.value || currentAd.telegram || '',
             
             // 콘텐츠 (placeholder 포함)
             content: contentHtml,
-            eventInfo: eventText,  // HTML이 아니라 텍스트로 저장
+            eventInfo: eventText || currentAd.eventInfo || '',  // 기존 값 유지
             
-            // 썸네일 (일단 기존 값 유지)
-            thumbnail: existingThumbnail || '',
+            // 썸네일 (변경되지 않았으면 기존 값 유지)
+            thumbnail: existingThumbnail || currentAd.thumbnail || '',
             
             // 업로드 상태
-            uploadStatus: (thumbnailFile || detailFiles.length > 0) ? 'uploading' : 'completed',
+            uploadStatus: (thumbnailFile || detailFiles.length > 0) ? 'uploading' : currentAd.uploadStatus || 'completed',
             
             // 카테고리별 추가 데이터
             ...categoryData,
             
-            // 메타 정보 (기존 값 유지 및 업데이트)
-            createdAt: currentAd.createdAt,  // 생성일은 유지
-            updatedAt: Date.now(),  // 수정일만 업데이트
+            // 메타 정보 업데이트 (생성일은 유지, 수정일만 변경)
+            updatedAt: Date.now(),
+            
+            // 명시적으로 유지해야 할 필드들
+            adId: adId,
+            authorId: currentAd.authorId,
+            createdAt: currentAd.createdAt,
             views: currentAd.views || 0,
             bookmarks: currentAd.bookmarks || [],
             reviews: currentAd.reviews || {},
             status: currentAd.status || 'pending'
         };
         
-        // Firebase 업데이트
+        // eventInfo가 텍스트인 경우 처리
+        if (categoryInput.value === '유흥주점' || categoryInput.value === '건전마사지') {
+            updatedData.eventInfo = eventText;
+        }
+        
+        // Firebase 업데이트 - update 함수 사용 (merge)
         await update(ref(rtdb, `advertisements/${adId}`), updatedData);
         console.log('광고 업데이트 완료:', adId);
         
@@ -547,7 +595,7 @@ async function handleSubmit(e) {
             console.log('API 호출 시작됨 - 백그라운드에서 진행 중');
         }
         
-        // 페이지 이동 전 3초 대기
+        // 페이지 이동 전 5초 대기
         console.log('페이지 이동 전 5초 대기...');
         await new Promise(resolve => setTimeout(resolve, 5000));
         

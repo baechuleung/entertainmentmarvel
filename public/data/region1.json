@@ -1,9 +1,9 @@
 {
  "regions": [
-   { "code": "seoul_gangnam", "name": "서울-강남" },
-   { "code": "seoul_non_gangnam", "name": "서울-비강남" },
-   { "code": "gyeonggi_south", "name": "경기-남부" },
-   { "code": "gyeonggi_north", "name": "경기-북부" },
+   { "code": "seoul_gangnam", "name": "서울" },
+   { "code": "seoul_non_gangnam", "name": "서울(비강남)" },
+   { "code": "gyeonggi_south", "name": "경기(남부)" },
+   { "code": "gyeonggi_north", "name": "경기(북부)" },
    { "code": "incheon_bucheon", "name": "인천/부천" },
    { "code": "chungcheong_daejeon_gangwon", "name": "충청/대전/강원" },
    { "code": "daegu", "name": "대구" },

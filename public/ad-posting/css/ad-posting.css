@@ -587,8 +587,8 @@
 
 .thumbnail-preview {
     position: relative;
-    width: 200px;
-    height: 200px;
+    width: 150px;
+    height: 100px;
     border-radius: 8px;
     overflow: hidden;
     background-color: #2a2a2a;
