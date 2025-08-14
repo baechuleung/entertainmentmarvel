@@ -40,9 +40,9 @@ export function selectCategory(element) {
     // 선택한 버튼에 active 클래스 추가
     element.classList.add('active');
     
-    // 선택한 업종으로 필터링
-    const selectedType = element.getAttribute('data-value');
-    updateFilters('businessType', selectedType);
+    // 선택한 업종의 name 값으로 필터링 (code가 아닌 textContent 사용)
+    const selectedTypeName = element.textContent === '전체' ? '' : element.textContent;
+    updateFilters('businessType', selectedTypeName);
     
     // URL 파라미터 업데이트
     updateURLWithFilters();

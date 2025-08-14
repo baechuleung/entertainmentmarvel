@@ -1,34 +1,19 @@
 // /ad-posting/js/modules/category-fields.js
 
-// 이벤트 에디터 초기화
+// 이벤트 에디터 초기화 - 텍스트만 입력 가능하도록 수정
 export function initializeEventEditor(previewImages) {
-    const eventQuill = new Quill('#event-editor', {
-        theme: 'snow',
-        modules: {
-            toolbar: [
-                [{ 'size': ['small', false, 'large', 'huge'] }],  // 글자 크기
-                [{ 'color': [] }],  // 글자 색상
-                ['link', 'image'],  // 링크, 이미지
-            ]
-        },
-        placeholder: '이벤트 내용을 입력하세요...'
-    });
-    
-    // 이벤트 에디터 최소 높이
-    const eventEditorElement = document.querySelector('#event-editor .ql-editor');
-    if (eventEditorElement) {
-        eventEditorElement.style.minHeight = '200px';
-    }
-    
-    // 이벤트 에디터 내용 변경 시 hidden input 업데이트
+    // Quill 에디터 대신 일반 textarea 사용
+    const eventTextarea = document.getElementById('event-textarea');
     const eventInput = document.getElementById('event-info');
-    if (eventInput) {
-        eventQuill.on('text-change', function() {
-            eventInput.value = eventQuill.root.innerHTML;
+    
+    if (eventTextarea && eventInput) {
+        // textarea 내용 변경 시 hidden input 업데이트
+        eventTextarea.addEventListener('input', function() {
+            eventInput.value = eventTextarea.value;
         });
     }
     
-    return eventQuill;
+    return null; // Quill 에디터 반환하지 않음
 }
 
 // 주대 추가/삭제 이벤트 설정
@@ -175,23 +160,27 @@ export function toggleCategorySpecificFields(categoryName, eventQuill) {
         massageFields.forEach(field => field.style.display = 'block');
         karaokeFields.forEach(field => field.style.display = 'none');
         commonFields.forEach(field => field.style.display = 'block');
-        resetKaraokeFields(eventQuill);
+        resetKaraokeFields();
     } 
     // 그 외 카테고리
     else {
         karaokeFields.forEach(field => field.style.display = 'none');
         massageFields.forEach(field => field.style.display = 'none');
         commonFields.forEach(field => field.style.display = 'none');
-        resetKaraokeFields(eventQuill);
+        resetKaraokeFields();
         resetMassageFields();
     }
 }
 
 // 유흥주점 필드 초기화
-function resetKaraokeFields(eventQuill) {
+function resetKaraokeFields() {
     // 영업시간 초기화
     const businessHours = document.getElementById('business-hours');
     if (businessHours) businessHours.value = '';
+    
+    // 이벤트 텍스트 초기화
+    const eventTextarea = document.getElementById('event-textarea');
+    if (eventTextarea) eventTextarea.value = '';
     
     // 주대설정 초기화 - 첫 번째 항목만 남기고 나머지 제거
     const priceItems = document.querySelectorAll('.table-price-item');
@@ -278,8 +267,9 @@ export function collectCategoryData(categoryName, eventQuill) {
         // 주대설정
         data.tablePrice = collectTablePrices();
         
-        // 이벤트 내용
-        data.eventInfo = eventQuill ? eventQuill.root.innerHTML : '';
+        // 이벤트 내용 - textarea에서 가져오기
+        const eventTextarea = document.getElementById('event-textarea');
+        data.eventInfo = eventTextarea ? eventTextarea.value : '';
     } 
     else if (categoryName === '건전마사지') {
         // 영업시간
@@ -301,8 +291,9 @@ export function collectCategoryData(categoryName, eventQuill) {
         // 코스설정
         data.courses = collectCourses();
         
-        // 이벤트 내용
-        data.eventInfo = eventQuill ? eventQuill.root.innerHTML : '';
+        // 이벤트 내용 - textarea에서 가져오기
+        const eventTextarea = document.getElementById('event-textarea');
+        data.eventInfo = eventTextarea ? eventTextarea.value : '';
     }
     
     return data;

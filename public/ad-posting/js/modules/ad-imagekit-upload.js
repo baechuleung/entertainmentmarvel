@@ -17,7 +17,44 @@ async function fileToBase64(file) {
     });
 }
 
-// 백그라운드 업로드 시작 - 동기적으로 처리하여 실제 URL 반환
+// 배치 업로드 헬퍼 함수
+async function uploadBatch(requestData) {
+    try {
+        console.log('배치 업로드 요청:', {
+            adId: requestData.adId,
+            thumbnailCount: requestData.thumbnailImages.length,
+            detailCount: requestData.detailImages.length
+        });
+        
+        const response = await fetch(UPLOAD_API_URL, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(requestData),
+            mode: 'cors'
+        });
+        
+        const responseText = await response.text();
+        console.log('배치 업로드 응답:', response.status, responseText);
+        
+        if (response.ok) {
+            const result = JSON.parse(responseText);
+            console.log('배치 업로드 성공:', result);
+            
+            // DB 업데이트는 백엔드에서 처리됨
+            return { success: true, result: result };
+        } else {
+            console.error('배치 업로드 실패:', response.status, responseText);
+            return { success: false, error: responseText };
+        }
+    } catch (error) {
+        console.error('배치 업로드 에러:', error);
+        return { success: false, error: error.message };
+    }
+}
+
 // 백그라운드 업로드 시작 - 동기적으로 처리하여 실제 URL 반환
 export async function startBackgroundUpload(adId, thumbnailFile, detailFiles, eventFiles) {
     try {
@@ -33,8 +70,7 @@ export async function startBackgroundUpload(adId, thumbnailFile, detailFiles, ev
             adId: adId,
             userId: currentUser.uid,
             thumbnailFile: !!thumbnailFile,
-            detailFilesCount: detailFiles?.length || 0,
-            eventFilesCount: eventFiles?.length || 0
+            detailFilesCount: detailFiles?.length || 0
         });
 
         // 요청 데이터 준비
@@ -42,8 +78,7 @@ export async function startBackgroundUpload(adId, thumbnailFile, detailFiles, ev
             adId: adId,
             userId: currentUser.uid,
             thumbnailImages: [],
-            detailImages: [],
-            eventImages: []
+            detailImages: []
         };
 
         // 썸네일 처리
@@ -71,37 +106,72 @@ export async function startBackgroundUpload(adId, thumbnailFile, detailFiles, ev
             console.log('상세 이미지 변환 완료');
         }
 
-        // 이벤트 이미지 처리
-        if (eventFiles && eventFiles.length > 0) {
-            console.log(`이벤트 이미지 ${eventFiles.length}개 변환 중...`);
-            for (const file of eventFiles) {
-                const base64 = await fileToBase64(file);
-                requestData.eventImages.push({
-                    base64: base64,
-                    fileName: file.name
-                });
-                console.log(`  - ${file.name} 변환 완료`);
-            }
-            console.log('이벤트 이미지 변환 완료');
-        }
-
         console.log('최종 요청 데이터:', {
             adId: requestData.adId,
             userId: requestData.userId,
             thumbnailCount: requestData.thumbnailImages.length,
             detailCount: requestData.detailImages.length,
-            eventCount: requestData.eventImages.length,
             totalSize: JSON.stringify(requestData).length + ' bytes'
         });
 
         // 요청 크기 체크 (10MB 제한)
         const requestSize = JSON.stringify(requestData).length;
-        if (requestSize > 10 * 1024 * 1024) {
-            console.error('요청 크기가 너무 큽니다:', requestSize);
-            throw new Error('이미지 파일 크기가 너무 큽니다. 이미지를 압축하거나 개수를 줄여주세요.');
+        const MAX_SIZE = 9 * 1024 * 1024; // 9MB로 안전하게 설정 (Base64 오버헤드 고려)
+        
+        if (requestSize > MAX_SIZE) {
+            console.log(`요청 크기(${requestSize} bytes)가 제한(${MAX_SIZE} bytes)을 초과하여 분할 업로드합니다.`);
+            
+            // 분할 업로드를 순차적으로 처리
+            try {
+                // 썸네일 먼저 업로드
+                if (requestData.thumbnailImages.length > 0) {
+                    const thumbnailRequest = {
+                        adId: requestData.adId,
+                        userId: requestData.userId,
+                        thumbnailImages: requestData.thumbnailImages,
+                        detailImages: []
+                    };
+                    
+                    console.log('썸네일 업로드 중...');
+                    const thumbnailResult = await uploadBatch(thumbnailRequest);
+                    if (!thumbnailResult.success) {
+                        console.error('썸네일 업로드 실패:', thumbnailResult.error);
+                    }
+                }
+                
+                // 상세 이미지를 하나씩 업로드
+                if (requestData.detailImages.length > 0) {
+                    for (let i = 0; i < requestData.detailImages.length; i++) {
+                        const singleImageRequest = {
+                            adId: requestData.adId,
+                            userId: requestData.userId,
+                            thumbnailImages: [],
+                            detailImages: [requestData.detailImages[i]]
+                        };
+                        
+                        console.log(`상세 이미지 ${i + 1}/${requestData.detailImages.length} 업로드 중...`);
+                        const detailResult = await uploadBatch(singleImageRequest);
+                        if (!detailResult.success) {
+                            console.error(`상세 이미지 ${i + 1} 업로드 실패:`, detailResult.error);
+                        }
+                    }
+                }
+                
+                console.log('✅ 모든 이미지 분할 업로드 완료');
+                return { 
+                    success: true, 
+                    message: 'All images uploaded in batches'
+                };
+            } catch (error) {
+                console.error('분할 업로드 중 에러:', error);
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
         }
 
-        // API 호출 시작을 알림
+        // 정상 크기인 경우 한 번에 업로드
         console.log('API 호출 시작:', UPLOAD_API_URL);
         
         // 백그라운드로 fetch 처리 - await 없이 바로 실행
@@ -173,6 +243,12 @@ export async function updateImageUrls(adId, uploadResults) {
             updateData.thumbnail = uploadResults.results.thumbnail;
         }
         
+        // 상세 이미지 URL 업데이트 (있는 경우)
+        if (uploadResults.results.detailImages && uploadResults.results.detailImages.length > 0) {
+            // 기존 content 가져와서 placeholder 교체
+            // 이 부분은 백엔드에서 처리하므로 여기서는 썸네일만 업데이트
+        }
+        
         // 업로드 상태 업데이트
         updateData.uploadStatus = 'completed';
         updateData.uploadedAt = Date.now();
@@ -191,33 +267,11 @@ export async function updateImageUrls(adId, uploadResults) {
     }
 }
 
-// 에디터용 단일 이미지 업로드 함수들 (에디터에서 미리보기용으로만 사용)
+// 에디터용 단일 이미지 업로드 함수 (에디터에서 미리보기용으로만 사용)
 export async function uploadSingleDetailImage(file, adId) {
     console.warn('에디터 이미지는 저장 시 일괄 업로드됩니다.');
     // 일단 base64 URL 반환 (나중에 handleSubmit에서 처리)
     return await fileToBase64(file);
-}
-
-export async function uploadSingleEventImage(file, adId) {
-    console.warn('에디터 이미지는 저장 시 일괄 업로드됩니다.');
-    // 일단 base64 URL 반환 (나중에 handleSubmit에서 처리)
-    return await fileToBase64(file);
-}
-
-// 기존 함수들 - 호환성 유지를 위해 남겨둠 (deprecated)
-export async function uploadAdThumbnail(file, adId) {
-    console.warn('uploadAdThumbnail은 더 이상 사용되지 않습니다. startBackgroundUpload를 사용하세요.');
-    throw new Error('이 함수는 더 이상 사용되지 않습니다.');
-}
-
-export async function uploadAdDetailImages(files, adId) {
-    console.warn('uploadAdDetailImages는 더 이상 사용되지 않습니다. startBackgroundUpload를 사용하세요.');
-    throw new Error('이 함수는 더 이상 사용되지 않습니다.');
-}
-
-export async function uploadAdEventImages(files, adId) {
-    console.warn('uploadAdEventImages는 더 이상 사용되지 않습니다. startBackgroundUpload를 사용하세요.');
-    throw new Error('이 함수는 더 이상 사용되지 않습니다.');
 }
 
 // 이미지 삭제 (기존 유지)

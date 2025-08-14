@@ -294,7 +294,7 @@ export function applyFilters() {
     
     // 업종 필터
     if (currentFilters.businessType) {
-        filteredAds = filteredAds.filter(ad => ad.businessTypeCode === currentFilters.businessType);
+        filteredAds = filteredAds.filter(ad => ad.businessType === currentFilters.businessType);
     }
     
     displayAdvertisements(filteredAds);

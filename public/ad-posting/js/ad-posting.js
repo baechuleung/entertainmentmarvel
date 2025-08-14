@@ -20,17 +20,14 @@ import {
     collectCategoryData,
     // 백그라운드 업로드 함수
     startBackgroundUpload,
-    uploadSingleDetailImage,
-    uploadSingleEventImage
+    uploadSingleDetailImage
 } from './modules/index.js';
 
 // 전역 변수
 let currentUser = null;
 let currentUserData = null;
 let quill = null;
-let eventQuill = null;
 let previewImages = new Map();
-let eventPreviewImages = new Map();
 let thumbnailFile = null;
 
 // DOM 요소
@@ -72,15 +69,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Quill 에디터 초기화
     quill = initializeQuillEditor();
     
-    // 이벤트 에디터 초기화 (유흥주점용)
-    eventQuill = initializeEventEditor(eventPreviewImages);
+    // 이벤트 에디터 초기화 (텍스트 필드만 사용)
+    initializeEventEditor();
     
     // 이미지 핸들러 설정
     const toolbar = quill.getModule('toolbar');
     toolbar.addHandler('image', createImageHandler(quill, previewImages));
-    
-    const eventToolbar = eventQuill.getModule('toolbar');
-    eventToolbar.addHandler('image', createImageHandler(eventQuill, eventPreviewImages));
     
     // 주대 추가/삭제 이벤트 설정
     setupTablePriceEvents();
@@ -103,7 +97,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
             
             // 카테고리별 필드 표시/숨김
-            toggleCategorySpecificFields(categoryName, eventQuill);
+            toggleCategorySpecificFields(categoryName);
             
             // 업종 데이터 로드
             const types = await loadBusinessTypes(categoryName);
@@ -266,11 +260,15 @@ async function handleSubmit(e) {
         
         // 2. 에디터 콘텐츠 처리 - 정규식으로 모든 base64 이미지 교체
         let contentHtml = quill.root.innerHTML;
-        let eventHtml = eventQuill && categoryInput.value === '유흥주점' ? eventQuill.root.innerHTML : '';
+        let eventText = ''; // 텍스트로 변경
+        
+        if (categoryInput.value === '유흥주점' || categoryInput.value === '건전마사지') {
+            const eventTextarea = document.getElementById('event-textarea');
+            eventText = eventTextarea ? eventTextarea.value : '';
+        }
         
         // 3. 이미지 파일 수집
         const detailFiles = [];
-        const eventFiles = [];
         
         // 상세 이미지 처리 - 정규식으로 base64 이미지 찾아서 교체
         const detailImgRegex = /<img[^>]+src="(data:image\/[^"]+)"[^>]*>/gi;
@@ -301,48 +299,16 @@ async function handleSubmit(e) {
             contentHtml = contentHtml.replace(original, replacement);
         });
         
-        // 이벤트 이미지 처리
-        if (eventQuill && categoryInput.value === '유흥주점') {
-            const eventImgRegex = /<img[^>]+src="(data:image\/[^"]+)"[^>]*>/gi;
-            let eventMatch;
-            let eventIndex = 0;
-            
-            const eventReplacements = [];
-            
-            while ((eventMatch = eventImgRegex.exec(eventHtml)) !== null) {
-                const fullImgTag = eventMatch[0];
-                const base64Src = eventMatch[1];
-                
-                // eventPreviewImages에서 파일 찾기
-                const file = eventPreviewImages.get(base64Src);
-                if (file) {
-                    eventFiles.push(file);
-                    // 교체할 내용 저장
-                    eventReplacements.push({
-                        original: fullImgTag,
-                        replacement: `<img src="EVENT_IMAGE_${eventIndex}">`
-                    });
-                    eventIndex++;
-                }
-            }
-            
-            // 모든 교체 수행
-            eventReplacements.forEach(({original, replacement}) => {
-                eventHtml = eventHtml.replace(original, replacement);
-            });
-        }
-        
         // 디버깅: placeholder가 제대로 생성되었는지 확인
         console.log('Content HTML (처음 200자):', contentHtml.substring(0, 200));
-        console.log('Event HTML (처음 200자):', eventHtml.substring(0, 200));
+        console.log('Event Text:', eventText);
         console.log('상세 이미지 파일 수:', detailFiles.length);
-        console.log('이벤트 이미지 파일 수:', eventFiles.length);
         
         // 4. 카테고리별 추가 데이터 수집
-        const categoryData = collectCategoryData(categoryInput.value, eventQuill);
-        // eventInfo는 이미 처리한 eventHtml로 덮어쓰기
-        if (categoryInput.value === '유흥주점') {
-            categoryData.eventInfo = eventHtml;
+        const categoryData = collectCategoryData(categoryInput.value);
+        // eventInfo는 텍스트로 설정
+        if (categoryInput.value === '유흥주점' || categoryInput.value === '건전마사지') {
+            categoryData.eventInfo = eventText;
         }
         
         // 5. 광고 데이터 생성 (placeholder 포함)
@@ -366,13 +332,13 @@ async function handleSubmit(e) {
             
             // 콘텐츠 (placeholder 포함)
             content: contentHtml,
-            eventInfo: eventHtml,
+            eventInfo: eventText, // HTML이 아닌 텍스트로 저장
             
             // 썸네일 (일단 빈 값)
             thumbnail: '',
             
             // 업로드 상태
-            uploadStatus: (thumbnailFile || detailFiles.length > 0 || eventFiles.length > 0) ? 'uploading' : 'completed',
+            uploadStatus: (thumbnailFile || detailFiles.length > 0) ? 'uploading' : 'completed',
             
             // 카테고리별 추가 데이터
             ...categoryData,
@@ -391,27 +357,36 @@ async function handleSubmit(e) {
         console.log('광고 저장 완료:', adId);
         
         // 7. 이미지 업로드 API 호출
-        if (thumbnailFile || detailFiles.length > 0 || eventFiles.length > 0) {
+        if (thumbnailFile || detailFiles.length > 0) {
             console.log('이미지 업로드 API 호출 준비...');
             
             // startBackgroundUpload 호출 - 이제 API 호출 시작만 확인
-            const uploadResult = await startBackgroundUpload(adId, thumbnailFile, detailFiles, eventFiles);
+            const uploadResult = await startBackgroundUpload(
+                adId, 
+                thumbnailFile, 
+                detailFiles, 
+                [] // eventFiles는 이제 없음
+            );
             
             if (uploadResult.success) {
                 console.log('API 호출 시작 확인됨');
-                // 백그라운드에서 계속 처리됨
             } else {
                 console.error('이미지 업로드 시작 실패:', uploadResult.error);
-                // 실패해도 광고는 등록되었으므로 계속 진행
             }
         }
 
-        // 8. 바로 페이지 이동
+        // 8. 페이지 이동 전 1초 대기
+        console.log('페이지 이동 전 1초 대기...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // 9. 알림 및 페이지 이동
         alert('광고가 성공적으로 등록되었습니다! 이미지는 백그라운드에서 업로드됩니다.');
 
         if (currentUserData.userType === 'administrator') {
+            console.log('관리자 계정 - ad-management.html로 이동');
             window.location.href = '/ad-posting/ad-management.html';
         } else {
+            console.log('일반 업체회원 - main.html로 이동');
             window.location.href = '/main/main.html';
         }
         

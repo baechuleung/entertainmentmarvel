@@ -66,7 +66,7 @@
                     <!-- 업소명 -->
                     <div class="form-group">
                         <label for="business-name">업소명 *</label>
-                        <input type="text" id="business-name" name="business-name" placeholder="예) 도파민 제니상무 (15자 이내로 작성해주세요)" maxlength="15" required>
+                        <input type="text" id="business-name" name="business-name" placeholder="예) 도파민 제니생무 (15자 이내로 작성해주세요)" maxlength="15" required>
                     </div>
                     
                     <!-- 지역과 도시 선택 (한 줄에 표시) -->
@@ -204,12 +204,15 @@
                         <input type="hidden" id="content" name="content" required>
                     </div>
                     
-                    <!-- 이벤트 (유흥주점/건전마사지 전용, 상세 내용 아래) -->
+                    <!-- 이벤트 (유흥주점/건전마사지 전용 - textarea로 변경) -->
                     <div class="form-group karaoke-field massage-field" style="display: none;">
                         <label for="event-info">이벤트</label>
-                        <div id="event-editor-container">
-                            <div id="event-editor"></div>
-                        </div>
+                        <textarea 
+                            id="event-textarea" 
+                            class="event-textarea"
+                            placeholder="이벤트 내용을 입력하세요..."
+                            rows="8"
+                        ></textarea>
                         <input type="hidden" id="event-info" name="event-info">
                     </div>
                 </div>
