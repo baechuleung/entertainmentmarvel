@@ -1,21 +1,15 @@
 {
-  "regions": [
-    { "code": "seoul", "name": "서울" },
-    { "code": "gyeonggi", "name": "경기" },
-    { "code": "incheon", "name": "인천" },
-    { "code": "busan", "name": "부산" },
-    { "code": "daegu", "name": "대구" },
-    { "code": "gwangju", "name": "광주" },
-    { "code": "daejeon", "name": "대전" },
-    { "code": "ulsan", "name": "울산" },
-    { "code": "sejong", "name": "세종" },
-    { "code": "gangwon", "name": "강원" },
-    { "code": "chungbuk", "name": "충북" },
-    { "code": "chungnam", "name": "충남" },
-    { "code": "jeonbuk", "name": "전북" },
-    { "code": "jeonnam", "name": "전남" },
-    { "code": "gyeongbuk", "name": "경북" },
-    { "code": "gyeongnam", "name": "경남" },
-    { "code": "jeju", "name": "제주" }
-  ]
+ "regions": [
+   { "code": "seoul_gangnam", "name": "서울-강남" },
+   { "code": "seoul_non_gangnam", "name": "서울-비강남" },
+   { "code": "gyeonggi_south", "name": "경기-남부" },
+   { "code": "gyeonggi_north", "name": "경기-북부" },
+   { "code": "incheon_bucheon", "name": "인천/부천" },
+   { "code": "chungcheong_daejeon_gangwon", "name": "충청/대전/강원" },
+   { "code": "daegu", "name": "대구" },
+   { "code": "gumi", "name": "구미" },
+   { "code": "gyeongsang_jeolla_jeju", "name": "경상/전라/제주" },
+   { "code": "busan", "name": "부산" },
+   { "code": "vietnam", "name": "베트남" }
+ ]
 }

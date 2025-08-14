@@ -23,10 +23,9 @@ import {
     setupTablePriceEvents,
     toggleCategorySpecificFields,
     collectCategoryData,
-    // 광고 전용 ImageKit 업로드 함수들
-    uploadAdThumbnail,
-    uploadSingleDetailImage,
-    uploadSingleEventImage
+    // 백그라운드 업로드 함수
+    startBackgroundUpload,
+    uploadSingleDetailImage
 } from './modules/index.js';
 
 // 전역 변수
@@ -35,7 +34,6 @@ let currentUserData = null;
 let adId = null;
 let currentAd = null;
 let quill = null;
-let eventQuill = null;
 let previewImages = new Map();
 let thumbnailFile = null;
 let existingThumbnail = null;
@@ -77,15 +75,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Quill 에디터 초기화
     quill = initializeQuillEditor();
     
-    // 이벤트 에디터 초기화
-    eventQuill = initializeEventEditor(previewImages);
+    // 이벤트 에디터 초기화 (텍스트 필드만 사용)
+    initializeEventEditor();
     
     // 이미지 핸들러 설정
     const toolbar = quill.getModule('toolbar');
     toolbar.addHandler('image', createImageHandler(quill, previewImages));
-    
-    const eventToolbar = eventQuill.getModule('toolbar');
-    eventToolbar.addHandler('image', createImageHandler(eventQuill, previewImages));
     
     // 주대/코스 추가/삭제 이벤트 설정
     setupTablePriceEvents();
@@ -108,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
             
             // 카테고리별 필드 표시/숨김
-            toggleCategorySpecificFields(categoryName, eventQuill);
+            toggleCategorySpecificFields(categoryName);
             
             // 업종 데이터 로드
             const types = await loadBusinessTypes(categoryName);
@@ -256,9 +251,12 @@ async function fillFormData() {
         setEditorContent(quill, currentAd.content);
     }
     
-    // 이벤트 에디터 내용 (유흥주점/건전마사지)
+    // 이벤트 텍스트 필드 내용 (유흥주점/건전마사지)
     if ((currentAd.category === '유흥주점' || currentAd.category === '건전마사지') && currentAd.eventInfo) {
-        setEditorContent(eventQuill, currentAd.eventInfo);
+        const eventTextarea = document.getElementById('event-textarea');
+        if (eventTextarea) {
+            eventTextarea.value = currentAd.eventInfo;
+        }
     }
     
     // 썸네일
@@ -429,50 +427,57 @@ async function handleSubmit(e) {
         }
         
         // 6. 상세 내용은 검증하지 않음 (이미지만 있어도 가능)
-        const editorContent = quill.root.innerHTML;
+        let contentHtml = quill.root.innerHTML;
+        let eventText = ''; // 텍스트로 변경
         
-        // 썸네일 처리 (광고 ID 사용)
-        let thumbnailUrl = existingThumbnail;
-        if (thumbnailFile) {
-            thumbnailUrl = await uploadAdThumbnail(thumbnailFile, adId);
+        if (categoryInput.value === '유흥주점' || categoryInput.value === '건전마사지') {
+            const eventTextarea = document.getElementById('event-textarea');
+            eventText = eventTextarea ? eventTextarea.value : '';
         }
         
-        // 에디터 이미지 처리 (광고 ID 사용)
-        const processedImages = await processEditorImages(
-            quill, 
-            previewImages, 
-            async (file) => {
-                if (file instanceof File) {
-                    return await uploadSingleDetailImage(file, adId);
-                }
-                console.error('Invalid file type:', file);
-                return null;
-            },
-            adId,
-            'detail'
-        );
+        // 이미지 파일 수집
+        const detailFiles = [];
         
-        // 이벤트 에디터 이미지 처리 (유흥주점/건전마사지 카테고리)
-        let eventInfo = '';
-        if ((categoryInput.value === '유흥주점' || categoryInput.value === '건전마사지') && eventQuill) {
-            // 이벤트 에디터의 이미지만 처리
-            await processEditorImages(
-                eventQuill, 
-                previewImages, 
-                async (file) => {
-                    if (file instanceof File) {
-                        return await uploadSingleEventImage(file, adId);
-                    }
-                    return null;
-                },
-                adId,
-                'event'
-            );
-            eventInfo = eventQuill.root.innerHTML;
+        // 상세 이미지 처리 - 정규식으로 base64 이미지 찾아서 교체
+        const detailImgRegex = /<img[^>]+src="(data:image\/[^"]+)"[^>]*>/gi;
+        let detailMatch;
+        let detailIndex = 0;
+        
+        const detailReplacements = [];
+        
+        while ((detailMatch = detailImgRegex.exec(contentHtml)) !== null) {
+            const fullImgTag = detailMatch[0];
+            const base64Src = detailMatch[1];
+            
+            // previewImages에서 파일 찾기
+            const file = previewImages.get(base64Src);
+            if (file) {
+                detailFiles.push(file);
+                // 교체할 내용 저장
+                detailReplacements.push({
+                    original: fullImgTag,
+                    replacement: `<img src="DETAIL_IMAGE_${detailIndex}">`
+                });
+                detailIndex++;
+            }
         }
+        
+        // 모든 교체 수행
+        detailReplacements.forEach(({original, replacement}) => {
+            contentHtml = contentHtml.replace(original, replacement);
+        });
+        
+        // 디버깅: placeholder가 제대로 생성되었는지 확인
+        console.log('Content HTML (처음 200자):', contentHtml.substring(0, 200));
+        console.log('Event Text:', eventText);
+        console.log('상세 이미지 파일 수:', detailFiles.length);
         
         // 카테고리별 추가 데이터 수집
-        const categoryData = collectCategoryData(categoryInput.value, eventQuill);
+        const categoryData = collectCategoryData(categoryInput.value);
+        // eventInfo는 텍스트로 설정
+        if (categoryInput.value === '유흥주점' || categoryInput.value === '건전마사지') {
+            categoryData.eventInfo = eventText;
+        }
         
         // 업데이트할 광고 데이터
         const updatedData = {
@@ -493,11 +498,15 @@ async function handleSubmit(e) {
             kakao: document.getElementById('kakao')?.value || '',
             telegram: document.getElementById('telegram')?.value || '',
             
-            // 콘텐츠
-            content: editorContent,
-            eventInfo: eventInfo,  // eventContent가 아니라 eventInfo
-            thumbnail: thumbnailUrl,
-            // images 필드 제거
+            // 콘텐츠 (placeholder 포함)
+            content: contentHtml,
+            eventInfo: eventText,  // HTML이 아니라 텍스트로 저장
+            
+            // 썸네일 (일단 기존 값 유지)
+            thumbnail: existingThumbnail || '',
+            
+            // 업로드 상태
+            uploadStatus: (thumbnailFile || detailFiles.length > 0) ? 'uploading' : 'completed',
             
             // 카테고리별 추가 데이터
             ...categoryData,
@@ -513,8 +522,36 @@ async function handleSubmit(e) {
         
         // Firebase 업데이트
         await update(ref(rtdb, `advertisements/${adId}`), updatedData);
+        console.log('광고 업데이트 완료:', adId);
         
-        alert('광고가 성공적으로 수정되었습니다.');
+        // 이미지 업로드 API 호출
+        if (thumbnailFile || detailFiles.length > 0) {
+            console.log('이미지 업로드 API 호출 준비...');
+            
+            // startBackgroundUpload 호출 - await 없이 백그라운드에서 실행
+            startBackgroundUpload(
+                adId, 
+                thumbnailFile, 
+                detailFiles, 
+                [] // eventFiles는 이제 없음
+            ).then(uploadResult => {
+                if (uploadResult.success) {
+                    console.log('백그라운드 업로드 성공');
+                } else {
+                    console.error('백그라운드 업로드 실패:', uploadResult.error);
+                }
+            }).catch(error => {
+                console.error('백그라운드 업로드 에러:', error);
+            });
+            
+            console.log('API 호출 시작됨 - 백그라운드에서 진행 중');
+        }
+        
+        // 페이지 이동 전 3초 대기
+        console.log('페이지 이동 전 5초 대기...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        
+        alert('광고가 성공적으로 수정되었습니다! 이미지는 백그라운드에서 업로드됩니다.');
         window.location.href = '/ad-posting/ad-management.html';
         
     } catch (error) {

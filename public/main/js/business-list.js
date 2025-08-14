@@ -11,9 +11,9 @@ let currentDisplayIndex = 0;
 let isLoading = false;
 let hasMoreData = true;
 
-const INITIAL_LOAD = 100;  // 처음 로드할 개수
-const DISPLAY_BATCH = 50;  // 한번에 보여줄 개수
-const PRELOAD_BATCH = 50;  // 미리 로드할 개수
+const INITIAL_LOAD = 50;  // 처음 로드할 개수
+const DISPLAY_BATCH = 25;  // 한번에 보여줄 개수
+const PRELOAD_BATCH = 25;  // 미리 로드할 개수
 
 // 업종 리스트 템플릿 로드
 export async function loadBusinessItemTemplate() {

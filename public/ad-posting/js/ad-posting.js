@@ -380,8 +380,8 @@ async function handleSubmit(e) {
         }
 
         // 8. 페이지 이동 전 1초 대기
-        console.log('페이지 이동 전 1초 대기...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log('페이지 이동 전 5초 대기...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
         
         // 9. 알림 및 페이지 이동
         alert('광고가 성공적으로 등록되었습니다! 이미지는 백그라운드에서 업로드됩니다.');
