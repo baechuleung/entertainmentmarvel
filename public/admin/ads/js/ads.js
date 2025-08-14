@@ -72,11 +72,17 @@ function displayAds(ads) {
         return;
     }
     
+    // displayAds 함수의 tbody.innerHTML 부분 수정
     tbody.innerHTML = ads.map(ad => {
         const statusClass = ad.status === 'active' ? 'status-active' : 
-                          ad.status === 'inactive' ? 'status-inactive' : 'status-pending';
+                        ad.status === 'inactive' ? 'status-inactive' : 'status-pending';
         const statusText = ad.status === 'active' ? '활성' : 
-                         ad.status === 'inactive' ? '비활성' : '승인대기';
+                        ad.status === 'inactive' ? '비활성' : '승인대기';
+        
+        // 입금 상태 처리
+        const paymentClass = ad.paymentStatus === '입금완료' ? 'paid' : 
+                            ad.paymentStatus === '입금대기' ? 'pending' : 'unpaid';
+        const paymentText = ad.paymentStatus || '미입금';
         
         return `
             <tr>
@@ -88,7 +94,9 @@ function displayAds(ads) {
                 <td>
                     <span class="status ${statusClass}">${statusText}</span>
                 </td>
-                <td>${ad.paymentStatus || '미입금'}</td>
+                <td>
+                    <span class="payment-status ${paymentClass}">${paymentText}</span>
+                </td>
                 <td>${formatDate(ad.createdAt)}</td>
                 <td>${ad.views || 0}</td>
                 <td>${ad.inquiries || 0}</td>

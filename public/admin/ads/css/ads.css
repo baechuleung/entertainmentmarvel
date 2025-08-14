@@ -1,4 +1,20 @@
-/* 광고 관리 페이지 스타일 */
+/* /admin/ads/css/ads.css - 광고 관리 페이지 스타일 (정리된 버전) */
+
+/* ========== 페이지 레이아웃 ========== */
+.page-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin: 0;
+}
+
+/* ========== 필터 섹션 ========== */
 .filters {
     display: flex;
     gap: 10px;
@@ -23,75 +39,72 @@
     min-width: 200px;
 }
 
-/* 상태 배지 */
-.status-badge {
-    padding: 4px 8px;
+/* ========== 버튼 스타일 ========== */
+.btn {
+    padding: 8px 16px;
+    border: none;
     border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
 }
 
-.status-badge.active {
-    background-color: #27ae60;
-    color: white;
-}
-
-.status-badge.inactive {
-    background-color: #95a5a6;
-    color: white;
-}
-
-/* 입금 상태 배지 */
-.payment-badge {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.payment-badge.paid {
+.btn-primary {
     background-color: #3498db;
     color: white;
 }
 
-.payment-badge.unpaid {
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.btn-danger {
     background-color: #e74c3c;
     color: white;
 }
 
-/* 마감일 스타일 */
-.end-date {
-    font-size: 12px;
+.btn-danger:hover {
+    background-color: #c0392b;
 }
 
-.end-date.expired {
-    color: #e74c3c;
-    font-weight: bold;
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
 }
 
-.end-date.soon {
-    color: #f39c12;
+.btn-secondary:hover {
+    background-color: #5a6268;
 }
 
-/* 액션 버튼 */
-.action-buttons {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
-}
-
-.action-buttons .btn {
+.btn-sm {
     padding: 5px 10px;
     font-size: 12px;
 }
 
-/* 테이블 스타일 개선 */
+/* ========== 데이터 테이블 ========== */
 .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
     font-size: 14px;
 }
 
+.data-table th,
 .data-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
     vertical-align: middle;
+}
+
+.data-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+.data-table tr:hover {
+    background-color: #f8f9fa;
 }
 
 .data-table th:first-child,
@@ -104,7 +117,62 @@
     width: 180px;
 }
 
-/* 모달 스타일 */
+/* ========== 상태 배지 ========== */
+.status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.status.status-active {
+    background-color: #27ae60;
+    color: white;
+}
+
+.status.status-inactive {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.status.status-pending {
+    background-color: #f39c12;
+    color: white;
+}
+
+/* ========== 입금 상태 스타일 ========== */
+.payment-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.payment-status.paid {
+    background-color: #00c851;  /* 녹색 - 입금완료 */
+    color: white;
+}
+
+.payment-status.unpaid {
+    background-color: #ff4444;  /* 빨간색 - 미입금 */
+    color: white;
+}
+
+.payment-status.pending {
+    background-color: #ffbb33;  /* 주황색 - 입금대기 */
+    color: white;
+}
+
+/* ========== 액션 버튼 그룹 ========== */
+.action-buttons {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+/* ========== 모달 스타일 ========== */
 .modal {
     display: none;
     position: fixed;
@@ -158,7 +226,7 @@
     padding: 20px;
 }
 
-/* 폼 스타일 */
+/* ========== 폼 스타일 ========== */
 .form-group {
     margin-bottom: 20px;
 }
@@ -171,7 +239,9 @@
 }
 
 .form-group input[type="text"],
-.form-group input[type="date"] {
+.form-group input[type="date"],
+.form-group select,
+.form-group textarea {
     width: 100%;
     padding: 8px 12px;
     border: 1px solid #ced4da;
@@ -188,17 +258,14 @@
     margin-right: 8px;
 }
 
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
 .form-actions {
     display: flex;
     gap: 10px;
     justify-content: flex-end;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background-color: #5a6268;
+    margin-top: 20px;
 }

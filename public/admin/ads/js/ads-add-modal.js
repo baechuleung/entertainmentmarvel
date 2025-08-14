@@ -193,18 +193,21 @@ async function initializeModal() {
     // 커스텀 셀렉트 초기화
     setupAddCustomSelects();
     
-    // 썸네일 업로드 설정 - add-thumbnail 요소들 사용
+    // ads-add-modal.js의 initializeModal 함수 내 썸네일 업로드 부분 수정
+
+    // 썸네일 업로드 설정 - 수정된 버전
     const thumbnailInput = document.getElementById('add-thumbnail-input');
-    const thumbnailUploadBtn = document.getElementById('add-thumbnail-upload-btn');
     const thumbnailPreview = document.getElementById('add-thumbnail-preview');
     const thumbnailImage = document.getElementById('add-thumbnail-image');
     const deleteThumbnailBtn = document.getElementById('add-delete-thumbnail');
-    
-    if (thumbnailInput && thumbnailUploadBtn) {
-        thumbnailUploadBtn.addEventListener('click', () => {
+
+    if (thumbnailInput && thumbnailPreview) {
+        // 썸네일 프리뷰 영역 클릭 시 파일 선택
+        thumbnailPreview.addEventListener('click', () => {
             thumbnailInput.click();
         });
         
+        // 파일 선택 시 미리보기
         thumbnailInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file && file.type.startsWith('image/')) {
@@ -213,11 +216,66 @@ async function initializeModal() {
             }
         });
         
+        // 삭제 버튼
         if (deleteThumbnailBtn) {
-            deleteThumbnailBtn.addEventListener('click', function() {
+            deleteThumbnailBtn.addEventListener('click', function(e) {
+                e.stopPropagation(); // 프리뷰 클릭 이벤트 방지
                 clearThumbnail();
             });
         }
+    }
+
+    // showThumbnailPreview 함수 수정
+    function showThumbnailPreview(file) {
+        const thumbnailPreview = document.getElementById('add-thumbnail-preview');
+        const deleteThumbnailBtn = document.getElementById('add-delete-thumbnail');
+        
+        if (!file || !thumbnailPreview) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // 배경 이미지로 설정
+            thumbnailPreview.style.backgroundImage = `url(${e.target.result})`;
+            thumbnailPreview.style.backgroundSize = 'cover';
+            thumbnailPreview.style.backgroundPosition = 'center';
+            
+            // 업로드 텍스트 숨기기
+            const uploadText = thumbnailPreview.querySelector('.upload-text');
+            if (uploadText) {
+                uploadText.style.display = 'none';
+            }
+            
+            // 삭제 버튼 표시
+            if (deleteThumbnailBtn) {
+                deleteThumbnailBtn.style.display = 'block';
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // clearThumbnail 함수 수정
+    function clearThumbnail() {
+        const thumbnailInput = document.getElementById('add-thumbnail-input');
+        const thumbnailPreview = document.getElementById('add-thumbnail-preview');
+        const deleteThumbnailBtn = document.getElementById('add-delete-thumbnail');
+        
+        if (thumbnailInput) thumbnailInput.value = '';
+        
+        if (thumbnailPreview) {
+            thumbnailPreview.style.backgroundImage = '';
+            
+            // 업로드 텍스트 다시 표시
+            const uploadText = thumbnailPreview.querySelector('.upload-text');
+            if (uploadText) {
+                uploadText.style.display = 'block';
+            }
+        }
+        
+        if (deleteThumbnailBtn) {
+            deleteThumbnailBtn.style.display = 'none';
+        }
+        
+        thumbnailFile = null;
     }
 }
 
