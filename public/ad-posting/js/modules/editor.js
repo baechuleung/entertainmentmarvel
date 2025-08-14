@@ -65,7 +65,9 @@ export function createImageHandler(quill, previewImages) {
             let currentIndex = range.index;
             
             // 순차적으로 처리하기 위해 for...of 사용
-            for (const file of files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
                 // Promise를 사용하여 각 파일이 완전히 처리될 때까지 대기
                 await new Promise((resolve) => {
                     const reader = new FileReader();
@@ -78,8 +80,19 @@ export function createImageHandler(quill, previewImages) {
                         // base64와 File 객체 매핑 저장
                         previewImages.set(base64, file);
                         
-                        // 다음 이미지 위치 계산 (이미지 블록 = 1)
+                        // 다음 위치로 이동 (이미지 = 1)
                         currentIndex += 1;
+                        
+                        // 마지막 이미지가 아니면 줄바꿈 2개 추가
+                        if (i < files.length - 1) {
+                            // 첫 번째 줄바꿈
+                            quill.insertText(currentIndex, '\n');
+                            currentIndex += 1;
+                            
+                            // 두 번째 줄바꿈 (빈 줄 생성)
+                            quill.insertText(currentIndex, '\n');
+                            currentIndex += 1;
+                        }
                         
                         resolve();
                     };
@@ -88,7 +101,7 @@ export function createImageHandler(quill, previewImages) {
                 });
             }
             
-            // 모든 이미지 삽입 후 커서를 마지막 이미지 다음으로 이동
+            // 모든 이미지 삽입 후 커서를 마지막 위치로 이동
             quill.setSelection(currentIndex);
         });
     };
