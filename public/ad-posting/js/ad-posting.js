@@ -360,19 +360,23 @@ async function handleSubmit(e) {
         if (thumbnailFile || detailFiles.length > 0) {
             console.log('이미지 업로드 API 호출 준비...');
             
-            // startBackgroundUpload 호출 - 이제 API 호출 시작만 확인
-            const uploadResult = await startBackgroundUpload(
+            // startBackgroundUpload 호출 - await 없이 백그라운드에서 실행
+            startBackgroundUpload(
                 adId, 
                 thumbnailFile, 
                 detailFiles, 
                 [] // eventFiles는 이제 없음
-            );
+            ).then(uploadResult => {
+                if (uploadResult.success) {
+                    console.log('백그라운드 업로드 성공');
+                } else {
+                    console.error('백그라운드 업로드 실패:', uploadResult.error);
+                }
+            }).catch(error => {
+                console.error('백그라운드 업로드 에러:', error);
+            });
             
-            if (uploadResult.success) {
-                console.log('API 호출 시작 확인됨');
-            } else {
-                console.error('이미지 업로드 시작 실패:', uploadResult.error);
-            }
+            console.log('API 호출 시작됨 - 백그라운드에서 진행 중');
         }
 
         // 8. 페이지 이동 전 1초 대기

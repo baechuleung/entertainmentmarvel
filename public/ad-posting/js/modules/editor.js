@@ -57,21 +57,39 @@ export function createImageHandler(quill, previewImages) {
         input.addEventListener('change', async function() {
             const files = Array.from(input.files);
             
+            // 파일명으로 정렬
+            files.sort((a, b) => a.name.localeCompare(b.name));
+            
+            // 현재 커서 위치 저장
+            const range = quill.getSelection() || { index: 0 };
+            let currentIndex = range.index;
+            
+            // 순차적으로 처리하기 위해 for...of 사용
             for (const file of files) {
-                // 이미지를 base64로 변환
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const base64 = e.target.result;
-                    
-                    // Quill 에디터에 이미지 삽입
-                    const range = quill.getSelection() || { index: 0 };
-                    quill.insertEmbed(range.index, 'image', base64);
-                    
-                    // base64와 File 객체 매핑 저장
-                    previewImages.set(base64, file);
-                };
-                reader.readAsDataURL(file);
+                // Promise를 사용하여 각 파일이 완전히 처리될 때까지 대기
+                await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const base64 = e.target.result;
+                        
+                        // Quill 에디터에 이미지 삽입
+                        quill.insertEmbed(currentIndex, 'image', base64);
+                        
+                        // base64와 File 객체 매핑 저장
+                        previewImages.set(base64, file);
+                        
+                        // 다음 이미지 위치 계산 (이미지 블록 = 1)
+                        currentIndex += 1;
+                        
+                        resolve();
+                    };
+                    reader.onerror = () => resolve();
+                    reader.readAsDataURL(file);
+                });
             }
+            
+            // 모든 이미지 삽입 후 커서를 마지막 이미지 다음으로 이동
+            quill.setSelection(currentIndex);
         });
     };
 }
