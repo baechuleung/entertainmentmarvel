@@ -5,7 +5,7 @@ import { auth, rtdb } from '/js/firebase-config.js';
 import { ref, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
 // 백엔드 API URL
-const UPLOAD_API_URL = 'https://ad-imagekit-upload-background-enujtcasca-uc.a.run.app';
+const UPLOAD_API_URL = 'https://ad-imagekit-upload-background-txjekregmq-uc.a.run.app';
 
 // Base64 변환 헬퍼 함수
 async function fileToBase64(file) {
@@ -17,6 +17,7 @@ async function fileToBase64(file) {
     });
 }
 
+// 백그라운드 업로드 시작 - 동기적으로 처리하여 실제 URL 반환
 // 백그라운드 업로드 시작 - 동기적으로 처리하여 실제 URL 반환
 export async function startBackgroundUpload(adId, thumbnailFile, detailFiles, eventFiles) {
     try {
@@ -100,23 +101,21 @@ export async function startBackgroundUpload(adId, thumbnailFile, detailFiles, ev
             throw new Error('이미지 파일 크기가 너무 큽니다. 이미지를 압축하거나 개수를 줄여주세요.');
         }
 
-        // fetch 사용하여 POST 요청
+        // API 호출 시작을 알림
         console.log('API 호출 시작:', UPLOAD_API_URL);
         
-        try {
-            const response = await fetch(UPLOAD_API_URL, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(requestData),
-                mode: 'cors'  // CORS 모드 명시
-            });
-            
+        // 백그라운드로 fetch 처리 - await 없이 바로 실행
+        fetch(UPLOAD_API_URL, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(requestData),
+            mode: 'cors'
+        }).then(async response => {
             console.log('API 응답 상태:', response.status);
             
-            // 응답 텍스트 먼저 받기
             const responseText = await response.text();
             console.log('API 응답 본문:', responseText);
             
@@ -125,69 +124,30 @@ export async function startBackgroundUpload(adId, thumbnailFile, detailFiles, ev
                     const result = JSON.parse(responseText);
                     console.log('✅ 이미지 업로드 성공:', result);
                     
-                    // 업로드된 URL들 로그
+                    // DB 업데이트는 백그라운드에서 처리
                     if (result.success && result.results) {
-                        console.log('업로드된 이미지 URL:');
-                        
-                        if (result.results.thumbnail) {
-                            console.log('  - 썸네일:', result.results.thumbnail);
-                        }
-                        
-                        if (result.results.detailImages) {
-                            result.results.detailImages.forEach((url, idx) => {
-                                console.log(`  - 상세 이미지 ${idx + 1}:`, url);
-                            });
-                        }
-                        
-                        if (result.results.eventImages) {
-                            result.results.eventImages.forEach((url, idx) => {
-                                console.log(`  - 이벤트 이미지 ${idx + 1}:`, url);
-                            });
-                        }
-                        
-                        // 성공 시 결과 반환
-                        return {
-                            success: true,
-                            results: result.results,
-                            uploadId: result.uploadId
-                        };
-                    } else {
-                        console.error('업로드 응답에 결과가 없음:', result);
-                        return {
-                            success: false,
-                            error: 'No results in response'
-                        };
+                        await updateImageUrls(adId, result);
                     }
+                    
+                    return result;
                 } catch (parseError) {
                     console.error('응답 파싱 실패:', parseError);
-                    return { 
-                        success: false, 
-                        error: 'Invalid JSON response' 
-                    };
+                    return { success: false, error: 'Invalid JSON response' };
                 }
             } else {
                 console.error('❌ API 에러 응답:', response.status, responseText);
-                return { 
-                    success: false, 
-                    error: `업로드 실패: ${response.status} - ${responseText}` 
-                };
+                return { success: false, error: `업로드 실패: ${response.status}` };
             }
-        } catch (error) {
-            console.error('❌ 네트워크 에러 상세:', error);
-            console.error('에러 타입:', error.name);
-            console.error('에러 메시지:', error.message);
-            console.error('에러 스택:', error.stack);
-            
-            // CORS 에러 체크
-            if (error.message.includes('CORS') || error.message.includes('fetch')) {
-                console.error('CORS 에러 발생! 서버 CORS 설정을 확인하세요.');
-            }
-            
-            return { 
-                success: false, 
-                error: error.message || 'Upload failed' 
-            };
-        }
+        }).catch(error => {
+            console.error('❌ 네트워크 에러:', error);
+            return { success: false, error: error.message };
+        });
+        
+        // API 호출이 시작되었으므로 바로 반환
+        return { 
+            success: true, 
+            message: 'Upload started in background'
+        };
         
     } catch (error) {
         console.error('이미지 업로드 실패:', error);
@@ -263,7 +223,7 @@ export async function uploadAdEventImages(files, adId) {
 // 이미지 삭제 (기존 유지)
 export async function deleteAdImages(fileUrls, userId) {
     try {
-        const response = await fetch('https://imagekit-delete-enujtcasca-uc.a.run.app', {
+        const response = await fetch('https://imagekit-delete-txjekregmq-uc.a.run.app', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -297,7 +257,7 @@ export async function deleteAdFolder(adId, userId) {
         
         console.log('광고 폴더 삭제 시작:', `/entmarvel/advertise/${adId}/`);
         
-        const response = await fetch('https://imagekit-delete-enujtcasca-uc.a.run.app', {
+        const response = await fetch('https://imagekit-delete-txjekregmq-uc.a.run.app', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

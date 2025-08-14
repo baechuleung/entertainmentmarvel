@@ -1,4 +1,3 @@
-// /ad-posting/js/ad-posting.js
 import { auth, db, rtdb } from '/js/firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
@@ -265,56 +264,86 @@ async function handleSubmit(e) {
         const adId = newAdRef.key;
         console.log('생성된 광고 ID:', adId);
         
-        // 2. 에디터 콘텐츠 복사
+        // 2. 에디터 콘텐츠 처리 - 정규식으로 모든 base64 이미지 교체
         let contentHtml = quill.root.innerHTML;
         let eventHtml = eventQuill && categoryInput.value === '유흥주점' ? eventQuill.root.innerHTML : '';
         
         // 3. 이미지 파일 수집
         const detailFiles = [];
-        const detailImageMap = new Map(); // base64 -> index 매핑
-        const detailImages = quill.root.querySelectorAll('img');
+        const eventFiles = [];
+        
+        // 상세 이미지 처리 - 정규식으로 base64 이미지 찾아서 교체
+        const detailImgRegex = /<img[^>]+src="(data:image\/[^"]+)"[^>]*>/gi;
+        let detailMatch;
         let detailIndex = 0;
         
-        detailImages.forEach((img) => {
-            if (img.src.startsWith('data:')) {
-                const file = previewImages.get(img.src);
-                if (file) {
-                    detailFiles.push(file);
-                    detailImageMap.set(img.src, detailIndex);
-                    
-                    // 임시 placeholder 생성 (나중에 교체할 수 있도록)
-                    const placeholder = `DETAIL_IMAGE_${detailIndex}`;
-                    contentHtml = contentHtml.replace(img.src, placeholder);
-                    detailIndex++;
-                }
+        const detailReplacements = [];
+        
+        while ((detailMatch = detailImgRegex.exec(contentHtml)) !== null) {
+            const fullImgTag = detailMatch[0];
+            const base64Src = detailMatch[1];
+            
+            // previewImages에서 파일 찾기
+            const file = previewImages.get(base64Src);
+            if (file) {
+                detailFiles.push(file);
+                // 교체할 내용 저장
+                detailReplacements.push({
+                    original: fullImgTag,
+                    replacement: `<img src="DETAIL_IMAGE_${detailIndex}">`
+                });
+                detailIndex++;
             }
+        }
+        
+        // 모든 교체 수행
+        detailReplacements.forEach(({original, replacement}) => {
+            contentHtml = contentHtml.replace(original, replacement);
         });
         
-        // 이벤트 이미지 파일 수집
-        const eventFiles = [];
-        const eventImageMap = new Map();
-        let eventIndex = 0;
-        
+        // 이벤트 이미지 처리
         if (eventQuill && categoryInput.value === '유흥주점') {
-            const eventImages = eventQuill.root.querySelectorAll('img');
-            eventImages.forEach((img) => {
-                if (img.src.startsWith('data:')) {
-                    const file = eventPreviewImages.get(img.src);
-                    if (file) {
-                        eventFiles.push(file);
-                        eventImageMap.set(img.src, eventIndex);
-                        
-                        // 임시 placeholder 생성
-                        const placeholder = `EVENT_IMAGE_${eventIndex}`;
-                        eventHtml = eventHtml.replace(img.src, placeholder);
-                        eventIndex++;
-                    }
+            const eventImgRegex = /<img[^>]+src="(data:image\/[^"]+)"[^>]*>/gi;
+            let eventMatch;
+            let eventIndex = 0;
+            
+            const eventReplacements = [];
+            
+            while ((eventMatch = eventImgRegex.exec(eventHtml)) !== null) {
+                const fullImgTag = eventMatch[0];
+                const base64Src = eventMatch[1];
+                
+                // eventPreviewImages에서 파일 찾기
+                const file = eventPreviewImages.get(base64Src);
+                if (file) {
+                    eventFiles.push(file);
+                    // 교체할 내용 저장
+                    eventReplacements.push({
+                        original: fullImgTag,
+                        replacement: `<img src="EVENT_IMAGE_${eventIndex}">`
+                    });
+                    eventIndex++;
                 }
+            }
+            
+            // 모든 교체 수행
+            eventReplacements.forEach(({original, replacement}) => {
+                eventHtml = eventHtml.replace(original, replacement);
             });
         }
         
+        // 디버깅: placeholder가 제대로 생성되었는지 확인
+        console.log('Content HTML (처음 200자):', contentHtml.substring(0, 200));
+        console.log('Event HTML (처음 200자):', eventHtml.substring(0, 200));
+        console.log('상세 이미지 파일 수:', detailFiles.length);
+        console.log('이벤트 이미지 파일 수:', eventFiles.length);
+        
         // 4. 카테고리별 추가 데이터 수집
         const categoryData = collectCategoryData(categoryInput.value, eventQuill);
+        // eventInfo는 이미 처리한 eventHtml로 덮어쓰기
+        if (categoryInput.value === '유흥주점') {
+            categoryData.eventInfo = eventHtml;
+        }
         
         // 5. 광고 데이터 생성 (placeholder 포함)
         const adData = {
@@ -361,16 +390,23 @@ async function handleSubmit(e) {
         await set(newAdRef, adData);
         console.log('광고 저장 완료:', adId);
         
-        // 7. 백그라운드에서 이미지 업로드 (fire and forget)
+        // 7. 이미지 업로드 API 호출
         if (thumbnailFile || detailFiles.length > 0 || eventFiles.length > 0) {
-            console.log('백그라운드 업로드 시작...');
+            console.log('이미지 업로드 API 호출 준비...');
             
-            // 응답을 기다리지 않고 바로 실행
-            startBackgroundUpload(adId, thumbnailFile, detailFiles, eventFiles);
-            // .then이나 await 없이 바로 진행
+            // startBackgroundUpload 호출 - 이제 API 호출 시작만 확인
+            const uploadResult = await startBackgroundUpload(adId, thumbnailFile, detailFiles, eventFiles);
+            
+            if (uploadResult.success) {
+                console.log('API 호출 시작 확인됨');
+                // 백그라운드에서 계속 처리됨
+            } else {
+                console.error('이미지 업로드 시작 실패:', uploadResult.error);
+                // 실패해도 광고는 등록되었으므로 계속 진행
+            }
         }
 
-        // 8. 즉시 성공 메시지 & 페이지 이동
+        // 8. 바로 페이지 이동
         alert('광고가 성공적으로 등록되었습니다! 이미지는 백그라운드에서 업로드됩니다.');
 
         if (currentUserData.userType === 'administrator') {

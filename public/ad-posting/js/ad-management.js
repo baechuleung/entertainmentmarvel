@@ -97,6 +97,36 @@ function loadUserAd() {
     });
 }
 
+// placeholder를 기본 이미지로 교체하는 함수
+function replaceImagePlaceholders(htmlContent) {
+    if (!htmlContent) return '';
+    
+    // DETAIL_IMAGE_X placeholder를 기본 이미지로 교체
+    htmlContent = htmlContent.replace(/src="DETAIL_IMAGE_\d+"/g, 'src="/img/upload/default.gif"');
+    
+    // EVENT_IMAGE_X placeholder를 기본 이미지로 교체
+    htmlContent = htmlContent.replace(/src="EVENT_IMAGE_\d+"/g, 'src="/img/upload/default.gif"');
+    
+    // 빈 src나 잘못된 src도 기본 이미지로 교체
+    htmlContent = htmlContent.replace(/src=""/g, 'src="/img/upload/default.gif"');
+    
+    return htmlContent;
+}
+
+// 썸네일 URL 체크 및 기본 이미지 설정 함수
+function getThumbnailUrl(thumbnail) {
+    // 썸네일이 없거나 placeholder인 경우
+    if (!thumbnail || 
+        thumbnail === '' || 
+        thumbnail.includes('THUMBNAIL_') ||
+        thumbnail === 'uploading') {
+        return '/img/upload/thumbnail.gif';
+    }
+    
+    // 정상적인 URL인 경우
+    return thumbnail;
+}
+
 // 광고 상세 정보 표시
 function displayAdDetail() {
     if (!currentAd) return;
@@ -104,8 +134,13 @@ function displayAdDetail() {
     // 각 섹션 표시
     showAdSections();
     
-    // 썸네일 표시
-    adThumbnail.src = currentAd.thumbnail || '/img/default-thumb.jpg';
+    // 썸네일 표시 (placeholder 체크)
+    adThumbnail.src = getThumbnailUrl(currentAd.thumbnail);
+    
+    // 썸네일 로드 실패 시 기본 이미지로 대체
+    adThumbnail.onerror = function() {
+        this.src = '/img/upload/thumbnail.gif';
+    };
     
     // 제목 표시 (businessName - author 형식)
     adTitle.textContent = `${currentAd.businessName || '업소명 없음'} - ${currentAd.author || '작성자 없음'}`;
@@ -116,12 +151,53 @@ function displayAdDetail() {
         `${currentAd.region || ''}`;
     adTypeAuthor.textContent = `${currentAd.businessType || '업종'} - ${location}`.trim();
     
-    // 광고 설명 (HTML 콘텐츠)
+    // 광고 설명 (HTML 콘텐츠 - placeholder 교체)
     const adDescriptionContent = document.getElementById('ad-description-content');
     if (currentAd.content) {
-        adDescriptionContent.innerHTML = currentAd.content;
+        // placeholder를 기본 이미지로 교체
+        let processedContent = replaceImagePlaceholders(currentAd.content);
+        adDescriptionContent.innerHTML = processedContent;
+        
+        // 모든 이미지에 onerror 핸들러 추가
+        const images = adDescriptionContent.querySelectorAll('img');
+        images.forEach(img => {
+            img.onerror = function() {
+                this.src = '/img/upload/default.png';
+            };
+        });
     } else {
         adDescriptionContent.innerHTML = '<p>광고 상세 내용이 없습니다.</p>';
+    }
+    
+    // 이벤트 정보가 있는 경우 (유흥주점 카테고리)
+    if (currentAd.eventInfo) {
+        // eventInfo도 placeholder 교체
+        let processedEventInfo = replaceImagePlaceholders(currentAd.eventInfo);
+        
+        // 이벤트 섹션이 없다면 생성
+        let eventSection = document.getElementById('ad-event-info');
+        if (!eventSection) {
+            eventSection = document.createElement('div');
+            eventSection.id = 'ad-event-info';
+            eventSection.className = 'ad-description';
+            eventSection.innerHTML = `
+                <h2>이벤트 정보</h2>
+                <div class="ad-description-content" id="ad-event-content"></div>
+            `;
+            // 광고 상세 다음에 삽입
+            adDescription.insertAdjacentElement('afterend', eventSection);
+        }
+        
+        const eventContent = document.getElementById('ad-event-content');
+        eventContent.innerHTML = processedEventInfo;
+        
+        // 이벤트 이미지에도 onerror 핸들러 추가
+        const eventImages = eventContent.querySelectorAll('img');
+        eventImages.forEach(img => {
+            img.onerror = function() {
+                this.src = '/img/upload/default.png';
+            };
+        });
     }
     
     // 통계 정보
@@ -164,12 +240,14 @@ function hideAdSections() {
     actionButtons.style.display = 'none';
 }
 
-// ImageKit에서 이미지들 삭제 (기존 함수 - 폴백용)
+// ImageKit에서 이미지들 삭제 (기존 함수 - 콜백용)
 async function deleteAllAdImages(ad) {
     const imageUrls = [];
     
-    // 썸네일 수집
-    if (ad.thumbnail && ad.thumbnail.includes('ik.imagekit.io')) {
+    // 썸네일 수집 (placeholder가 아닌 경우만)
+    if (ad.thumbnail && 
+        ad.thumbnail.includes('ik.imagekit.io') && 
+        !ad.thumbnail.includes('THUMBNAIL_')) {
         imageUrls.push(ad.thumbnail);
     }
     
@@ -182,25 +260,29 @@ async function deleteAllAdImages(ad) {
         });
     }
     
-    // 에디터 내용에서 이미지 URL 추출
+    // 에디터 내용에서 이미지 URL 추출 (placeholder 제외)
     if (ad.content) {
         const imgRegex = /<img[^>]+src="([^">]+)"/g;
         let match;
         while ((match = imgRegex.exec(ad.content)) !== null) {
             const imageUrl = match[1];
-            if (imageUrl && imageUrl.includes('ik.imagekit.io')) {
+            if (imageUrl && 
+                imageUrl.includes('ik.imagekit.io') && 
+                !imageUrl.includes('DETAIL_IMAGE_')) {
                 imageUrls.push(imageUrl);
             }
         }
     }
     
-    // 이벤트 내용에서 이미지 URL 추출 (eventInfo)
+    // 이벤트 내용에서 이미지 URL 추출 (placeholder 제외)
     if (ad.eventInfo) {
         const imgRegex = /<img[^>]+src="([^">]+)"/g;
         let match;
         while ((match = imgRegex.exec(ad.eventInfo)) !== null) {
             const imageUrl = match[1];
-            if (imageUrl && imageUrl.includes('ik.imagekit.io')) {
+            if (imageUrl && 
+                imageUrl.includes('ik.imagekit.io') && 
+                !imageUrl.includes('EVENT_IMAGE_')) {
                 imageUrls.push(imageUrl);
             }
         }
@@ -213,7 +295,7 @@ async function deleteAllAdImages(ad) {
     
     try {
         // 배포된 Firebase Function 호출
-        const response = await fetch('https://imagekit-delete-enujtcasca-uc.a.run.app', {
+        const response = await fetch('https://imagekit-delete-txjekregmq-uc.a.run.app', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
