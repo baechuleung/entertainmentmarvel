@@ -1,12 +1,12 @@
-<!-- admin/ads/ads-add-modal.html - 광고 추가 모달 -->
-<div class="modal" id="ad-add-modal">
+<!-- admin/ads/ads-edit-modal.html - 광고 수정 모달 -->
+<div class="modal" id="ad-edit-modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h2>새 광고 추가</h2>
-            <button class="modal-close" id="add-modal-close">&times;</button>
+            <h2>광고 수정</h2>
+            <button class="modal-close" id="edit-modal-close">&times;</button>
         </div>
         <div class="modal-body">
-            <form id="ad-posting-form" class="ad-form">
+            <form id="ad-edit-form" class="ad-form">
                 <!-- 1. 기본정보 섹션 -->
                 <div class="form-section">
                     <h3 class="section-title">1. 기본정보 입력</h3>
@@ -39,7 +39,7 @@
                     <!-- 업소명 -->
                     <div class="form-group">
                         <label for="business-name">업소명 *</label>
-                        <input type="text" id="business-name" name="business-name" placeholder="예) 도파민 제니상무 (15자 이내로 작성해주세요)" maxlength="15" required>
+                        <input type="text" id="business-name" name="business-name" placeholder="예) 도파민 제니상무 (15자 이내)" maxlength="15" required>
                     </div>
                     
                     <!-- 지역과 도시 (한 줄) -->
@@ -71,7 +71,7 @@
                     <!-- 전화번호 -->
                     <div class="form-group">
                         <label for="phone">전화번호 *</label>
-                        <input type="tel" id="phone" name="phone" placeholder="예) 010-1234-5678 (전화 발신이 가능한 번호여야 합니다)" required>
+                        <input type="tel" id="phone" name="phone" placeholder="예) 010-1234-5678" required>
                     </div>
                     
                     <!-- 카카오톡, 텔레그램 (한 줄) -->
@@ -92,23 +92,15 @@
                 <div class="form-section">
                     <h3 class="section-title">3. 광고 내용</h3>
                     
-                    <!-- 광고 기간 및 입금 정보 (관리자용) -->
+                    <!-- 상태 관리 (관리자 전용) -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="start-date">광고 시작일</label>
-                            <input type="date" id="start-date" name="startDate">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="expiry-date">광고 종료일</label>
-                            <input type="date" id="expiry-date" name="expiryDate">
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="payment-amount">입금액</label>
-                            <input type="text" id="payment-amount" name="paymentAmount" placeholder="예: 300,000원">
+                            <label for="status">광고 상태</label>
+                            <select id="status" name="status">
+                                <option value="pending">승인대기</option>
+                                <option value="active">활성</option>
+                                <option value="inactive">비활성</option>
+                            </select>
                         </div>
                         
                         <div class="form-group">
@@ -125,7 +117,7 @@
                     <div class="karaoke-field" id="entertainment-fields" style="display:none;">
                         <div class="form-group">
                             <label for="business-hours">영업시간</label>
-                            <input type="text" id="business-hours" name="businessHours" placeholder="예) PM7:00 ~ AM5:00 (100일휴무)">
+                            <input type="text" id="business-hours" name="businessHours" placeholder="예: PM 7:00 ~ AM 5:00">
                         </div>
                         
                         <div class="form-group">
@@ -141,22 +133,22 @@
                     <div class="massage-field" id="massage-fields" style="display:none;">
                         <div class="form-group">
                             <label for="massage-business-hours">영업시간</label>
-                            <input type="text" id="massage-business-hours" name="massageBusinessHours" placeholder="예) 10:00~22:00 (연중무휴 또는 휴무일 표기)">
+                            <input type="text" id="massage-business-hours" name="massageBusinessHours" placeholder="예: AM 10:00 ~ PM 10:00">
                         </div>
                         
                         <div class="form-group">
                             <label for="closed-days">휴무일</label>
-                            <input type="text" id="closed-days" name="closedDays" placeholder="예) 연중무휴, 매주 일요일 휴무 등">
+                            <input type="text" id="closed-days" name="closedDays" placeholder="예: 매주 일요일">
                         </div>
                         
                         <div class="form-group">
                             <label for="parking-info">주차안내</label>
-                            <input type="text" id="parking-info" name="parkingInfo" placeholder="예) 무료주차 2시간, 발렛가능, 인근 유료주차장 등">
+                            <input type="text" id="parking-info" name="parkingInfo" placeholder="예: 건물 뒤편 무료주차 가능">
                         </div>
                         
                         <div class="form-group">
                             <label for="directions">오시는 길</label>
-                            <textarea id="directions" name="directions" rows="3" placeholder="예) 강남역 5번 출구에서 도보 3분, ○○건물 3층"></textarea>
+                            <textarea id="directions" name="directions" rows="3" placeholder="예: 지하철 2호선 강남역 3번 출구에서 도보 5분"></textarea>
                         </div>
                         
                         <div class="form-group">
@@ -183,7 +175,7 @@
                         <div class="thumbnail-upload-wrapper">
                             <input type="file" id="thumbnail-input" accept="image/*" style="display:none;">
                             <button type="button" id="thumbnail-upload-btn" class="btn btn-secondary">
-                                📷 썸네일 업로드
+                                📷 썸네일 변경
                             </button>
                             <div id="thumbnail-preview" class="thumbnail-preview" style="display:none;">
                                 <img id="thumbnail-image" src="" alt="썸네일">
@@ -204,8 +196,8 @@
                 
                 <!-- 제출 버튼 -->
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" id="add-cancel-btn">취소</button>
-                    <button type="submit" class="btn btn-primary" id="add-submit-btn">광고 등록</button>
+                    <button type="button" class="btn btn-secondary" id="edit-cancel-btn">취소</button>
+                    <button type="submit" class="btn btn-primary" id="edit-submit-btn">광고 수정</button>
                 </div>
             </form>
         </div>
