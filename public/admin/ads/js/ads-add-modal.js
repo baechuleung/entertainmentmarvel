@@ -1,10 +1,11 @@
 // admin/ads/js/ads-add-modal.js - 광고 추가 모달
+// ad-posting/js/modules/index.js를 완전히 동일하게 사용
 
 import { rtdb, db, auth } from '/js/firebase-config.js';
 import { ref, push, set } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-// ad-posting 모듈에서 필요한 기능들 import
+// ad-posting 모듈에서 필요한 기능들 import (완전히 동일한 구조)
 import {
     // 데이터 관련
     loadCategoryData,
@@ -111,54 +112,32 @@ async function initializeModal() {
         ]);
         
         // 2. 카테고리 버튼 생성
-        const categoryContainer = document.getElementById('category-buttons');
+        const categoryButtons = document.getElementById('category-buttons');
         const categoryInput = document.getElementById('category');
         
-        createCategoryButtons(categoryContainer, categoryInput, categoryData, async (categoryName) => {
-            // 업종 데이터 로드
-            const businessTypes = await loadBusinessTypes(categoryName);
-            createBusinessTypeOptions(businessTypes);
-            
-            // 카테고리별 필드 토글
-            toggleCategorySpecificFields(categoryName);
-        });
+        if (categoryButtons && categoryData) {
+            createCategoryButtons(
+                categoryButtons,
+                categoryInput,
+                categoryData,
+                async (categoryName) => {
+                    // 카테고리별 필드 표시/숨김
+                    toggleCategorySpecificFields(categoryName);
+                    
+                    // 업종 로드
+                    const types = await loadBusinessTypes(categoryName);
+                    if (types) {
+                        createBusinessTypeOptions(types);
+                    }
+                }
+            );
+        }
         
         // 3. 지역 옵션 생성
         createRegionOptions(regionData);
         
-        // 4. 커스텀 셀렉트 설정 및 지역 선택 이벤트 추가
+        // 4. 커스텀 셀렉트 초기화
         setupCustomSelects();
-        
-        // 지역 선택 시 도시 업데이트를 위한 이벤트 추가
-        const regionOptions = document.querySelectorAll('#region-options div');
-        regionOptions.forEach(option => {
-            option.addEventListener('click', async function() {
-                const regionName = this.getAttribute('data-value');
-                
-                // selectOption 함수 호출
-                const wrapper = this.closest('.custom-select');
-                const selected = wrapper.querySelector('.select-selected');
-                const input = document.getElementById('region');
-                
-                if (selected) {
-                    selected.textContent = this.textContent;
-                    selected.setAttribute('data-value', regionName);
-                }
-                
-                if (input) {
-                    input.value = regionName;
-                }
-                
-                // 드롭다운 닫기
-                const items = wrapper.querySelector('.select-items');
-                if (items) {
-                    items.classList.add('select-hide');
-                }
-                
-                // 도시 옵션 업데이트
-                await updateCityByRegion(regionName);
-            });
-        });
         
         // 5. Quill 에디터 초기화
         quillEditor = initializeQuillEditor();
@@ -167,7 +146,7 @@ async function initializeModal() {
             toolbar.addHandler('image', createImageHandler(quillEditor, previewImages));
         }
         
-        // 6. 이벤트 에디터 초기화
+        // 6. 이벤트 에디터 초기화 (건전마사지용)
         const eventEditorContainer = document.getElementById('event-editor');
         if (eventEditorContainer) {
             eventEditor = new Quill('#event-editor', {
@@ -253,10 +232,9 @@ async function handleSubmit(e) {
         return;
     }
     
-    // 버튼 비활성화
     const submitBtn = document.getElementById('add-submit-btn');
     submitBtn.disabled = true;
-    submitBtn.textContent = '처리 중...';
+    submitBtn.textContent = '등록 중...';
     
     try {
         // 폼 데이터 수집
@@ -265,62 +243,38 @@ async function handleSubmit(e) {
         // 카테고리별 데이터 수집
         const categoryData = collectCategoryData(formData.category);
         
-        // 이벤트 내용 수집
-        let eventContent = '';
-        if (eventEditor) {
-            eventContent = getEditorContent(eventEditor) || '';
+        // 이미지 처리 (placeholder 사용)
+        const processedContent = processBase64Images(content, previewImages);
+        
+        // 이벤트 에디터 내용 처리 (건전마사지인 경우)
+        let eventInfo = '';
+        if (formData.category === '건전마사지' && eventEditor) {
+            eventInfo = eventEditor.root.innerHTML;
         }
         
-        // 이미지 처리 - processBase64Images가 없으면 직접 처리
-        let processedContent = { content: content, base64Images: [] };
-        try {
-            processedContent = await processBase64Images(content, previewImages);
-        } catch (error) {
-            console.log('이미지 처리 스킵:', error);
-            processedContent = { content: content, base64Images: [] };
-        }
+        // 종료일 설정 (시작일 제거)
+        const expiryDate = formData.expiryDate || ''; // 종료일이 없으면 무제한
         
-        // 광고 기간 설정 (기본값: 오늘부터 30일)
-        const startDate = form.querySelector('#start-date')?.value || new Date().toISOString().split('T')[0];
-        const expiryDate = form.querySelector('#expiry-date')?.value || '';
+        // 입금 상태
+        const paymentStatus = formData.paymentStatus || '입금대기';
+        const paymentAmount = formData.paymentAmount || '';
         
-        // 종료일이 없으면 시작일로부터 30일 후로 설정
-        let calculatedExpiryDate = expiryDate;
-        if (!expiryDate && startDate) {
-            const start = new Date(startDate);
-            start.setDate(start.getDate() + 30);
-            calculatedExpiryDate = start.toISOString().split('T')[0];
-        }
-        
-        // 입금 정보
-        const paymentAmount = form.querySelector('#payment-amount')?.value || '';
-        const paymentStatus = form.querySelector('#payment-status')?.value || '입금대기';
-        
-        // 광고 데이터 구성 - undefined 값 방지
+        // Firebase에 저장할 데이터
         const adData = {
-            author: formData.author || '',
-            category: formData.category || '',
-            businessName: formData.businessName || '',
-            businessType: formData.businessType || '',
-            region: formData.region || '',
-            city: formData.city || '',
-            phone: formData.phone || '',
-            kakao: formData.kakao || '',
-            telegram: formData.telegram || '',
-            content: processedContent.content || content || '',
-            eventInfo: eventContent || '',
-            status: paymentStatus === '입금완료' ? 'active' : 'pending',  // 입금완료시 자동 활성화
+            ...formData,
+            content: processedContent.processedContent,
+            eventInfo: eventInfo,
+            status: paymentStatus === '입금완료' ? 'active' : 'pending',
             paymentStatus: paymentStatus,
             paymentAmount: paymentAmount,
-            startDate: startDate,
-            expiryDate: calculatedExpiryDate,
+            expiryDate: expiryDate,
             views: 0,
             calls: 0,
             createdAt: Date.now(),
             updatedAt: Date.now(),
             authorId: auth.currentUser?.uid || '',
             thumbnail: thumbnailFile ? 'uploading' : '',
-            ...categoryData  // 카테고리별 추가 데이터
+            ...categoryData
         };
         
         // undefined 값 제거
@@ -340,22 +294,21 @@ async function handleSubmit(e) {
             id: adId
         });
         
-        // 백그라운드 이미지 업로드 시도
-        try {
-            if (processedContent.base64Images.length > 0 || thumbnailFile) {
-                await startBackgroundUpload(
-                    adId,
-                    thumbnailFile,
-                    processedContent.base64Images,
-                    processedContent.content
-                );
-            }
-        } catch (error) {
-            console.log('백그라운드 업로드 스킵:', error);
+        // 백그라운드 이미지 업로드 (placeholder 교체)
+        if (thumbnailFile || processedContent.detailFiles.length > 0) {
+            await startBackgroundUpload(
+                adId,
+                thumbnailFile,
+                processedContent.detailFiles,
+                [] // eventFiles는 빈 배열
+            );
         }
         
         alert('광고가 등록되었습니다.');
         closeModal();
+        
+        // 페이지 새로고침하여 목록 업데이트
+        window.location.reload();
         
     } catch (error) {
         console.error('광고 등록 실패:', error);

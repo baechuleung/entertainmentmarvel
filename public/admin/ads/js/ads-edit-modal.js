@@ -1,9 +1,10 @@
 // admin/ads/js/ads-edit-modal.js - 광고 수정 모달
+// ad-posting/js/modules/index.js를 완전히 동일하게 사용
 
 import { rtdb } from '/js/firebase-config.js';
 import { ref, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
-// ad-posting 모듈에서 필요한 기능들 import
+// ad-posting 모듈에서 필요한 기능들 import (완전히 동일한 구조)
 import {
     // 데이터 관련
     loadCategoryData,
@@ -120,54 +121,32 @@ async function initializeModal() {
         ]);
         
         // 2. 카테고리 버튼 생성
-        const categoryContainer = document.getElementById('category-buttons');
+        const categoryButtons = document.getElementById('category-buttons');
         const categoryInput = document.getElementById('category');
         
-        createCategoryButtons(categoryContainer, categoryInput, categoryData, async (categoryName) => {
-            // 업종 데이터 로드
-            const businessTypes = await loadBusinessTypes(categoryName);
-            createBusinessTypeOptions(businessTypes);
-            
-            // 카테고리별 필드 토글
-            toggleCategorySpecificFields(categoryName);
-        });
+        if (categoryButtons && categoryData) {
+            createCategoryButtons(
+                categoryButtons,
+                categoryInput,
+                categoryData,
+                async (categoryName) => {
+                    // 카테고리별 필드 표시/숨김
+                    toggleCategorySpecificFields(categoryName);
+                    
+                    // 업종 로드
+                    const types = await loadBusinessTypes(categoryName);
+                    if (types) {
+                        createBusinessTypeOptions(types);
+                    }
+                }
+            );
+        }
         
         // 3. 지역 옵션 생성
         createRegionOptions(regionData);
         
-        // 4. 커스텀 셀렉트 설정 및 지역 선택 이벤트 추가
+        // 4. 커스텀 셀렉트 초기화
         setupCustomSelects();
-        
-        // 지역 선택 시 도시 업데이트를 위한 이벤트 추가
-        const regionOptions = document.querySelectorAll('#region-options div');
-        regionOptions.forEach(option => {
-            option.addEventListener('click', async function() {
-                const regionName = this.getAttribute('data-value');
-                
-                // selectOption 함수 호출
-                const wrapper = this.closest('.custom-select');
-                const selected = wrapper.querySelector('.select-selected');
-                const input = document.getElementById('region');
-                
-                if (selected) {
-                    selected.textContent = this.textContent;
-                    selected.setAttribute('data-value', regionName);
-                }
-                
-                if (input) {
-                    input.value = regionName;
-                }
-                
-                // 드롭다운 닫기
-                const items = wrapper.querySelector('.select-items');
-                if (items) {
-                    items.classList.add('select-hide');
-                }
-                
-                // 도시 옵션 업데이트
-                await updateCityByRegion(regionName);
-            });
-        });
         
         // 5. Quill 에디터 초기화
         quillEditor = initializeQuillEditor();
@@ -176,7 +155,7 @@ async function initializeModal() {
             toolbar.addHandler('image', createImageHandler(quillEditor, previewImages));
         }
         
-        // 6. 이벤트 에디터 초기화
+        // 6. 이벤트 에디터 초기화 (건전마사지용)
         const eventEditorContainer = document.getElementById('event-editor');
         if (eventEditorContainer) {
             eventEditor = new Quill('#event-editor', {
@@ -196,16 +175,16 @@ async function initializeModal() {
             eventToolbar.addHandler('image', createImageHandler(eventEditor, previewImages));
         }
         
-        // 6. 썸네일 업로드 설정
+        // 7. 썸네일 업로드 설정
         setupThumbnailUpload((file) => {
             thumbnailFile = file;
         });
         
-        // 7. 카테고리별 이벤트 설정
+        // 8. 카테고리별 이벤트 설정
         setupTablePriceEvents();
         setupCourseEvents();
         
-        // 8. 이벤트 리스너 설정
+        // 9. 이벤트 리스너 설정
         setupEventListeners();
         
     } catch (error) {
@@ -213,8 +192,6 @@ async function initializeModal() {
         alert('모달 초기화에 실패했습니다.');
     }
 }
-
-// 삭제 - initializeEditors 함수 완전히 제거 (index.js의 함수 사용)
 
 // 광고 데이터 로드
 async function loadAdData() {
@@ -248,26 +225,21 @@ async function loadAdData() {
         }
     }
     
-    // 광고 기간 설정
-    const startDateInput = document.getElementById('start-date');
-    if (startDateInput && currentEditingAd.startDate) {
-        startDateInput.value = currentEditingAd.startDate;
-    }
-    
+    // 종료일 설정
     const expiryDateInput = document.getElementById('expiry-date');
     if (expiryDateInput && currentEditingAd.expiryDate) {
         expiryDateInput.value = currentEditingAd.expiryDate;
     }
     
     // 입금 정보 설정
+    const paymentStatusSelect = document.getElementById('payment-status');
+    if (paymentStatusSelect && currentEditingAd.paymentStatus) {
+        setSelectValue('payment-status', currentEditingAd.paymentStatus);
+    }
+    
     const paymentAmountInput = document.getElementById('payment-amount');
     if (paymentAmountInput && currentEditingAd.paymentAmount) {
         paymentAmountInput.value = currentEditingAd.paymentAmount;
-    }
-    
-    const paymentDateInput = document.getElementById('payment-date');
-    if (paymentDateInput && currentEditingAd.paymentDate) {
-        paymentDateInput.value = currentEditingAd.paymentDate;
     }
     
     // 카테고리별 필드 표시
@@ -355,10 +327,9 @@ async function handleSubmit(e) {
         return;
     }
     
-    // 버튼 비활성화
     const submitBtn = document.getElementById('edit-submit-btn');
     submitBtn.disabled = true;
-    submitBtn.textContent = '처리 중...';
+    submitBtn.textContent = '수정 중...';
     
     try {
         // 폼 데이터 수집
@@ -367,82 +338,92 @@ async function handleSubmit(e) {
         // 카테고리별 데이터 수집
         const categoryData = collectCategoryData(formData.category);
         
-        // 이벤트 내용 수집
-        let eventContent = '';
-        if (eventEditor) {
-            eventContent = getEditorContent(eventEditor) || '';
+        // 이미지 처리 (placeholder 사용)
+        const processedContent = processBase64Images(content, previewImages);
+        
+        // 이벤트 에디터 내용 처리 (건전마사지인 경우)
+        let eventInfo = '';
+        if (formData.category === '건전마사지' && eventEditor) {
+            eventInfo = eventEditor.root.innerHTML;
         }
         
-        // 상태 정보 수집
-        const statusSelect = document.getElementById('status');
-        const paymentSelect = document.getElementById('payment-status');
+        // 입금 상태
+        const paymentStatus = formData.paymentStatus || currentEditingAd.paymentStatus || '입금대기';
+        const paymentAmount = formData.paymentAmount || currentEditingAd.paymentAmount || '';
         
-        // 광고 기간 정보
-        const startDate = form.querySelector('#start-date')?.value || currentEditingAd.startDate || '';
-        const expiryDate = form.querySelector('#expiry-date')?.value || currentEditingAd.expiryDate || '';
+        // 썸네일 처리
+        let finalThumbnail = existingThumbnail;
+        if (thumbnailFile) {
+            finalThumbnail = 'uploading'; // 새 썸네일 업로드 예정
+        }
         
-        // 입금 정보
-        const paymentAmount = form.querySelector('#payment-amount')?.value || currentEditingAd.paymentAmount || '';
-        const paymentDate = form.querySelector('#payment-date')?.value || currentEditingAd.paymentDate || '';
-        
-        // 이미지 처리
-        const processedContent = await processBase64Images(content, previewImages);
-        
-        // 변경된 이미지 확인
-        const deletedImages = existingDetailImages.filter(img => 
-            !processedContent.content.includes(img)
-        );
-        
-        // 광고 데이터 구성
-        const updatedData = {
+        // 업데이트할 데이터
+        const updateData = {
             ...formData,
-            ...categoryData,
-            content: processedContent.content,
-            eventInfo: eventContent,
-            status: statusSelect?.value || currentEditingAd.status,
-            paymentStatus: paymentSelect?.value || currentEditingAd.paymentStatus,
-            startDate: startDate,
-            expiryDate: expiryDate,
+            content: processedContent.processedContent,
+            eventInfo: eventInfo,
+            status: paymentStatus === '입금완료' ? 'active' : currentEditingAd.status,
+            paymentStatus: paymentStatus,
             paymentAmount: paymentAmount,
-            paymentDate: paymentDate,
-            updatedAt: Date.now()
+            thumbnail: finalThumbnail,
+            updatedAt: Date.now(),
+            ...categoryData
         };
         
-        // 썸네일 변경 확인
-        if (thumbnailFile) {
-            updatedData.thumbnailToUpdate = true;
-        } else if (existingThumbnail) {
-            updatedData.thumbnail = existingThumbnail;
-        }
+        // undefined 값 제거
+        Object.keys(updateData).forEach(key => {
+            if (updateData[key] === undefined) {
+                delete updateData[key];
+            }
+        });
         
         // Firebase 업데이트
         const adRef = ref(rtdb, `advertisements/${currentEditingAd.id}`);
-        await update(adRef, updatedData);
+        await update(adRef, updateData);
         
-        // 삭제된 이미지 처리
-        if (deletedImages.length > 0) {
-            await deleteAdImages(deletedImages);
-        }
-        
-        // 백그라운드 이미지 업로드
-        if (processedContent.base64Images.length > 0 || thumbnailFile) {
+        // 이미지 업로드 처리
+        if (thumbnailFile || processedContent.detailFiles.length > 0) {
+            // 기존 이미지와 새 이미지 비교하여 삭제할 이미지 찾기
+            const imagesToDelete = [];
+            
+            // 썸네일 변경 시 기존 썸네일 삭제 대상에 추가
+            if (thumbnailFile && existingThumbnail && existingThumbnail.includes('imagekit.io')) {
+                imagesToDelete.push(existingThumbnail);
+            }
+            
+            // 상세 이미지 중 교체된 것들 삭제 대상에 추가
+            existingDetailImages.forEach(url => {
+                if (!content.includes(url)) {
+                    imagesToDelete.push(url);
+                }
+            });
+            
+            // 이미지 삭제
+            if (imagesToDelete.length > 0) {
+                await deleteAdImages(imagesToDelete, currentEditingAd.authorId);
+            }
+            
+            // 새 이미지 업로드 (placeholder 교체)
             await startBackgroundUpload(
                 currentEditingAd.id,
                 thumbnailFile,
-                processedContent.base64Images,
-                processedContent.content
+                processedContent.detailFiles,
+                [] // eventFiles는 빈 배열
             );
         }
         
         alert('광고가 수정되었습니다.');
         closeModal();
         
+        // 페이지 새로고침하여 목록 업데이트
+        window.location.reload();
+        
     } catch (error) {
         console.error('광고 수정 실패:', error);
         alert('광고 수정에 실패했습니다.');
     } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = '수정';
+        submitBtn.textContent = '광고 수정';
     }
 }
 
