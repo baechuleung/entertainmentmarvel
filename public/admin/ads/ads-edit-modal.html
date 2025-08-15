@@ -1,4 +1,4 @@
-<!-- admin/ads/ads-edit-modal.html - 광고 수정 모달 (ad-edit.html과 완전히 동일한 구조) -->
+<!-- admin/ads/ads-edit-modal.html - 광고 수정 모달 (최종본) -->
 <div class="modal" id="ad-edit-modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -11,17 +11,43 @@
                 <div class="form-section">
                     <h2 class="section-title">1. 기본정보 입력</h2>
                     
-                    <!-- 작성자 -->
+                    <!-- 작성자 (관리자는 수정 가능) -->
                     <div class="form-group">
                         <label for="author">작성자</label>
-                        <input type="text" id="author" name="author" readonly>
+                        <div class="author-input-wrapper">
+                            <input type="text" id="author" name="author" placeholder="작성자 이름">
+                            <button type="button" id="btn-search-user" class="btn-search-user">회원 검색</button>
+                        </div>
+                        <div class="author-id-list" id="author-id-list">
+                            <label>작성자 ID 목록:</label>
+                            <div id="author-ids"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 회원 검색 모달 -->
+                    <div class="user-search-modal" id="user-search-modal" style="display: none;">
+                        <div class="user-search-content">
+                            <div class="user-search-header">
+                                <h3>회원 검색</h3>
+                                <button type="button" class="close-user-search" id="close-user-search">&times;</button>
+                            </div>
+                            <div class="user-search-body">
+                                <input type="text" id="user-search-input" placeholder="이메일 또는 이름으로 검색">
+                                <div class="user-list" id="user-list">
+                                    <!-- 회원 목록이 여기에 표시됩니다 -->
+                                </div>
+                            </div>
+                            <div class="user-search-footer">
+                                <button type="button" id="btn-add-selected-users" class="btn btn-primary">선택한 회원 추가</button>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- 카테고리 선택 -->
                     <div class="form-group">
                         <label>카테고리 *</label>
                         <div class="category-buttons" id="category-buttons">
-                            <!-- 카테고리 버튼들이 동적으로 추가됩니다 -->
+                            <!-- 카테고리 버튼들이 여기에 동적으로 추가됩니다 -->
                         </div>
                         <input type="hidden" id="category" name="category" required>
                     </div>
@@ -39,10 +65,10 @@
                     <!-- 업소명 -->
                     <div class="form-group">
                         <label for="business-name">업소명 *</label>
-                        <input type="text" id="business-name" name="business-name" placeholder="예) 도파민 제니상무 (15자 이내로 작성해주세요)" maxlength="15" required>
+                        <input type="text" id="business-name" name="business-name" placeholder="예) 도파민 제니상무 (15자 이내)" maxlength="15" required>
                     </div>
                     
-                    <!-- 지역과 도시 선택 (한 줄에 표시) -->
+                    <!-- 지역과 도시 선택 -->
                     <div class="form-group-row">
                         <div class="form-group">
                             <label for="region">지역 *</label>
@@ -64,13 +90,13 @@
                     </div>
                 </div>
                 
-                <!-- 2. 연락처 정보 입력 섹션 -->
+                <!-- 2. 연락처 정보 섹션 -->
                 <div class="form-section">
-                    <h2 class="section-title">2. 연락처 정보 입력</h2>
+                    <h2 class="section-title">2. 연락처 정보</h2>
                     
                     <div class="form-group">
                         <label for="phone">전화번호 *</label>
-                        <input type="tel" id="phone" name="phone" placeholder="010-0000-0000" required>
+                        <input type="tel" id="phone" name="phone" placeholder="010-1234-5678" required>
                     </div>
                     
                     <div class="form-group">
@@ -84,57 +110,32 @@
                     </div>
                 </div>
                 
-                <!-- 3. 광고 정보 입력 섹션 -->
+                <!-- 3. 상세 정보 섹션 -->
                 <div class="form-section">
-                    <h2 class="section-title">3. 광고 정보 입력</h2>
+                    <h2 class="section-title">3. 상세 정보</h2>
                     
-                    <!-- 유흥주점 카테고리 전용 필드 (기본 숨김) -->
+                    <!-- 유흥주점 전용 필드 -->
                     <div class="form-group karaoke-field" style="display: none;">
-                        <label for="business-hours">영업시간</label>
-                        <input type="text" id="business-hours" name="business-hours" placeholder="예: 오후 7시 ~ 새벽 5시">
-                    </div>
-                    
-                    <div class="form-group karaoke-field" style="display: none;">
-                        <label>주대설정</label>
-                        <div id="table-price-list">
+                        <label>테이블 가격</label>
+                        <div class="table-price-list" id="table-price-list">
                             <div class="table-price-item">
-                                <input type="text" class="table-price-name" placeholder="예: 일반룸">
+                                <input type="text" class="table-price-name" placeholder="예: 1인 일반룸">
                                 <div class="price-input-wrapper">
-                                    <input type="text" class="table-price-value" placeholder="예: 30만">
+                                    <input type="text" class="table-price-value" placeholder="예: 300,000">
                                     <span class="price-unit">원</span>
                                 </div>
                                 <button type="button" class="btn-remove-price" style="display: none;">×</button>
                             </div>
                         </div>
-                        <button type="button" id="btn-add-price" class="btn-add-price">+ 주대 추가</button>
+                        <button type="button" id="btn-add-price" class="btn-add-price">+ 가격 추가</button>
                     </div>
                     
-                    <!-- 건전마사지 카테고리 전용 필드 (기본 숨김) -->
+                    <!-- 건전마사지 전용 필드 -->
                     <div class="form-group massage-field" style="display: none;">
-                        <label for="massage-business-hours">영업시간</label>
-                        <input type="text" id="massage-business-hours" name="massage-business-hours" placeholder="예: 오전 10시 ~ 오후 10시">
-                    </div>
-                    
-                    <div class="form-group massage-field" style="display: none;">
-                        <label for="closed-days">휴무일</label>
-                        <input type="text" id="closed-days" name="closed-days" placeholder="예: 매주 일요일">
-                    </div>
-                    
-                    <div class="form-group massage-field" style="display: none;">
-                        <label for="parking-info">주차안내</label>
-                        <input type="text" id="parking-info" name="parking-info" placeholder="예: 건물 지하 1~2층 무료주차 가능">
-                    </div>
-                    
-                    <div class="form-group massage-field" style="display: none;">
-                        <label for="directions">오시는 길</label>
-                        <input type="text" id="directions" name="directions" placeholder="예: 강남역 3번 출구에서 도보 5분">
-                    </div>
-                    
-                    <div class="form-group massage-field" style="display: none;">
-                        <label>코스설정</label>
-                        <div id="course-list">
+                        <label>코스 정보</label>
+                        <div class="course-list" id="course-list">
                             <div class="course-item">
-                                <input type="text" class="course-name" placeholder="예: 전신관리">
+                                <input type="text" class="course-name" placeholder="예: 60분 코스">
                                 <div class="price-input-wrapper">
                                     <input type="text" class="course-price" placeholder="예: 100,000">
                                     <span class="price-unit">원</span>
@@ -163,47 +164,54 @@
                     
                     <!-- 상세 내용 에디터 -->
                     <div class="form-group">
-                        <label for="content">상세 내용</label>
+                        <label for="content">상세 내용 *</label>
                         <div id="editor-container" class="editor-container">
                             <div id="editor"></div>
                         </div>
-                        <input type="hidden" id="content" name="content">
+                        <input type="hidden" id="content" name="content" required>
+                    </div>
+                    
+                    <!-- 이벤트 (유흥주점/건전마사지 전용) -->
+                    <div class="form-group karaoke-field massage-field" style="display: none;">
+                        <label for="event-info">이벤트</label>
+                        <textarea 
+                            id="event-textarea" 
+                            class="event-textarea"
+                            placeholder="이벤트 내용을 입력하세요..."
+                            rows="8"
+                        ></textarea>
+                        <input type="hidden" id="event-info" name="event-info">
                     </div>
                 </div>
                 
-                <!-- 4. 광고 관리 정보 (맨 아래) -->
+                <!-- 4. 광고 관리 정보 -->
                 <div class="form-section">
-                    <h2 class="section-title">4. 광고 관리</h2>
+                    <h2 class="section-title">4. 광고 관리 정보</h2>
                     
-                    <!-- 광고 종료일 -->
                     <div class="form-group">
-                        <label for="expiry-date">광고 종료일</label>
+                        <label for="expiry-date">종료일</label>
                         <input type="date" id="expiry-date" name="expiry-date">
-                        <small class="form-help">종료일을 설정하지 않으면 무제한으로 노출됩니다.</small>
+                        <small>비워두면 무제한으로 설정됩니다</small>
                     </div>
                     
-                    <!-- 입금 정보 -->
                     <div class="form-group">
-                        <label>입금 상태</label>
-                        <div class="payment-info">
-                            <div class="custom-select" id="payment-status-wrapper">
-                                <div class="select-selected" data-value="입금대기">입금대기</div>
-                                <div class="select-items select-hide">
-                                    <div data-value="입금대기">입금대기</div>
-                                    <div data-value="입금완료">입금완료</div>
-                                </div>
-                            </div>
-                            <input type="hidden" id="payment-status" name="payment-status" value="입금대기">
-                            <input type="text" id="payment-amount" name="payment-amount" placeholder="입금액 (예: 300,000원)">
-                        </div>
-                        <small class="form-help">입금완료 시 광고가 자동으로 활성화됩니다.</small>
+                        <label for="payment-status">입금 상태</label>
+                        <select id="payment-status" name="payment-status">
+                            <option value="입금대기">입금대기</option>
+                            <option value="입금완료">입금완료</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="payment-amount">입금액</label>
+                        <input type="text" id="payment-amount" name="payment-amount" placeholder="예: 100,000">
                     </div>
                 </div>
                 
                 <!-- 제출 버튼 -->
                 <div class="form-actions">
-                    <button type="button" class="btn-cancel" id="edit-cancel-btn">취소</button>
-                    <button type="submit" class="btn-submit" id="edit-submit-btn">광고 수정</button>
+                    <button type="button" class="btn btn-secondary" id="edit-cancel-btn">취소</button>
+                    <button type="submit" class="btn btn-primary" id="edit-submit-btn">광고 수정</button>
                 </div>
             </form>
         </div>

@@ -1,4 +1,4 @@
-// admin/ads/js/ads.js - 광고 관리 메인 파일
+// admin/ads/js/ads.js - 광고 관리 메인 파일 (최종본)
 import { checkAuthFirst, loadAdminHeader } from '/admin/js/admin-header.js';
 import { rtdb } from '/js/firebase-config.js';
 import { ref, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
@@ -78,8 +78,7 @@ function displayAds(ads) {
                          ad.status === 'inactive' ? '비활성' : '승인대기';
         
         const paymentClass = ad.paymentStatus === '입금완료' ? 'paid' : 
-                            ad.paymentStatus === '입금대기' ? 'pending' : 'unpaid';
-        const paymentText = ad.paymentStatus || '미입금';
+                            ad.paymentStatus === '입금대기' ? 'waiting' : '';
         
         return `
             <tr>
@@ -89,120 +88,309 @@ function displayAds(ads) {
                 <td>${ad.author || '-'}</td>
                 <td>${ad.phone || '-'}</td>
                 <td><span class="status ${statusClass}">${statusText}</span></td>
-                <td><span class="payment-status ${paymentClass}">${paymentText}</span></td>
-                <td>${formatDate(ad.createdAt)}</td>
+                <td><span class="payment-status ${paymentClass}">${ad.paymentStatus || '-'}</span></td>
+                <td>${ad.createdAt ? new Date(ad.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
                 <td>${ad.views || 0}</td>
                 <td>${ad.calls || 0}</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn btn-sm btn-primary" onclick="editAd('${ad.id}')">수정</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteAdWithConfirm('${ad.id}')">삭제</button>
+                        <button class="btn-action btn-edit" data-id="${ad.id}">수정</button>
+                        <button class="btn-action btn-delete" data-id="${ad.id}">삭제</button>
                     </div>
                 </td>
             </tr>
         `;
     }).join('');
+    
+    // 수정/삭제 버튼 이벤트
+    setupTableActions();
 }
 
-// 날짜 포맷
-function formatDate(timestamp) {
-    if (!timestamp) return '-';
-    const date = new Date(timestamp);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+// 테이블 액션 버튼 이벤트 설정
+function setupTableActions() {
+    // 수정 버튼
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const adId = e.target.dataset.id;
+            openEditModal(adId);
+        });
+    });
+    
+    // 삭제 버튼
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const adId = e.target.dataset.id;
+            handleDelete(adId);
+        });
+    });
 }
 
-// 광고 수정
-window.editAd = function(adId) {
-    openEditModal(adId);
-};
-
-// 광고 삭제
-window.deleteAdWithConfirm = async function(adId) {
-    if (!confirm('정말 이 광고를 삭제하시겠습니까?\n삭제된 광고는 복구할 수 없습니다.')) {
+// ImageKit에서 이미지들 삭제 (ad-management.js와 동일)
+async function deleteAllAdImages(ad) {
+    const imageUrls = [];
+    
+    // 썸네일 수집 (placeholder가 아닌 경우만)
+    if (ad.thumbnail && 
+        ad.thumbnail.includes('ik.imagekit.io') && 
+        !ad.thumbnail.includes('THUMBNAIL_')) {
+        imageUrls.push(ad.thumbnail);
+    }
+    
+    // 상세 이미지들 수집
+    if (ad.images && Array.isArray(ad.images)) {
+        ad.images.forEach(imageUrl => {
+            if (imageUrl && imageUrl.includes('ik.imagekit.io')) {
+                imageUrls.push(imageUrl);
+            }
+        });
+    }
+    
+    // 에디터 내용에서 이미지 URL 추출 (placeholder 제외)
+    if (ad.content) {
+        const imgRegex = /<img[^>]+src="([^">]+)"/g;
+        let match;
+        while ((match = imgRegex.exec(ad.content)) !== null) {
+            const imageUrl = match[1];
+            if (imageUrl && 
+                imageUrl.includes('ik.imagekit.io') && 
+                !imageUrl.includes('DETAIL_IMAGE_')) {
+                imageUrls.push(imageUrl);
+            }
+        }
+    }
+    
+    // 이벤트 내용에서 이미지 URL 추출 (placeholder 제외)
+    if (ad.eventInfo) {
+        const imgRegex = /<img[^>]+src="([^">]+)"/g;
+        let match;
+        while ((match = imgRegex.exec(ad.eventInfo)) !== null) {
+            const imageUrl = match[1];
+            if (imageUrl && 
+                imageUrl.includes('ik.imagekit.io') && 
+                !imageUrl.includes('EVENT_IMAGE_')) {
+                imageUrls.push(imageUrl);
+            }
+        }
+    }
+    
+    if (imageUrls.length === 0) {
+        console.log('삭제할 ImageKit 이미지가 없습니다.');
         return;
     }
     
+    try {
+        // 배포된 Firebase Function 호출
+        const response = await fetch('https://imagekit-delete-txjekregmq-uc.a.run.app', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                fileUrls: imageUrls,
+                userId: currentUser.uid
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('이미지 삭제 결과:', result);
+            
+            // 삭제 결과 확인
+            if (result.summary) {
+                console.log(`총 ${result.summary.total}개 중 ${result.summary.deleted}개 삭제 성공`);
+            }
+            
+            // 실패한 파일이 있으면 로그
+            if (result.failed && result.failed.length > 0) {
+                console.warn('삭제 실패한 파일들:', result.failed);
+            }
+        } else {
+            const errorText = await response.text();
+            console.error('이미지 삭제 요청 실패:', errorText);
+        }
+    } catch (error) {
+        console.error('ImageKit 이미지 삭제 오류:', error);
+        // 실패해도 광고 삭제는 계속 진행
+    }
+}
+
+// 광고 폴더 전체 삭제 시도
+async function deleteAdFolder(adId, userId) {
+    if (!adId) {
+        console.log('광고 ID가 없어 폴더 삭제를 건너뜁니다.');
+        return { error: 'No ad ID' };
+    }
+    
+    try {
+        console.log(`광고 폴더 삭제 시작: /entmarvel/advertise/${adId}/`);
+        
+        const response = await fetch('https://imagekit-delete-txjekregmq-uc.a.run.app', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                adId: adId,
+                userId: userId
+            })
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('폴더 삭제 실패 응답:', errorText);
+            throw new Error('광고 이미지 폴더 삭제 실패');
+        }
+        
+        const result = await response.json();
+        console.log('광고 폴더 삭제 결과:', result);
+        return result;
+        
+    } catch (error) {
+        console.error('광고 폴더 삭제 오류:', error);
+        return { error: error.message };
+    }
+}
+
+// 삭제 처리 (ad-management.js와 동일한 로직)
+async function handleDelete(adId) {
     const ad = window.allAds.find(a => a.id === adId);
     if (!ad) {
         alert('광고를 찾을 수 없습니다.');
         return;
     }
     
+    const adName = ad.businessName || '이 광고';
+    if (!confirm(`"${adName}"를 삭제하시겠습니까?\n\n삭제된 광고와 이미지는 복구할 수 없습니다.`)) {
+        return;
+    }
+    
+    // 삭제 버튼 찾기 및 상태 변경
+    const deleteBtn = document.querySelector(`.btn-delete[data-id="${adId}"]`);
+    const originalText = deleteBtn ? deleteBtn.textContent : '삭제';
+    
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = '삭제 중...';
+    }
+    
     try {
-        // Firebase에서 광고 삭제
-        const adRef = ref(rtdb, `advertisements/${adId}`);
-        await remove(adRef);
+        // 1. 먼저 ImageKit 이미지 삭제 시도
+        const adIdToDelete = ad.adId || adId; // 광고 ID 확인
+        
+        if (adIdToDelete) {
+            console.log(`광고 ID ${adIdToDelete}의 폴더 삭제 시작`);
+            
+            try {
+                // 폴더 전체 삭제 시도
+                const deleteResult = await deleteAdFolder(adIdToDelete, currentUser.uid);
+                
+                if (deleteResult && !deleteResult.error) {
+                    console.log('광고 폴더 삭제 성공:', deleteResult);
+                } else if (deleteResult && deleteResult.error) {
+                    console.warn('폴더 삭제 실패, 개별 파일 삭제 시도:', deleteResult.error);
+                    // 폴더 삭제 실패 시 개별 파일 삭제 시도
+                    await deleteAllAdImages(ad);
+                }
+            } catch (folderError) {
+                console.warn('폴더 삭제 오류, 개별 파일 삭제 시도:', folderError);
+                // 폴더 삭제 실패 시 개별 파일 삭제 시도
+                await deleteAllAdImages(ad);
+            }
+        } else {
+            // adId가 없는 경우 기존 방식으로 삭제
+            console.log('광고 ID가 없어 개별 파일 삭제 시도');
+            await deleteAllAdImages(ad);
+        }
+        
+        // 2. Firebase에서 광고 삭제
+        await remove(ref(rtdb, `advertisements/${adId}`));
         
         alert('광고가 삭제되었습니다.');
+        
+        // 목록 새로고침 (페이지 새로고침 대신 데이터만 다시 로드)
+        loadAds();
+        
     } catch (error) {
         console.error('광고 삭제 실패:', error);
         alert('광고 삭제에 실패했습니다.');
+        
+        // 버튼 원래대로 복구
+        if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.textContent = originalText;
+        }
     }
-};
+}
 
 // 이벤트 리스너 설정
 function setupEventListeners() {
     // 새 광고 추가 버튼
-    const addBtn = document.getElementById('btn-add-ad');
-    if (addBtn) {
-        addBtn.addEventListener('click', () => {
-            openAddModal();
-        });
-    }
+    document.getElementById('btn-add-ad')?.addEventListener('click', () => {
+        openAddModal();
+    });
     
-    // 검색 기능
-    const searchBtn = document.getElementById('btn-search');
-    const searchInput = document.getElementById('search-input');
-    const filterCategory = document.getElementById('filter-category');
-    const filterStatus = document.getElementById('filter-status');
+    // 카테고리 필터
+    document.getElementById('filter-category')?.addEventListener('change', filterAds);
     
-    if (searchBtn) {
-        searchBtn.addEventListener('click', filterAds);
-    }
+    // 상태 필터
+    document.getElementById('filter-status')?.addEventListener('change', filterAds);
     
-    if (searchInput) {
-        searchInput.addEventListener('keyup', (e) => {
-            if (e.key === 'Enter') {
-                filterAds();
-            }
-        });
-    }
+    // 검색 버튼
+    document.getElementById('btn-search')?.addEventListener('click', searchAds);
     
-    if (filterCategory) {
-        filterCategory.addEventListener('change', filterAds);
-    }
-    
-    if (filterStatus) {
-        filterStatus.addEventListener('change', filterAds);
-    }
+    // 검색 입력 엔터키
+    document.getElementById('search-input')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchAds();
+    });
 }
 
 // 광고 필터링
 function filterAds() {
-    const searchText = document.getElementById('search-input')?.value.toLowerCase() || '';
-    const category = document.getElementById('filter-category')?.value || '';
-    const status = document.getElementById('filter-status')?.value || '';
+    const category = document.getElementById('filter-category').value;
+    const status = document.getElementById('filter-status').value;
     
-    let filteredAds = [...window.allAds];
+    let filtered = window.allAds;
     
-    // 카테고리 필터
     if (category) {
-        filteredAds = filteredAds.filter(ad => ad.category === category);
+        filtered = filtered.filter(ad => ad.category === category);
     }
     
-    // 상태 필터
     if (status) {
-        filteredAds = filteredAds.filter(ad => ad.status === status);
+        filtered = filtered.filter(ad => ad.status === status);
     }
     
-    // 텍스트 검색
-    if (searchText) {
-        filteredAds = filteredAds.filter(ad => {
-            return (ad.businessName && ad.businessName.toLowerCase().includes(searchText)) ||
-                   (ad.author && ad.author.toLowerCase().includes(searchText)) ||
-                   (ad.phone && ad.phone.includes(searchText));
-        });
+    displayAds(filtered);
+}
+
+// 광고 검색
+function searchAds() {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    
+    if (!searchTerm) {
+        displayAds(window.allAds);
+        return;
     }
     
-    displayAds(filteredAds);
+    const filtered = window.allAds.filter(ad => 
+        (ad.businessName && ad.businessName.toLowerCase().includes(searchTerm)) ||
+        (ad.author && ad.author.toLowerCase().includes(searchTerm)) ||
+        (ad.phone && ad.phone.includes(searchTerm))
+    );
+    
+    displayAds(filtered);
+}
+
+// 에러 메시지 표시
+function showErrorMessage(message) {
+    const content = document.querySelector('.admin-content');
+    if (content) {
+        content.innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+                <h2 style="color: #dc3545;">${message}</h2>
+                <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 20px;">
+                    새로고침
+                </button>
+            </div>
+        `;
+    }
 }
